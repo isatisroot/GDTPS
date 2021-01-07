@@ -1,8 +1,44 @@
 <template>
-	<div id="printCerificate" class="printcss">
-		
-	<!-- <el-button type="success" icon="el-icon-printer" @click="printVoucher">打印凭证</el-button> -->
-	<!-- <div id="wrap" class="wrap">
+	<div>
+		<!-- <div>
+			<h3 class="titile3" align="center">佛山电器照明股份有限公司</h3>
+			<h2 class="title2" align="center">{{year+name}}登记凭证</h2>
+			<p style="text-indent:50px;">此据为参加{{year+name}}现场会议登记凭证，请凭此据于{{date}}到本公司办公楼五楼会议室（佛山市禅城区汾江北路64号），领取会议材料，并参加股东大会。</p>
+			<table border="1" style="width: 100%;margin:auto;text-align: center;">
+				<tr>
+					<th rowspan="2">登记日期</th>
+					<th rowspan="2">序号</th>
+					<th rowspan="2">股东姓名(单位)</th>
+					<th rowspan="2">股东代码</th>
+					<th colspan="3">股数数</th>
+				</tr>
+				<tr>
+					<th>A股</th>
+					<th>B股</th>
+					<th>小计</th>
+				</tr>
+
+				<tr>
+					<td>{{currentDate}}</td>
+					<td>{{currentPage}}</td>
+					<td>{{checkedData[currentPage-1].gdxm}}</td>
+					<td>{{checkedData[currentPage-1].gddmk}}</td>
+					<td>{{checkedData[currentPage-1].gzA}}</td>
+					<td>{{checkedData[currentPage-1].gzB}}</td>
+					<td>{{checkedData[currentPage-1].gzA + checkedData[0].gzB}}</td>
+
+				</tr>
+			</table>
+			<p align="right" class="bottom-p">佛山电器照明股份有限公司</p>
+			<p align="right" class="bottom-p">{{currentDate}}</p>
+		</div>
+		<el-pagination layout="prev, pager, next" @current-change="current_change" :total="1000">
+		</el-pagination>
+ -->
+		<div id="printCerificate" class="print-cerificate" >
+
+			<!-- <el-button type="success" icon="el-icon-printer" @click="printVoucher">打印凭证</el-button> -->
+			<!-- <div id="wrap" class="wrap">
 		<h3 class="title3" align="center">佛山电器照明股份有限公司</h3>
 		<h2 class="title2" align="center">{{year+name}}登记凭证</h2>
 		<p align="center">此据为参加{{year+name}}现场会议登记凭证，请凭此据于{{date}}到本公司办公楼五楼会议室（佛山市禅城区汾江北路64号），领取会议材料，并参加股东大会。</p>
@@ -34,38 +70,42 @@
 		</el-table>
 		
 	</div> -->
-	<div style="page-break-after:always " v-for="(row,index) in checkedData" :key="row.gdxm">
-		<h3 class="titile3" align="center" >佛山电器照明股份有限公司</h3>
-		<h2 class="title2" align="center">{{year+name}}登记凭证</h2>
-		<p style="text-indent:50px;">此据为参加{{year+name}}现场会议登记凭证，请凭此据于{{date}}到本公司办公楼五楼会议室（佛山市禅城区汾江北路64号），领取会议材料，并参加股东大会。</p>
-		<table border="1" style="width: 100%;margin:auto;text-align: center;">
-			<tr>
-				<th rowspan="2">登记日期</th>
-				<th rowspan="2">序号</th>
-				<th rowspan="2">股东姓名(单位)</th>
-				<th rowspan="2">股东代码</th>
-				<th colspan="3">股数数</th>
-			</tr>
-			<tr>
-				<th>A股</th>
-				<th>B股</th>
-				<th>小计</th>
-			</tr>
-			
-			<tr>
-				<td>{{currentDate}}</td>
-				<td>{{index+1}}</td>
-				<td>{{row.gdxm}}</td>
-				<td>{{row.gddmk}}</td>
-				<td>{{row.gzA}}</td>
-				<td>{{row.gzB}}</td>
-				<td>{{row.gzA + row.gzB}}</td>
-				
-			</tr>
-		</table>
-		<p align="right" class="bottom-p">佛山电器照明股份有限公司</p>
-		<p align="right" class="bottom-p">{{currentDate}}</p>
-	</div>
+
+			<div style="page-break-after:always " v-for="(row,index) in checkedData" :key="row.gdxm">
+				<h3 class="titile3" align="center">佛山电器照明股份有限公司</h3>
+				<h2 class="title2" align="center">{{year+name}}登记凭证</h2>
+				<p style="text-indent:50px;">此据为参加{{year+name}}现场会议登记凭证，请凭此据于{{date}}到本公司办公楼五楼会议室（佛山市禅城区汾江北路64号），领取会议材料，并参加股东大会。</p>
+				<table border="1" style="width: 100%;margin:auto;text-align: center;">
+					<tr>
+						<th rowspan="2">登记日期</th>
+						<th rowspan="2">序号</th>
+						<th rowspan="2">股东姓名(单位)</th>
+						<th rowspan="2">股东代码</th>
+						<th colspan="3">股数数</th>
+					</tr>
+					<tr>
+						<th>A股</th>
+						<th>B股</th>
+						<th>小计</th>
+					</tr>
+
+					<tr>
+						<td>{{currentDate}}</td>
+						<td>{{index+1}}</td>
+						<td>{{row.gdxm}}</td>
+						<td>{{row.gddmk}}</td>
+						<td>{{row.gzA}}</td>
+						<td>{{row.gzB}}</td>
+						<td>{{row.gzA + row.gzB}}</td>
+
+					</tr>
+				</table>
+				<p align="right" class="bottom-p">佛山电器照明股份有限公司</p>
+				<p align="right" class="bottom-p">{{currentDate}}</p>
+			</div>
+
+
+		</div>
 	</div>
 </template>
 
@@ -77,6 +117,8 @@
 			return {
 				currentDate: this.dateToString(),
 				sumShare: this.Share(),
+				currentPage: 1,
+				pagesize: 1,
 			}
 		},
 		methods: {
@@ -88,22 +130,47 @@
 				var currentDate = year.toString() + '-' + month.toString() + '-' + day.toString();
 				return currentDate
 			},
+
 			Share() {
 				console.log(this.content)
 			},
+
 			getSummaries(param) {
 				console.log(param)
+			},
+
+			current_change: function(currentPage) {
+				this.currentPage = currentPage;
 			},
 		}
 	}
 </script>
 
 <style>
-	.printcss {
+	/* 屏显使用一套CSS，打印使用另一套CSS，解决因为使用overflow无法分页打印的问题 */
+	@media screen {
+		.print-cerificate {
+			padding-left: 100px;
+			padding-right: 100px;
+			overflow-y: scroll;
+			height: 24rem;
+		}
+	}
+
+	@media print {
+		.print-cerificate {
+			padding-left: 100px;
+			padding-right: 100px;
+
+			
+		}
+	}
+
+	/* .printcss {
 		padding-left: 100px;
 		padding-right: 100px;
-	}
-	.bottom-p{
+	} */
+	.bottom-p {
 		margin: 30px;
 	}
 </style>

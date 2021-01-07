@@ -85,6 +85,7 @@
 								<!-- <li v-for="(val, id) in motion.list" :key="id" style="list-style-type:none;">
 									<el-input type="text" style="margin-bottom: 5px;" v-model="val.text"></el-input>
 								</li> -->
+								<!-- 使用作用域插槽，el-table是子组件，现在往子组件传<template>的内容，并获取里面的内容 -->
 								<el-table :data="motionArray" :show-header="false">
 									<el-table-column prop=motion >
 										<template slot-scope="scope">
@@ -211,6 +212,7 @@
 	export default {
 		name: 'dashboard',
 		data() {
+			// 检验方法：判断查询年度会议功能模块中输入的年份是否满足以下格式
 			var checkYear = (rule, value, callback) => {
 				if (!value) {
 					return callback(new Error('年份不能为空'));
@@ -405,6 +407,7 @@
 					.then(response => (
 
 						this.tableData = response.data['list'],
+						// 事件总线，向BaseForm组件通信，共享数据
 						EventBus.$emit('addition', {
 							year: this.ruleForm.year,
 							date: this.date,
