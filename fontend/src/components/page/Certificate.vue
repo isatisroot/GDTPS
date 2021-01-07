@@ -35,77 +35,46 @@
 		<el-pagination layout="prev, pager, next" @current-change="current_change" :total="1000">
 		</el-pagination>
  -->
-		<div id="printCerificate" class="print-cerificate" >
+		<div id="printCerificate" class="print-cerificate">
+			<ul id="t1">
+				<li style="page-break-after:always " v-for="(row,index) in checkedData" :key="row.gdxm">
+					<h3 class="titile3" align="center">佛山电器照明股份有限公司</h3>
+					<h2 class="title2" align="center">{{year+name}}登记凭证</h2>
+					<p style="text-indent:50px;">此据为参加{{year+name}}现场会议登记凭证，请凭此据于{{date}}到本公司办公楼五楼会议室（佛山市禅城区汾江北路64号），领取会议材料，并参加股东大会。</p>
+					<table border="1" style="width: 100%;margin:auto;text-align: center;">
+						<tr>
+							<th rowspan="2">登记日期</th>
+							<th rowspan="2">序号</th>
+							<th rowspan="2">股东姓名(单位)</th>
+							<th rowspan="2">股东代码</th>
+							<th colspan="3">股数数</th>
+						</tr>
+						<tr>
+							<th>A股</th>
+							<th>B股</th>
+							<th>小计</th>
+						</tr>
 
-			<!-- <el-button type="success" icon="el-icon-printer" @click="printVoucher">打印凭证</el-button> -->
-			<!-- <div id="wrap" class="wrap">
-		<h3 class="title3" align="center">佛山电器照明股份有限公司</h3>
-		<h2 class="title2" align="center">{{year+name}}登记凭证</h2>
-		<p align="center">此据为参加{{year+name}}现场会议登记凭证，请凭此据于{{date}}到本公司办公楼五楼会议室（佛山市禅城区汾江北路64号），领取会议材料，并参加股东大会。</p>
-		
-		<el-table :data="content" border align="center" :summary-method="getSummaries">
-			<el-table-column label="登记日期" width="100" align="center">
-				<template slot-scope="scope">
-					<span>{{currentDate}}</span>
-				</template>
-			</el-table-column>
-			<el-table-column type="index" label="序号" align="center">
-			</el-table-column>
-			<el-table-column prop="gdxm" label="股东姓名(单位)" width="180" align="center">
-			</el-table-column>
-			<el-table-column prop="gddmk" label="股东代码" width="110" align="center">
-			</el-table-column>
-			<el-table-column label="股份数" align="center">
-				<el-table-column prop="gzA" label="A股" align="center">
-				</el-table-column>
-				<el-table-column prop="gzB" label="B股" align="center">
-				</el-table-column>
-				<el-table-column label="小计" align="center">
-					<template slot-scope="scope">
-						<span>{{sumShare}}</span>
-					</template>
-				</el-table-column>
-			</el-table-column>
+						<tr>
+							<td>{{currentDate}}</td>
+							<td>{{index+1}}</td>
+							<td>{{row.gdxm}}</td>
+							<td>{{row.gddmk}}</td>
+							<td>{{row.gzA}}</td>
+							<td>{{row.gzB}}</td>
+							<td>{{row.gzA + row.gzB}}</td>
 
-		</el-table>
-		
-	</div> -->
-
-			<div style="page-break-after:always " v-for="(row,index) in checkedData" :key="row.gdxm">
-				<h3 class="titile3" align="center">佛山电器照明股份有限公司</h3>
-				<h2 class="title2" align="center">{{year+name}}登记凭证</h2>
-				<p style="text-indent:50px;">此据为参加{{year+name}}现场会议登记凭证，请凭此据于{{date}}到本公司办公楼五楼会议室（佛山市禅城区汾江北路64号），领取会议材料，并参加股东大会。</p>
-				<table border="1" style="width: 100%;margin:auto;text-align: center;">
-					<tr>
-						<th rowspan="2">登记日期</th>
-						<th rowspan="2">序号</th>
-						<th rowspan="2">股东姓名(单位)</th>
-						<th rowspan="2">股东代码</th>
-						<th colspan="3">股数数</th>
-					</tr>
-					<tr>
-						<th>A股</th>
-						<th>B股</th>
-						<th>小计</th>
-					</tr>
-
-					<tr>
-						<td>{{currentDate}}</td>
-						<td>{{index+1}}</td>
-						<td>{{row.gdxm}}</td>
-						<td>{{row.gddmk}}</td>
-						<td>{{row.gzA}}</td>
-						<td>{{row.gzB}}</td>
-						<td>{{row.gzA + row.gzB}}</td>
-
-					</tr>
-				</table>
-				<p align="right" class="bottom-p">佛山电器照明股份有限公司</p>
-				<p align="right" class="bottom-p">{{currentDate}}</p>
-			</div>
+						</tr>
+					</table>
+					<p align="right" class="bottom-p">佛山电器照明股份有限公司</p>
+					<p align="right" class="bottom-p">{{currentDate}}</p>
+				</li>
 
 
+			</ul>
 		</div>
+		<el-pagination layout="prev, pager, next" background @current-change="current_change" :total="10*checkedData.length">
+		</el-pagination>
 	</div>
 </template>
 
@@ -140,7 +109,11 @@
 			},
 
 			current_change: function(currentPage) {
-				this.currentPage = currentPage;
+				// this.currentPage = currentPage;
+				var oUl = document.getElementById('t1');
+				console.log(currentPage)
+				oUl.style.top = -355*(currentPage-1) + 'px'
+
 			},
 		}
 	}
@@ -149,12 +122,24 @@
 <style>
 	/* 屏显使用一套CSS，打印使用另一套CSS，解决因为使用overflow无法分页打印的问题 */
 	@media screen {
-		.print-cerificate {
+		 .print-cerificate {
 			padding-left: 100px;
 			padding-right: 100px;
-			overflow-y: scroll;
+			overflow-y: hidden;
 			height: 24rem;
+			position: relative;
+
+			
 		}
+		.print-cerificate ul {
+
+			list-style-type: none;
+			position: absolute;
+		}
+		
+	
+		
+		
 	}
 
 	@media print {
@@ -162,7 +147,10 @@
 			padding-left: 100px;
 			padding-right: 100px;
 
-			
+
+		}
+		.print-cerificate ul{
+			list-style-type: none;
 		}
 	}
 

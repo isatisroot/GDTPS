@@ -11,7 +11,7 @@
 		<!-- <div class="topDiv"> -->
 		<ul class="button-group">
 
-			<el-tooltip class="item" effect="dark" content="打印建议:横向-缩放75%" placement="top">
+			<el-tooltip class="item" effect="dark" content="打印建议:横向-缩放75%,勾选背景图形" placement="top">
 				<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印现场会议登记表</el-button>
 			</el-tooltip>
 			<el-button class="button" icon="el-icon-printer" @click="printCertificate" v-print="'#printCerificate'">打印凭证</el-button>
@@ -57,20 +57,54 @@
 			</el-table-column> -->
 					<!-- <el-table-column prop="date" label="注册时间"></el-table-column> -->
 					<!-- 编辑和删除行 -->
-
-					<el-table-column label="操作" width="180" align="center">
+					
+					<el-table-column label="操作" width="180" align="center" >
 						<template slot-scope="scope">
 							<el-button type="text" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
 							<el-button type="text" icon="el-icon-delete" class="red" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
 						</template>
 					</el-table-column>
-
+					
 
 					<!-- <el-table-column>
 					<el-button type="success" icon="el-icon-printer" @click="printVoucher(index)">打印凭证</el-button>
 				</el-table-column> -->
 
 				</el-table>
+				<el-dialog title="编辑" :visible.sync="editVisible" width="30%">
+					<!-- <el-form ref="form" :model="form" label-width="70px">
+						<el-form-item label="人数">
+							<el-input v-model="form.rs"></el-input>
+						</el-form-item>
+						<el-form-item label="股东类型">
+							<el-input v-model="form.gdtype"></el-input>
+						</el-form-item>
+						<el-form-item label="股东姓名">
+							<el-input v-model="form.name"></el-input>
+						</el-form-item>
+						<el-form-item label="股东代码卡">
+							<el-input v-model="form.gddmk"></el-input>
+						</el-form-item>
+						<el-form-item label="身份证号">
+							<el-input v-model="form.sfz"></el-input>
+						</el-form-item>
+						<el-form-item label="A股">
+							<el-input v-model="form.frA"></el-input>
+						</el-form-item>
+						<el-form-item label="B股">
+							<el-input v-model="form.frB"></el-input>
+						</el-form-item>
+						<el-form-item label="备注">
+							<el-input v-model="form.bz"></el-input>
+						</el-form-item>
+				
+					</el-form> -->
+					<span slot="footer" class="dialog-footer">
+						<el-button @click="editVisible = false">取 消</el-button>
+						<el-button type="primary" @click="saveEdit">确 定</el-button>
+					</span>
+				
+				</el-dialog>
 				<div class="do-not-print-me handle-box">
 					<el-button type="success" icon="el-icon-circle-plus" @click="addRow"></el-button>
 					<el-button type="primary" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection">批量删除</el-button>
@@ -123,6 +157,7 @@
 		data() {
 			var currenYear = new Date().getFullYear();
 			return {
+				editVisible:false,
 				query: {
 					address: '',
 					year: '',
@@ -392,7 +427,7 @@
 			handleEdit(index, row) {
 				this.idx = index;
 				this.form = row;
-
+				console.log(index)
 				this.editVisible = true;
 			},
 			// 保存编辑
