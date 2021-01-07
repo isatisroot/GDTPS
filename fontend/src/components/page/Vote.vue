@@ -1,6 +1,7 @@
 <template>
 	<div>
 		<!-- <button v-print="'#printTest'">打印</button> -->
+		<el-button class="button" icon="el-icon-printer"  v-print="'#printVote'">打印表决票</el-button>
 		<div id="printVote">
 			　　
 			<div style="page-break-after:always" v-for="row in checkedData" :key="row.gdxm">
@@ -94,5 +95,6 @@
 	.titile3 {
 		margin-top: 30px;
 		margin-bottom: 20px;
+		
 	}
 </style>

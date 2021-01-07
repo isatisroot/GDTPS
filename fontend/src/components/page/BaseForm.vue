@@ -9,21 +9,28 @@
 			</el-breadcrumb>
 		</div> -->
 		<!-- <div class="topDiv"> -->
-		<ul class="button-group">
+		<!-- <ul class="button-group">
 
-			<el-tooltip class="item" effect="dark" content="打印建议:横向-缩放75%,勾选背景图形" placement="top">
+			<el-tooltip class="item" effect="dark"  placement="top">
+				<span slot="content">打印建议:横向-缩放75%,勾选背景图形</span>
 				<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印现场会议登记表</el-button>
 			</el-tooltip>
-			<el-button class="button" icon="el-icon-printer" @click="printCertificate" v-print="'#printCerificate'">打印凭证</el-button>
+			
 			<el-button class="button" icon="el-icon-printer" @click="printVote" v-print="'#printVote'">打印表决票</el-button>
-			<el-button class="button" icon="el-icon-printer" @click="printStock" v-print="'#printStock'">打印股东、股份数统计表</el-button>
+			<el-button class="button" icon="el-icon-printer"  v-print="'#printStock'">打印股东、股份数统计表</el-button>
 			<el-button class="button" icon="el-icon-back" @click="goback">返回</el-button>
-		</ul>
+		</ul> -->
 		<!-- </div> -->
 		<div class="container">
-			<div id="onSite" v-show="showOnSite">
+			<!-- <div id="onSite" v-show="showOnSite"> -->
+			<el-tabs v-model="message" type="border-card" @tab-click="handleTabClick">
+				<el-tab-pane name="first"><span slot="label"><i class="el-icon-tickets"></i> 年度会议</span>
+				<el-tooltip class="item" effect="dark"  placement="right">
+					<span slot="content">打印建议:横向-缩放75%,勾选背景图形</span>
+					<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印现场会议登记表</el-button>
+				</el-tooltip>
 				<h3 align="center">佛山电器照明公司</h3>
-				<h2 align="center">{{query.year + query.name}}现场会议登记表</h2>
+				<h2 align="center" v-show="query.year!=''">{{query.year + query.name}}现场会议登记表</h2>
 
 				<el-table :data="tableData" border class="table" ref="multipleTable" header-cell-class-name="table-header"
 				 @selection-change="handleSelectionChange">
@@ -71,40 +78,7 @@
 				</el-table-column> -->
 
 				</el-table>
-				<el-dialog title="编辑" :visible.sync="editVisible" width="30%">
-					<!-- <el-form ref="form" :model="form" label-width="70px">
-						<el-form-item label="人数">
-							<el-input v-model="form.rs"></el-input>
-						</el-form-item>
-						<el-form-item label="股东类型">
-							<el-input v-model="form.gdtype"></el-input>
-						</el-form-item>
-						<el-form-item label="股东姓名">
-							<el-input v-model="form.name"></el-input>
-						</el-form-item>
-						<el-form-item label="股东代码卡">
-							<el-input v-model="form.gddmk"></el-input>
-						</el-form-item>
-						<el-form-item label="身份证号">
-							<el-input v-model="form.sfz"></el-input>
-						</el-form-item>
-						<el-form-item label="A股">
-							<el-input v-model="form.frA"></el-input>
-						</el-form-item>
-						<el-form-item label="B股">
-							<el-input v-model="form.frB"></el-input>
-						</el-form-item>
-						<el-form-item label="备注">
-							<el-input v-model="form.bz"></el-input>
-						</el-form-item>
 				
-					</el-form> -->
-					<span slot="footer" class="dialog-footer">
-						<el-button @click="editVisible = false">取 消</el-button>
-						<el-button type="primary" @click="saveEdit">确 定</el-button>
-					</span>
-				
-				</el-dialog>
 				<div class="do-not-print-me handle-box">
 					<el-button type="success" icon="el-icon-circle-plus" @click="addRow"></el-button>
 					<el-button type="primary" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection">批量删除</el-button>
@@ -123,12 +97,56 @@
 					<!-- </el-form-item> -->
 					<el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
 				</div>
-			</div>
-
-			<certificate :year="query.year" :name="query.name" :date="query.date" :checkedData="checkedData" v-show="showCertificate"></certificate>
-			<vote :year="query.year" :name="query.name" :checkedData="checkedData" :motion="motion" v-show="showVote"></vote>
-			<stock :query="query" :statistics="statistics" v-show="showStock"> </stock>
+				</el-tab-pane>
+			
+				<!-- 对应id="onSite" -->
+			<!-- </div> -->
+			<el-tab-pane name="second"  ><span slot="label"><i class="el-icon-tickets"></i>预览登记凭证</span>
+			<certificate :year="query.year" :name="query.name" :date="query.date" :checkedData="checkedData" ></certificate>
+			</el-tab-pane>
+			<el-tab-pane label="预览议案表决票" name="third">
+			<vote :year="query.year" :name="query.name" :checkedData="checkedData" :motion="motion" ></vote>
+			</el-tab-pane>
+			<el-tab-pane label="股东,股份数统计表" name="fouth">
+			<stock :query="query" :statistics="statistics" > </stock>
+			</el-tab-pane>
+			 </el-tabs>
+			<el-dialog title="编辑" :visible.sync="editVisible" width="30%">
+								 <!-- <el-form ref="form" :model="form" label-width="70px">
+									<el-form-item label="人数">
+										<el-input v-model="form.rs"></el-input>
+									</el-form-item>
+									<el-form-item label="股东类型">
+										<el-input v-model="form.gdtype"></el-input>
+									</el-form-item>
+									<el-form-item label="股东姓名">
+										<el-input v-model="form.name"></el-input>
+									</el-form-item>
+									<el-form-item label="股东代码卡">
+										<el-input v-model="form.gddmk"></el-input>
+									</el-form-item>
+									<el-form-item label="身份证号">
+										<el-input v-model="form.sfz"></el-input>
+									</el-form-item>
+									<el-form-item label="A股">
+										<el-input v-model="form.frA"></el-input>
+									</el-form-item>
+									<el-form-item label="B股">
+										<el-input v-model="form.frB"></el-input>
+									</el-form-item>
+									<el-form-item label="备注">
+										<el-input v-model="form.bz"></el-input>
+									</el-form-item>
+							
+								</el-form> -->
+								<span slot="footer" class="dialog-footer">
+									<el-button @click="editVisible = false">取 消</el-button>
+									<el-button type="primary" @click="saveEdit">确 定</el-button>
+								</span>
+							
+							</el-dialog>
 		</div>
+		
 	</div>
 </template>
 
@@ -158,6 +176,7 @@
 			var currenYear = new Date().getFullYear();
 			return {
 				editVisible:false,
+				message:'first',
 				query: {
 					address: '',
 					year: '',
@@ -185,13 +204,6 @@
 				motion: [],
 
 
-				showOnSite: true,
-				showCertificate: false,
-				showStock: false,
-				showVote: false,
-				showDirector: false,
-				showOppose: false,
-
 
 			};
 		},
@@ -211,6 +223,10 @@
 		},
 
 		methods: {
+			// 处理选项卡的点击事件
+			handleTabClick(tab, event){
+				this.handleCheckedData();
+			},
 			// 添加行
 			addRow() {
 				var newValue = {
@@ -266,21 +282,11 @@
 
 			},
 			goback() {
-				this.showCertificate = false;
-				this.showOnSite = true;
-				this.showStock = false,
-				this.showVote = false,
-				this.showDirector = false,
-				this.showOppose = false
+				
 			},
 
 			printOnSite() {
-				this.showCertificate = false;
-				this.showOnSite = true;
-				this.showStock = false,
-				this.showVote = false,
-				this.showDirector = false,
-				this.showOppose = false,
+				
 				Print('#onSite', {
 					noPrint: '.do-not-print-me',
 					onStart: function() {
@@ -292,26 +298,13 @@
 				})
 			},
 
-			printVote() {
-				this.showCertificate = false;
-				this.showOnSite = false;
-				this.showStock = false;
-				this.showVote = true;
-				this.showDirector = false;
-				this.showOppose = false;
-				this.handleCheckedData();
+			// printVote() {
 
-			},
+			// 	this.handleCheckedData();
+
+			// },
 
 			printStock() {
-				this.showCertificate = false;
-				this.showOnSite = false;
-				this.showStock = true;
-				this.showVote = false;
-				this.showDirector = false;
-				this.showOppose = false;
-
-
 				for (var index in this.indexChecked) {
 					var i = this.indexChecked[index];
 					if (this.tableData[i].gzA > 0) {
@@ -343,13 +336,6 @@
 			},
 
 			printCertificate() {
-				// console.log(this.rowList)
-				this.showCertificate = true;
-				this.showOnSite = false;
-				this.showStock = false;
-				this.showVote = false;
-				this.showDirector = false;
-				this.showOppose = false;
 				this.handleCheckedData();
 				// Print('#wrap', {
 				// 	onStart: function() {
@@ -444,7 +430,14 @@
 		}
 	};
 </script>
+<style>
+	.el-tabs__nav {
+		border-radius: 13px;
+		background: #20A0FF;
+	}
+</style>
 <style scoped>
+
 	.button-group {
 		/* font-size: 0; */
 		/* Inline block elements gap - fix */
@@ -456,6 +449,7 @@
 		-moz-border-radius: 7px;
 		-webkit-border-radius: 7px;
 		border-radius: 7px;
+		/* float: right; */
 	}
 
 	.button {
