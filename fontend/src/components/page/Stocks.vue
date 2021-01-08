@@ -2,7 +2,7 @@
 	<div id="printStock">
 		<h3 align="center">佛山电器照明股份有限公司</h3>
 		<h2 align="center">{{query.year+query.name}}股东、股份数统计表</h2>
-		<p>公司总股本：{{statistics.sumAStock + statistics.sumBStock}},其中A股：{{statistics.sumAStock}},B股：{{statistics.sumBStock}}</p>
+		<p>公司总股本：{{totalShare}}股，其中A股：{{AShareTotal}}股，B股：{{BShareTotal}}股</p>
 		<table border="1" style="width: 50%;margin:auto;text-align: center;">
 			<tr>
 				<th></th>
@@ -25,6 +25,13 @@
 				<td>{{statistics.percentB}}</td>
 				<td></td>
 			</tr>
+			<tr>
+				<td>合计</td>
+				<td>{{statistics.sumB + statistics.sumA}}</td>
+				<td>{{statistics.sumBStock + statistics.sumAStock}}</td>
+				<td>{{statistics.percentB}}</td>
+				<td></td>
+			</tr>
 		</table>
 		
 	</div>
@@ -33,7 +40,7 @@
 <script>
 	export default {
 		name: 'stock',
-		props: ['query', 'statistics'],
+		props: ['query', 'statistics','totalShare', 'AShareTotal', 'BShareTotal'],
 		data(){
 			return{}
 		},

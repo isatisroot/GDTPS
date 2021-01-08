@@ -1,10 +1,10 @@
 <template>
 	<div>
 		<!-- <button v-print="'#printTest'">打印</button> -->
-		<el-button class="button" icon="el-icon-printer"  v-print="'#printVote'">打印表决票</el-button>
-		<div id="printVote">
-			　　
-			<div style="page-break-after:always" v-for="row in checkedData" :key="row.gdxm">
+		<el-button class="button" icon="el-icon-printer"  v-print="'#printVote'">打印</el-button>
+		<div id="printVote" class="print-vote">
+			　<ul id="uvote">　
+			<li style="page-break-after:always" v-for="row in checkedData" :key="row.gdxm">
 				<h3 class="titile3" align="center" >佛山电器照明股份有限公司</h3>
 				<h2 class="titile2" align="center">{{year+name}}议案表决票</h2>
 				<table border="1" style="width: 50%;margin:auto;text-align: center;">
@@ -45,11 +45,14 @@
 						<td></td>
 					</tr>
 				</table>
-			</div>
+			<!-- </div> -->
+			</li>
+			</ul>
 
 			
 		</div>
-
+		<el-pagination layout="prev, pager, next" background @current-change="current_change" :total="10*checkedData.length">
+		</el-pagination>
 		<!-- <el-button type="success" icon="el-icon-printer">打印议案表决票</el-button> -->
 		<!-- <el-table :data="content" border align="center" >
 				</el-table-column>
@@ -82,11 +85,51 @@
 		created() {
 
 		},
-		methods: {},
+		methods: {
+			current_change: function(currentPage) {
+				// this.currentPage = currentPage;
+				var oUl = document.getElementById('uvote');
+				console.log(currentPage)
+				oUl.style.top = -355*(currentPage-1) + 'px'
+			
+			},
+		},
 	}
 </script>
 
 <style>
+	@media screen {
+		 .print-vote {
+			padding-left: 100px;
+			padding-right: 100px;
+			overflow-y: hidden;
+			height: 24rem;
+			position: relative;
+	
+			
+		}
+		.print-vote ul {	
+			list-style-type: none;
+			position: absolute;
+		}
+		
+	
+		
+		
+	}
+	
+	@media print {
+		.print-cerificate {
+			padding-left: 100px;
+			padding-right: 100px;
+	
+	
+		}
+		.print-cerificate ul{
+			list-style-type: none;
+		}
+	}
+	
 	.title2{
 		margin-top: 30px;
 		margin-bottom: 20px;

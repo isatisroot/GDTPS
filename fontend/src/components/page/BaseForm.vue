@@ -25,10 +25,41 @@
 			<!-- <div id="onSite" v-show="showOnSite"> -->
 			<el-tabs v-model="message" type="border-card" @tab-click="handleTabClick">
 				<el-tab-pane name="first"><span slot="label"><i class="el-icon-tickets"></i> 年度会议</span>
+				<div>
+				<div class="sharemsg">
+					<span>总股本：</span><el-input  v-model="totalShare" :disabled="disabled"></el-input>
+					<span>流通A股：</span><el-input  v-model="AShareTotal" :disabled="disabled"></el-input>
+					<span>流通B股：</span><el-input  v-model="BShareTotal" :disabled="disabled"></el-input>
+					<el-button type="info" @click="disabled=false">编辑</el-button>
+					<el-button type="success">更新</el-button>
+				</div>
+				<div class="search-box">
+					<el-select v-model="query.year" placeholder="年份" class="handle-select mr10" filterable allow-create
+					 default-first-option clearable>
+						<!-- <el-option key="1" label="2020" value="2020"></el-option>
+						<el-option key="2" label="2019" value="2019"></el-option> -->
+						<el-option v-for="(val, id) in yearList" :key="id" :value="val"></el-option>
+					</el-select>
+					<!-- <el-input v-model="query.name" placeholder="会议类型" class="handle-input mr10"></el-input> -->
+					<!-- <el-form-item label="会议类型" required> -->
+					<el-select v-model="query.name" label="会议类型" required placeholder="请选择会议类型">
+						<el-option v-for="(val, id) in meetingName" :key="id" :value="val"></el-option>
+					</el-select>
+					<!-- </el-form-item> -->
+					<el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+				</div>
+				</div>
+				<div class="do-not-print-me handle-box">
+					<el-button type="info" icon="el-icon-circle-plus" @click="addRow">新增行</el-button>
+					<el-button type="primary" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection">全选</el-button>
+					<!-- filterable allow-create default-first-option clearable  既可下来菜单选择又可手动输入内容 -->
+					<!-- <el-button type="success">更新登记表</el-button> -->
+				</div>
 				<el-tooltip class="item" effect="dark"  placement="right">
 					<span slot="content">打印建议:横向-缩放75%,勾选背景图形</span>
-					<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印现场会议登记表</el-button>
+					<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印</el-button>
 				</el-tooltip>
+				<div id="onSite" >
 				<h3 align="center">佛山电器照明公司</h3>
 				<h2 align="center" v-show="query.year!=''">{{query.year + query.name}}现场会议登记表</h2>
 
@@ -40,9 +71,15 @@
 					</el-table-column>
 					<el-table-column prop="cx" label="出席" width="55">
 						<template slot-scope="scope">
-							<el-checkbox v-model="scope.row.checked" @change="handleCheckOneChange(scope.$index)"></el-checkbox>
+							<el-checkbox v-model="scope.row.cx" @change="handleCheckOneChange(scope.$index)"></el-checkbox>
 						</template>
 
+					</el-table-column>
+					<el-table-column prop="xc" label="现场" width="55">
+						<template slot-scope="scope">
+							<el-checkbox v-model="scope.row.xc" ></el-checkbox>
+						</template>
+					
 					</el-table-column>
 					<el-table-column prop="rs" label="人数" width="55"> </el-table-column>
 					<el-table-column prop="gdtype" label="股东类型" width="85"> </el-table-column>
@@ -53,7 +90,7 @@
 					<el-table-column prop="gzA" label="A股" align="right"> </el-table-column>
 					<el-table-column prop="gzB" label="B股" align="right"> </el-table-column>
 					<el-table-column label="签名"> </el-table-column>
-					<el-table-column prop="emon" label="备注"></el-table-column>
+					<el-table-column prop="meno" label="备注"></el-table-column>
 					<!-- <el-table-column prop="address" label="地址"></el-table-column> -->
 					<!-- <el-table-column label="状态" align="center">
 			    <template slot-scope="scope">
@@ -78,29 +115,11 @@
 				</el-table-column> -->
 
 				</el-table>
-				
-				<div class="do-not-print-me handle-box">
-					<el-button type="success" icon="el-icon-circle-plus" @click="addRow"></el-button>
-					<el-button type="primary" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection">批量删除</el-button>
-					<!-- filterable allow-create default-first-option clearable  既可下来菜单选择又可手动输入内容 -->
-					<el-select v-model="query.year" placeholder="年份" class="handle-select mr10" filterable allow-create
-					 default-first-option clearable>
-						<!-- <el-option key="1" label="2020" value="2020"></el-option>
-						<el-option key="2" label="2019" value="2019"></el-option> -->
-						<el-option v-for="(val, id) in yearList" :key="id" :value="val"></el-option>
-					</el-select>
-					<!-- <el-input v-model="query.name" placeholder="会议类型" class="handle-input mr10"></el-input> -->
-					<!-- <el-form-item label="会议类型" required> -->
-					<el-select v-model="query.name" label="会议类型" required placeholder="请选择会议类型">
-						<el-option v-for="(val, id) in meetingName" :key="id" :value="val"></el-option>
-					</el-select>
-					<!-- </el-form-item> -->
-					<el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
 				</div>
+				
 				</el-tab-pane>
 			
-				<!-- 对应id="onSite" -->
-			<!-- </div> -->
+			
 			<el-tab-pane name="second"  ><span slot="label"><i class="el-icon-tickets"></i>预览登记凭证</span>
 			<certificate :year="query.year" :name="query.name" :date="query.date" :checkedData="checkedData" ></certificate>
 			</el-tab-pane>
@@ -108,7 +127,7 @@
 			<vote :year="query.year" :name="query.name" :checkedData="checkedData" :motion="motion" ></vote>
 			</el-tab-pane>
 			<el-tab-pane label="股东,股份数统计表" name="fouth">
-			<stock :query="query" :statistics="statistics" > </stock>
+			<stock :query="query" :statistics="statistics" :totalShare='totalShare' :AShareTotal='AShareTotal' :BShareTotal='BShareTotal'> </stock>
 			</el-tab-pane>
 			 </el-tabs>
 			<el-dialog title="编辑" :visible.sync="editVisible" width="30%">
@@ -175,6 +194,10 @@
 		data() {
 			var currenYear = new Date().getFullYear();
 			return {
+				disabled:true,
+				totalShare:'',
+				AShareTotal:'',
+				BShareTotal:'',
 				editVisible:false,
 				message:'first',
 				query: {
@@ -188,7 +211,7 @@
 				yearList: [currenYear, currenYear + 1],
 				meetingName: ["第一次临时股东大会", "第二次临时股东大会", "第三次临时股东大会"],
 				tableData: [],
-				indexChecked: [],
+				indexChecked: [],  // 存储勾选出席股东的索引号
 				checkedData: [],
 				rowList: [],
 				statistics: {
@@ -209,6 +232,10 @@
 		},
 
 		created() {
+			// 将数字转换为千位分隔符字符串
+			this.totalShare = String(1399346154).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
+			this.AShareTotal = String(1077274404).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
+			this.BShareTotal = String(322071750).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
 			EventBus.$on('addition', param => {
 
 				this.tableData = param.tableData;
@@ -216,22 +243,29 @@
 				this.query.year = param.year;
 				this.query.date = param.date;
 				this.query.name = param.meetingName;
+				this.motion = param.motion;
+				console.log(this.tableData[0])
 				// alert("date:" + this.query.date)
 			});
-
+			
 			// this.getData();
 		},
 
 		methods: {
+			
 			// 处理选项卡的点击事件
 			handleTabClick(tab, event){
 				this.handleCheckedData();
+				if(tab.index == 3){
+					this.printStock()
+				}
 			},
 			// 添加行
 			addRow() {
 				var newValue = {
 					id: '',
 					cx: '',
+					xc:'',
 					rs: '',
 					gdtype: '',
 					name: '',
@@ -246,7 +280,7 @@
 			},
 			handleCheckOneChange(index) {
 				// alert('勾选的下标值：' + index )
-				console.log('勾选的下标值：' + index + ' 对应值为' + this.tableData[index].gdxm)
+				console.log('勾选的下标值：' + index + ' 对应值为' + this.tableData[index].gdxm + '出席' + this.tableData[index].cx)
 				var flag = false;
 				if (this.indexChecked.length == 0) {
 					// alert('列表为空，执行添加操作')
@@ -281,9 +315,7 @@
 
 
 			},
-			goback() {
-				
-			},
+		
 
 			printOnSite() {
 				
@@ -320,19 +352,33 @@
 
 
 				// 求占公司所有A股股份数百分比
-				for (var i in this.tableData) {
+				// for (var i in this.tableData) {
 
-					this.statistics.sumAStock += this.tableData[i].gzA;
-					this.statistics.sumBStock += this.tableData[i].gzB
-				};
-				this.statistics.percentA = this.sumAChecked / this.sumAStock;
-				this.statistics.percentB = this.sumBChecked / this.sumBStock;
-
+				// 	this.statistics.sumAStock += this.tableData[i].gzA;
+				// 	this.statistics.sumBStock += this.tableData[i].gzB
+				// };
+				// this.statistics.percentA = this.sumAChecked / this.sumAStock;
+				// this.statistics.percentB = this.sumBChecked / this.sumBStock;
+				this.statistics.percentA =this.GetPercent(this.sumAChecked, this.AShareTotal);
+				this.statistics.percentB = this.GetPercent(this.sumBChecked, this.BShareTotal);
 
 				console.log('A股人数是：' + this.statistics.sumA + ' 股份数：' + this.statistics.sumAStock + ' B股人数: ' + this.statistics.sumB +
 					' B股数是:' + this.statistics.sumBStock +
 					' A百分比：' + this.statistics.percentA +
 					' B百分比:' + this.statistics.percentB)
+			},
+			GetPercent(num, total) {
+			    /// <summary>
+			    /// 求百分比
+			    /// </summary>
+			    /// <param name="num">当前数</param>
+			    /// <param name="total">总数</param>
+			    num = parseFloat(num);
+			    total = parseFloat(total);
+			    if (isNaN(num) || isNaN(total)) {
+			        return "-";
+			    }
+			    return total <= 0 ? "0%" : (Math.round(num / total * 10000) / 100.00)+"%";
 			},
 
 			printCertificate() {
@@ -432,12 +478,95 @@
 </script>
 <style>
 	.el-tabs__nav {
-		border-radius: 13px;
-		background: #20A0FF;
+		/* border-radius: 13px; */
+		background: #6666ff;
+		/* background: -webkit-gradient(linear, left top, left bottom, from(#6666ff), to(#6666ff)); */
+		/* background: -webkit-linear-gradient(top, #503e9c, #65d6b6); */
+		/* background: -moz-linear-gradient(top, #503e9c, #65d6b6);
+		background: -ms-linear-gradient(top, #503e9c, #65d6b6);
+		background: -o-linear-gradient(top, #503e9c, #65d6b6); */
+		/* padding: 10px 20px; */
+		/* -webkit-border-radius: 13px;
+		-moz-border-radius: 13px; */
+		/* border-radius: 13px; */
+		/* -webkit-box-shadow: rgba(185, 185, 185, 1.0) 0 1px 0; */
+		-moz-box-shadow: rgba(152, 152, 152, 1.0) 0 1px 0;
+		box-shadow: rgba(127, 127, 127, 1.0) 0 1px 0;
+		/* text-shadow: rgba(0, 0, 0, .4) 0 1px 0; */
 	}
+	.el-tabs--border-card>.el-tabs__header .el-tabs__item {
+		border: 3px solid #FFFFFF;
+		border-radius: 5px;
+		color:white
+	}
+	
+	.el-tabs--border-card>.el-tabs__header .el-tabs__item.is-active{
+		color:#3f51b5;
+		/* background-color: #00BCD4; */
+		background: -webkit-gradient(linear, left top, left bottom, from(#6699ff), to(#ffffff));
+		border-radius: 5px;
+		font-weight: 600;
+	}
+	
+	
+	.button {
+		border-top: 1px solid #97f7df;
+		background:#1ABC9C;
+		/* margin-left: 800px; */
+		/* position: absolute; */
+		/* right: 50px; */
+		/* top:35px; */
+		/* background: -webkit-gradient(linear, left top, left bottom, from(#503e9c), to(#65d6b6)); */
+		/* background: -webkit-linear-gradient(top, #503e9c, #65d6b6);
+		background: -moz-linear-gradient(top, #503e9c, #65d6b6);
+		background: -ms-linear-gradient(top, #503e9c, #65d6b6);
+		background: -o-linear-gradient(top, #503e9c, #65d6b6); */
+		padding: 9px 15px;
+		/* -webkit-border-radius: 13px;
+		-moz-border-radius: 13px; */
+		border-radius: 3px;
+		/* -webkit-box-shadow: rgba(185, 185, 185, 1.0) 0 1px 0;
+		-moz-box-shadow: rgba(152, 152, 152, 1.0) 0 1px 0;
+		box-shadow: rgba(127, 127, 127, 1.0) 0 1px 0; */
+		/* text-shadow: rgba(0, 0, 0, .4) 0 1px 0; */
+		color: white;
+		font-size: 12px;
+		/* font-family: Helvetica, Arial, Sans-Serif;
+		text-decoration: none;
+		vertical-align: middle; */
+	}
+	.button:hover {
+		border-top-color: #287378;
+		background: #287378;
+		color: #ccc;
+	}
+	
+	.button:active {
+		border-top-color: #3162a7;
+		background: #1b365c;
+	}
+	
+	
 </style>
 <style scoped>
-
+	.sharemsg {
+		display: inline-block;
+	}
+	.sharemsg .el-input{
+		display: inline-block;
+		width:15%;
+		margin-right: 10px;
+	}
+	.sharemsg span{
+		margin-left: 5px;
+	}
+	
+	.search-box{
+		display: inline-block;
+		position: absolute;
+		right:25px;
+	}
+	
 	.button-group {
 		/* font-size: 0; */
 		/* Inline block elements gap - fix */
@@ -450,40 +579,6 @@
 		-webkit-border-radius: 7px;
 		border-radius: 7px;
 		/* float: right; */
-	}
-
-	.button {
-		border-top: 1px solid #97f7df;
-		background: #65d6b6;
-		background: -webkit-gradient(linear, left top, left bottom, from(#503e9c), to(#65d6b6));
-		background: -webkit-linear-gradient(top, #503e9c, #65d6b6);
-		background: -moz-linear-gradient(top, #503e9c, #65d6b6);
-		background: -ms-linear-gradient(top, #503e9c, #65d6b6);
-		background: -o-linear-gradient(top, #503e9c, #65d6b6);
-		padding: 10px 20px;
-		-webkit-border-radius: 13px;
-		-moz-border-radius: 13px;
-		border-radius: 13px;
-		-webkit-box-shadow: rgba(185, 185, 185, 1.0) 0 1px 0;
-		-moz-box-shadow: rgba(152, 152, 152, 1.0) 0 1px 0;
-		box-shadow: rgba(127, 127, 127, 1.0) 0 1px 0;
-		text-shadow: rgba(0, 0, 0, .4) 0 1px 0;
-		color: white;
-		font-size: 16px;
-		font-family: Helvetica, Arial, Sans-Serif;
-		text-decoration: none;
-		vertical-align: middle;
-	}
-
-	.button:hover {
-		border-top-color: #287378;
-		background: #287378;
-		color: #ccc;
-	}
-
-	.button:active {
-		border-top-color: #3162a7;
-		background: #1b365c;
 	}
 
 
@@ -507,6 +602,7 @@
 
 	.handle-box {
 		margin-top: 20px;
+		display: inline-block;
 	}
 
 	.handle-select {

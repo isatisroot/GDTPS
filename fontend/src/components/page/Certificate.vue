@@ -35,7 +35,7 @@
 		<el-pagination layout="prev, pager, next" @current-change="current_change" :total="1000">
 		</el-pagination>
  -->
-		<el-button class="button" icon="el-icon-printer"  v-print="'#printCerificate'">打印凭证</el-button>
+		<el-button class="button" icon="el-icon-printer"  v-print="'#printCerificate'">打印</el-button>
 		<div id="printCerificate" class="print-cerificate">
 			<ul id="t1">
 				<li style="page-break-after:always " v-for="(row,index) in checkedData" :key="row.gdxm">

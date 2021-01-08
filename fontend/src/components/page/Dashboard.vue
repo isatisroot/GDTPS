@@ -231,6 +231,7 @@
 			};
 
 			return {
+				res_data:{},
 				
 				options: [{
 						value: 'headOffice',
@@ -405,17 +406,20 @@
 			getData() {
 				axios.get(this.host + 'get_detail/' + this.ruleForm.year + '/' + this.meetingName)
 					.then(response => (
-
-						this.tableData = response.data['list'],
+						this.res_data = response.data,
+			
+						this.tableData = this.res_data.list,
+						
 						// 事件总线，向BaseForm组件通信，共享数据
 						EventBus.$emit('addition', {
 							year: this.ruleForm.year,
 							date: this.date,
 							meetingName: this.meetingName,
-							tableData: this.tableData
+							tableData: this.tableData,
+							motion:this.res_data.motion
 						})
 					)).catch(error => {
-						console.log(error.response.data);
+						// console.log(error.response);
 					})
 			},
 			submitForm(formName) {

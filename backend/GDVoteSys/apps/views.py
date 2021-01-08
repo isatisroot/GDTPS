@@ -5,9 +5,7 @@ from django.http.response import JsonResponse, HttpResponseBadRequest
 from .models import Meeting, ShareholderInfo
 
 from datetime import datetime,date,timedelta
-#
-# import json
-# # Create your views here.
+
 
 class QueryYear(View):
     def get(self, request):
@@ -109,11 +107,14 @@ class QueryDetail(View):
             _d = m.date + timedelta(minutes=-10)
             str_date = _d.strftime('%Y年%m月%d日 %H时%M分')
             motion = m.motion.split(";")
+            motion.pop()
+            print(motion)
             for i in queryset:
                 q = i.shareholder
+                print(i.cx)
                 data = {
-                    'xh': i.cx,
-                    'xcorwl': i.xcorwl,
+                    'cx': i.cx,
+                    'xc': i.xcorwl,
                     'gdxm': q.gdxm,
                     'gdtype': q.gdtype,
                     'gddmk': q.gddmk,
@@ -133,28 +134,3 @@ class QueryDetail(View):
 
 
         return JsonResponse({'date': str_date, 'motion':motion, 'list':detail_list})
-#
-# class Add(View):
-#     def post(self, request):
-#         json_str = request.body.decode()
-#         req_data = json.loads(json_str)
-#         year = req_data.get('year')
-#         meeting_name = req_data.get('meeting_name')
-#         xh = req_data.get('xh')
-#         xcorwl = req_data.get('xcorwl')
-#         gdtype = req_data.get('gdtype')
-#         gdxm = req_data.get('gdxm')
-#         id = Conference.objects.filter(year=year,name=meeting_name)
-#         if not id:
-#             id = Conference(year=year, name=meeting_name)
-#             id.save()
-#
-#         r = RegisterInfo(
-#             xh=xh,
-#             xcorwl=xcorwl,
-#             gdtype=gdtype,
-#             gdxm=gdxm
-#         )
-#         r.save()
-#
-#         return HttpResponse()
