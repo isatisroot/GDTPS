@@ -41,14 +41,14 @@
 				<li style="page-break-after:always " v-for="(row,index) in checkedData" :key="index">
 					<p class="title1" >佛山电器照明股份有限公司</p>
 					<p class="title2">{{year+name}}登记凭证</p>
-					<p style="text-indent:50px;">此据为参加{{year+name}}现场会议登记凭证，请凭此据于{{date}}到本公司办公楼五楼会议室（佛山市禅城区汾江北路64号），领取会议材料，并参加股东大会。</p>
-					<table border="1" style="width: 100%;margin:auto;text-align: center;">
+					<p class="text">此据为参加{{year+name}}现场会议登记凭证，请凭此据于{{date}}到本公司办公楼五楼会议室（佛山市禅城区汾江北路64号），领取会议材料，并参加股东大会。</p>
+					<table border="1" class="table1" >
 						<tr>
 							<th rowspan="2">登记日期</th>
 							<th rowspan="2">序号</th>
 							<th rowspan="2">股东姓名(单位)</th>
 							<th rowspan="2">股东代码</th>
-							<th colspan="3">股数数</th>
+							<th colspan="3">股份数</th>
 						</tr>
 						<tr>
 							<th>A股</th>
@@ -113,7 +113,7 @@
 				// this.currentPage = currentPage;
 				var oUl = document.getElementById('t1');
 				console.log(currentPage)
-				oUl.style.top = -355*(currentPage-1) + 'px'
+				oUl.style.top = -455*(currentPage-1) + 'px'
 
 			},
 		}
@@ -127,7 +127,7 @@
 			padding-left: 100px;
 			padding-right: 100px;
 			overflow-y: hidden;
-			height: 24rem;
+			height: 455px;
 			position: relative;
 
 			
@@ -160,6 +160,39 @@
 		padding-right: 100px;
 	} */
 	.bottom-p {
-		margin: 30px;
+		/* margin-top: 30px; */
+		line-height: 55px;
+		font-size: 18px;
+		
+	}
+	
+	.text{
+		text-indent:50px;
+		font-size: 20px;
+		/* margin-bottom: 10px; */
+		line-height: 35px;
+	}
+	
+	.table1{
+		width: 100% ;
+		margin:auto;
+		text-align: center;
+		
+		border-collapse:collapse;
+		
+	}
+	.table1 tr th{
+		font-family: SimSun;
+		font-weight: 900;
+		height: 50px;
+		font-size: 20px;
+		border:1px solid #000000;
+	}
+	.table1 tr td{
+		font-family: STSong;
+		font-weight: 200;
+		font-size: 18px;
+		border:1px solid #000000;
+		height: 50px;
 	}
 </style>

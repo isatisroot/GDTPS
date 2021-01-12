@@ -55,7 +55,7 @@
 
 						<div class="do-not-print-me handle-box">
 							<el-tooltip class="item" effect="dark" placement="left">
-								<span slot="content">打印建议:横向-缩放77%,勾选背景图形</span>
+								<span slot="content">打印建议:横向-缩放61%,勾选背景图形</span>
 								<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印</el-button>
 							</el-tooltip>
 							<el-button type="info" icon="el-icon-edit" @click="[showColum=!showColum]">{{showColum?'隐藏编辑':'编辑行'}}</el-button>
@@ -68,8 +68,8 @@
 					<div id="onSite">
 						<p class="title1" >佛山电器照明股份有限公司</p>
 						<p class="title2"  v-show="query.year!=''">{{query.year+query.name}}现场会议登记表</p>
-						<el-table :data="tableData" border class="table" ref="multipleTable"  header-cell-class-name="table-header"
-						 @selection-change="handleSelectionChange" >
+						<el-table :data="tableData" border class="table" ref="multipleTable" :header-cell-style="headerCellStyle"
+						:cell-style="cellStyle" @selection-change="handleSelectionChange" >
 							<el-table-column label="序号" width="55" align="center" type="index">
 							</el-table-column>
 							<el-table-column prop="cx" label="出席" width="55">
@@ -90,8 +90,8 @@
 							<el-table-column prop="sfz" label="身份证号码 " width="190"> </el-table-column>
 							<el-table-column prop="gzA" label="A股" align="right"> </el-table-column>
 							<el-table-column prop="gzB" label="B股" align="right"> </el-table-column>
-							<el-table-column label="签名"> </el-table-column>
-							<el-table-column prop="meno" label="备注"></el-table-column>
+							<el-table-column label="签名" align=center> </el-table-column>
+							<el-table-column prop="meno" label="备注" align="center"></el-table-column>
 							<el-table-column label="操作" width="180" align="center" v-if="showColum">
 								<template slot-scope="scope">
 									<el-button type="text" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
@@ -111,7 +111,7 @@
 					<vote :year="query.year" :name="query.name" :checkedData="checkedData" :motion="motion"></vote>
 				</el-tab-pane>
 				<el-tab-pane label="股东,股份数统计表" name="fouth">
-					<stock :query="query" :statistics="statistics" :totalShare='totalShare' :AShareTotal='AShareTotal' :BShareTotal='BShareTotal'>
+					<stock :date="query.date" :query="query" :statistics="statistics" :totalShare='totalShare' :AShareTotal='AShareTotal' :BShareTotal='BShareTotal'>
 					</stock>
 				</el-tab-pane>
 			</el-tabs>
@@ -182,6 +182,19 @@
 		data() {
 			var currenYear = new Date().getFullYear();
 			return {
+				headerCellStyle:{
+					background:'#00dea3 !important',
+					color:'#7100aa',
+					'border-bottom': 'solid 1px #000000 !important',
+					'border-right':'solid 1px #000000 !important',
+					
+					},
+				cellStyle:{
+					'border-bottom':'solid 1px #000000',
+					'border-right':'solid 1px #000000 !important',
+					
+					},
+
 				form: {
 
 				},
@@ -436,17 +449,21 @@
 </script>
 <style>
 	.title1 {
-		margin-top: 30px;
+		/* margin-top: 30px; */
 		/* margin-bottom: 10px; */
 		text-align: center;
-		font-size: 30px;
+		font-size: 36px;
+		font-family: "LiSu" ;
+		color:orangered;
 		
 	}
 	.title2{
-		margin-top: 20px;
-		margin-bottom: 20px;
+		/* margin-top: 15px; */
+		/* margin-bottom: 20px; */
+		line-height: 80px;
 		text-align: center;
 		font-size: 38px;
+		color:indianred
 	}
 	
 	.el-tabs__nav {
@@ -521,6 +538,17 @@
 	}
 </style>
 <style scoped>
+	.el-table--border:after,
+	.el-table--group:after,
+	.el-table:before {
+	    background-color: #000000;
+	}
+	.el-table--border,
+	.el-table--group {
+	    border-color: #000000;
+	}
+
+	
 	.table-header{
 		background: #07C4A8;
 	}

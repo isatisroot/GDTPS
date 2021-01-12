@@ -1,9 +1,12 @@
 <template>
-	<div id="printStock">
-		<p class="title1" align="center">佛山电器照明股份有限公司</p>
+	<div>
+		<el-button class="button" icon="el-icon-printer" v-print="'#printStock'">打印</el-button>
+	
+		<div id="printStock">
+		<p class="title1" >佛山电器照明股份有限公司</p>
 		<p  class="title2" align="center">{{query.year+query.name}}股东、股份数统计表</p>
-		<p>公司总股本：{{totalShare}}股，其中A股：{{AShareTotal}}股，B股：{{BShareTotal}}股</p>
-		<table border="1" style="width: 50%;margin:auto;text-align: center;">
+		<p class="text">公司总股本：{{totalShare}}股，其中A股：{{AShareTotal}}股，B股：{{BShareTotal}}股</p>
+		<table class="table1">
 			<tr>
 				<th></th>
 				<th>股东人数</th>
@@ -33,26 +36,23 @@
 				<td></td>
 			</tr>
 		</table>
-		
+		<p align="right" class="bottom-p">统计人签字：____________</p>
+		<p> 注：统计至开会开始前{{date}},请在{{date}}前送到主席台</p>
+		<p align="right" class="bottom-p">佛山电器照明股份有限公司</p>
+		<p align="right" class="bottom-p">{{currentDate}}</p>
+	</div>
 	</div>
 </template>
 
 <script>
 	export default {
 		name: 'stock',
-		props: ['query', 'statistics','totalShare', 'AShareTotal', 'BShareTotal'],
+		props: ['query', 'statistics','totalShare', 'AShareTotal', 'BShareTotal', 'date'],
 		data(){
 			return{}
 		},
 		created(){
-			// axios.get(this.host + 'get_detail/' + this.query.year + '/' + this.query.name)
-			// 	.then(response => (
-			// 		this.tableData = response.data,
-			// 		this.pageTotal = 15
-			// 	)).catch(error => {
-			// 		alert('error')
-			// 		console.log(error.response.data);
-			// 	})
+
 		},
 		methods:{},
 		
