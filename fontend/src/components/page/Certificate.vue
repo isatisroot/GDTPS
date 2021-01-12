@@ -38,9 +38,9 @@
 		<el-button class="button" icon="el-icon-printer"  v-print="'#printCerificate'">打印</el-button>
 		<div id="printCerificate" class="print-cerificate">
 			<ul id="t1">
-				<li style="page-break-after:always " v-for="(row,index) in checkedData" :key="row.gdxm">
-					<h3 class="titile3" align="center">佛山电器照明股份有限公司</h3>
-					<h2 class="title2" align="center">{{year+name}}登记凭证</h2>
+				<li style="page-break-after:always " v-for="(row,index) in checkedData" :key="index">
+					<p class="title1" >佛山电器照明股份有限公司</p>
+					<p class="title2">{{year+name}}登记凭证</p>
 					<p style="text-indent:50px;">此据为参加{{year+name}}现场会议登记凭证，请凭此据于{{date}}到本公司办公楼五楼会议室（佛山市禅城区汾江北路64号），领取会议材料，并参加股东大会。</p>
 					<table border="1" style="width: 100%;margin:auto;text-align: center;">
 						<tr>
@@ -102,7 +102,7 @@
 			},
 
 			Share() {
-				console.log(this.content)
+				// console.log(this.content)
 			},
 
 			getSummaries(param) {

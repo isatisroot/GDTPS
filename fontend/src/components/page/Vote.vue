@@ -4,9 +4,9 @@
 		<el-button class="button" icon="el-icon-printer"  v-print="'#printVote'">打印</el-button>
 		<div id="printVote" class="print-vote">
 			　<ul id="uvote">　
-			<li style="page-break-after:always" v-for="row in checkedData" :key="row.gdxm">
-				<h3 class="titile3" align="center" >佛山电器照明股份有限公司</h3>
-				<h2 class="titile2" align="center">{{year+name}}议案表决票</h2>
+			<li style="page-break-after:always" v-for="(row,index) in checkedData" :key="index">
+				<p class="title1"  >佛山电器照明股份有限公司</p>
+				<p class="title2" >{{year+name}}议案表决票</p>
 				<table border="1" style="width: 50%;margin:auto;text-align: center;">
 					<tr>
 						<th rowspan="2">股东姓名</th>
@@ -130,14 +130,5 @@
 		}
 	}
 	
-	.title2{
-		margin-top: 30px;
-		margin-bottom: 20px;
 	
-	}
-	.titile3 {
-		margin-top: 30px;
-		margin-bottom: 20px;
-		
-	}
 </style>

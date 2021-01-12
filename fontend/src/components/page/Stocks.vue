@@ -1,7 +1,7 @@
 <template>
 	<div id="printStock">
-		<h3 align="center">佛山电器照明股份有限公司</h3>
-		<h2 align="center">{{query.year+query.name}}股东、股份数统计表</h2>
+		<p class="title1" align="center">佛山电器照明股份有限公司</p>
+		<p  class="title2" align="center">{{query.year+query.name}}股东、股份数统计表</p>
 		<p>公司总股本：{{totalShare}}股，其中A股：{{AShareTotal}}股，B股：{{BShareTotal}}股</p>
 		<table border="1" style="width: 50%;margin:auto;text-align: center;">
 			<tr>

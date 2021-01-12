@@ -44,8 +44,9 @@ router.beforeEach((to, from, next) => {
     }
 });
 
-new Vue({
+var vm = new Vue({
     router,
     i18n,
     render: h => h(App)
 }).$mount('#app');
+export{vm}

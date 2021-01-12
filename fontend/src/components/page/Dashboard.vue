@@ -379,7 +379,7 @@
 					// console.log()
 					axios.get(this.host + 'get_meeting/' + newVal)
 						.then(response => (
-							console.log(response.data[2020]),
+							// console.log(response.data[2020]),
 							this.meetingNameList = response.data[newVal]
 						)).catch(error => {
 							alert('error')
