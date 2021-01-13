@@ -9,24 +9,68 @@
 			</el-breadcrumb>
 		</div> -->
 		<!-- <div class="topDiv"> -->
-		<!-- <ul class="button-group">
-
-			<el-tooltip class="item" effect="dark"  placement="top">
+		<ul class="button-group">
+			<div class="search-box">
+				<el-select v-model="query.year" placeholder="年份" class="handle-select mr10" filterable allow-create
+				 default-first-option clearable>
+					
+					<el-option v-for="(val, id) in yearList" :key="id" :value="val"></el-option>
+				</el-select>
+				
+				<el-select v-model="query.name" label="会议类型" required placeholder="请选择会议类型">
+					<el-option v-for="(val, id) in meetingName" :key="id" :value="val"></el-option>
+				</el-select>
+				
+				<el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+				<el-button type="primary" icon="el-icon-circle-plus" >新增</el-button>
+			</div>
+			<div class="sharemsg">
+				<span>总股本：</span>
+				<el-input v-model="share.totalShare" :disabled="disabled"></el-input>
+				<span>流通A股：</span>
+				<el-input v-model="share.AShareTotal" :disabled="disabled"></el-input>
+				<span>流通B股：</span>
+				<el-input v-model="share.BShareTotal" :disabled="disabled"></el-input>
+				<el-button type="info" @click="editTable" icon="el-icon-edit">编辑</el-button>
+				<!-- <el-button type="primary" icon="el-icon-circle-plus" @click="addRow">新增行</el-button> -->
+				<el-button type="success" icon="el-icon-success" @click="updateTable">保存</el-button>
+				<template v-if="tab==0" >
+				<el-tooltip class="item" effect="dark" placement="bottom-start">
+					<!-- <el-alert title="请保存信息后再打印" type="warning" > -->
+					<span slot="content" v-show="disabled">打印建议:横向-缩放61%,勾选背景图形</span>
+					<span slot="content" v-show="!disabled">请保存信息后再打印</span>
+					<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印</el-button>
+				</el-tooltip>
+				 
+				  </el-alert>
+				</template>
+				<template v-else-if="tab == 1">
+					<el-button class="button" icon="el-icon-printer"  v-print="'#printCerificate'">打印</el-button>
+				</template>
+				<template v-else-if="tab == 2">
+					<el-button class="button" icon="el-icon-printer" v-print="'#printVote'">打印</el-button>
+				</template>
+				<template v-else-if="tab == 3">
+					<el-button class="button" icon="el-icon-printer" v-print="'#printStock'">打印</el-button>
+				</template>
+			</div>
+			
+			<!-- <el-tooltip class="item" effect="dark"  placement="top">
 				<span slot="content">打印建议:横向-缩放75%,勾选背景图形</span>
 				<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印现场会议登记表</el-button>
 			</el-tooltip>
 			
 			<el-button class="button" icon="el-icon-printer" @click="printVote" v-print="'#printVote'">打印表决票</el-button>
 			<el-button class="button" icon="el-icon-printer"  v-print="'#numOfStock'">打印股东、股份数统计表</el-button>
-			<el-button class="button" icon="el-icon-back" @click="goback">返回</el-button>
-		</ul> -->
+			<el-button class="button" icon="el-icon-back" @click="goback">返回</el-button> -->
+		</ul>
 		<!-- </div> -->
 		<div class="container">
 			<!-- <div id="onSite" v-show="showOnSite"> -->
-			<el-tabs v-model="message" type="border-card" @tab-click="handleTabClick">
-				<el-tab-pane name="first"><span slot="label"><i class="el-icon-tickets"></i> 年度会议</span>
+			<el-tabs v-model="message" type="border-card" @tab-click="handleTabClick" >
+				<el-tab-pane  name="first"><span slot="label"><i class="el-icon-tickets"></i> 年度会议</span>
 
-					<div class="sharemsg">
+					<!-- <div class="sharemsg">
 						<span>总股本：</span>
 						<el-input v-model="totalShare" :disabled="disabled"></el-input>
 						<span>流通A股：</span>
@@ -34,35 +78,38 @@
 						<span>流通B股：</span>
 						<el-input v-model="BShareTotal" :disabled="disabled"></el-input>
 						<el-button type="info" @click="disabled=false" icon="el-icon-edit">编辑</el-button>
+						<el-button type="primary" icon="el-icon-circle-plus" @click="addRow">新增行</el-button>
 						<el-button type="success" icon="el-icon-success">保存</el-button>
-					</div>
+						<el-tooltip class="item" effect="dark" placement="left">
+							<span slot="content">打印建议:横向-缩放61%,勾选背景图形</span>
+							<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印</el-button>
+						</el-tooltip>
+					</div> -->
 					<div>
-						<div class="search-box">
+						<!-- <div class="search-box">
 							<el-select v-model="query.year" placeholder="年份" class="handle-select mr10" filterable allow-create
 							 default-first-option clearable>
-								<!-- <el-option key="1" label="2020" value="2020"></el-option>
-						<el-option key="2" label="2019" value="2019"></el-option> -->
+								
 								<el-option v-for="(val, id) in yearList" :key="id" :value="val"></el-option>
 							</el-select>
-							<!-- <el-input v-model="query.name" placeholder="会议类型" class="handle-input mr10"></el-input> -->
-							<!-- <el-form-item label="会议类型" required> -->
+							
 							<el-select v-model="query.name" label="会议类型" required placeholder="请选择会议类型">
 								<el-option v-for="(val, id) in meetingName" :key="id" :value="val"></el-option>
 							</el-select>
-							<!-- </el-form-item> -->
+							
 							<el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
-						</div>
+						</div> -->
 
-						<div class="do-not-print-me handle-box">
+						<!-- <div class="do-not-print-me handle-box">
 							<el-tooltip class="item" effect="dark" placement="left">
 								<span slot="content">打印建议:横向-缩放61%,勾选背景图形</span>
 								<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印</el-button>
 							</el-tooltip>
-							<el-button type="info" icon="el-icon-edit" @click="[showColum=!showColum]">{{showColum?'隐藏编辑':'编辑行'}}</el-button>
+							<el-button type="info" icon="el-icon-edit" @click="[disabled=!disabled]">{{disabled?'隐藏编辑':'编辑行'}}</el-button>
 							<el-button type="primary" icon="el-icon-circle-plus" @click="addRow">新增行</el-button>
-							<!-- <el-button type="success" icon="el-icon-success">更新表</el-button> -->
+							<el-button type="success" icon="el-icon-success">更新表</el-button>
 
-						</div>
+						</div> -->
 
 					</div>
 					<div id="onSite">
@@ -72,14 +119,14 @@
 						:cell-style="cellStyle" @selection-change="handleSelectionChange" >
 							<el-table-column label="序号" width="55" align="center" type="index">
 							</el-table-column>
-							<el-table-column prop="cx" label="出席" width="55">
+							<el-table-column prop="cx" label="出席" width="55" >
 								<template slot-scope="scope">
-									<el-checkbox v-model="scope.row.cx" @change="handleCheckOneChange(scope.$index)"></el-checkbox>
+									<el-checkbox :disabled="disabled" v-model="scope.row.cx" @change="handleCheckOneChange(scope.$index)"></el-checkbox>
 								</template>
 							</el-table-column>
-							<el-table-column prop="xc" label="现场" width="55">
+							<el-table-column  prop="xc" label="现场" width="55">
 								<template slot-scope="scope">
-									<el-checkbox v-model="scope.row.xc"></el-checkbox>
+									<el-checkbox :disabled="disabled" v-model="scope.row.xc"></el-checkbox>
 								</template>
 							</el-table-column>
 							<el-table-column prop="rs" label="人数" width="55"> </el-table-column>
@@ -92,7 +139,7 @@
 							<el-table-column prop="gzB" label="B股" align="right"> </el-table-column>
 							<el-table-column label="签名" align=center> </el-table-column>
 							<el-table-column prop="meno" label="备注" align="center"></el-table-column>
-							<el-table-column label="操作" width="180" align="center" v-if="showColum">
+							<el-table-column label="操作" width="180" align="center" v-if="!disabled">
 								<template slot-scope="scope">
 									<el-button type="text" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
 									<el-button type="text" icon="el-icon-delete" class="red" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
@@ -104,16 +151,17 @@
 				</el-tab-pane>
 
 
-				<el-tab-pane name="second"><span slot="label"><i class="el-icon-tickets"></i>预览登记凭证</span>
+				<el-tab-pane :disabled="!disabled" name="second"><span slot="label"><i class="el-icon-tickets"></i>预览登记凭证</span>
 					<certificate :year="query.year" :name="query.name" :date="query.date" :checkedData="checkedData"></certificate>
 				</el-tab-pane>
-				<el-tab-pane label="预览议案表决票" name="third">
+				<el-tab-pane :disabled="!disabled" label="预览议案表决票" name="third">
 					<vote :year="query.year" :name="query.name" :checkedData="checkedData" :motion="motion"></vote>
 				</el-tab-pane>
-				<el-tab-pane label="股东,股份数统计表" name="fouth">
-					<stock :date="query.date" :query="query" :statistics="statistics" :totalShare='totalShare' :AShareTotal='AShareTotal' :BShareTotal='BShareTotal'>
+				<el-tab-pane :disabled="!disabled" label="股东,股份数统计表" name="fouth">
+					<stock :share="share" :query="query" :summary = "countCheckedData">
 					</stock>
 				</el-tab-pane>
+				
 			</el-tabs>
 			<el-dialog title="编辑" :visible.sync="editVisible" width="30%">
 				<el-form ref="form" :model="form" label-width="90px">
@@ -182,6 +230,8 @@
 		data() {
 			var currenYear = new Date().getFullYear();
 			return {
+				warning:false,
+				tab:0,
 				headerCellStyle:{
 					background:'#00dea3 !important',
 					color:'#7100aa',
@@ -198,11 +248,14 @@
 				form: {
 
 				},
-				showColum: false,
-				disabled: true,
-				totalShare: '',
-				AShareTotal: '',
-				BShareTotal: '',
+				
+				disabled: true,  // 为true时无法编辑
+				share:{
+					totalShare: 1399346154,
+					AShareTotal: 1077274404,
+					BShareTotal: 322071750,
+				},
+				
 				editVisible: false,
 				message: 'first',
 				query: {
@@ -219,16 +272,7 @@
 				rowChecked: [], // 存储“出席”列中勾选的复选框所在行的行号（下标从0开始）
 				checkedData: [],
 				rowList: [],
-				statistics: {
-					sumA: 0,
-					sumB: 0,
-					sumAChecked: 0,
-					sumBChecked: 0,
-					sumAStock: 0,
-					sumBStock: 0,
-					percentA: 0,
-					percentB: 0,
-				},
+				
 				motion: [],
 
 
@@ -237,9 +281,9 @@
 
 		created() {
 			// 将数字转换为千位分隔符字符串
-			this.totalShare = String(1399346154).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
-			this.AShareTotal = String(1077274404).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
-			this.BShareTotal = String(322071750).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
+			// this.share.totalShare = String(1399346154).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
+			// this.share.AShareTotal = String(1077274404).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
+			// this.share.BShareTotal = String(322071750).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
 			// 处理从主页查询传过来的数据
 			EventBus.$on('addition', param => {
 				this.tableData = param.tableData;
@@ -252,58 +296,64 @@
 
 			});
 			// console.log(this.tableData)
-
 		},
-
+		mounted() {
+			if(!this.query.year){
+				axios.get(this.host + 'get_year')
+					.then(response => (
+						// console.log(response.data['date']),
+						this.query.year = response.data['year'],
+						this.query.name = response.data['name'],
+						// this.date = response.data['date'],
+						this.meetingName = response.data['meeting_list']
+					)).catch(error => {
+						// alert('error')
+						console.log(error.response.data);
+					})
+			}
+		},
+		computed:{
+			countCheckedData:function(){
+				var summary = {PeopleA:0, PeopleB:0, AStock:0, BStock:0, PercentA:0, PercentB:0, PercentTotal:0}
+				for(var index in this.checkedData){
+					var row = this.checkedData[index]
+					if(row.gzA > 0){
+						summary.PeopleA += row.rs
+						summary.AStock += row.gzA
+					}else if(row.gzB > 0){
+						summary.PeopleB += row.rs
+						summary.BStock += row.gzB
+					}
+				}
+				
+				summary.PercentA = this.GetPercent(summary.AStock, this.share.AShareTotal);
+				summary.PercentB = this.GetPercent(summary.BStock, this.share.BShareTotal);
+				summary.PercentTotal = this.GetPercent(summary.AStock+summary.BStock, this.share.totalShare);
+				
+				return summary
+			}
+		},
 		methods: {
+			editTable(){
+				this.disabled = false;
+				this.addRow()
+			},
 			// 处理选项卡的点击事件
 			handleTabClick(tab, event) {
-				this.handleCheckedData();
-				// 如果切换到统计表，则调用方法进行统计计算
-				if (tab.index == 3) {
-					this.numOfStock()
+				if(this.disabled == false){
+					this.$message.success(`请先保存当前信息`);
 				}
+				this.tab = tab.index
+				// this.handleCheckedData();
+				// 如果切换到统计表，则调用方法进行统计计算
+				// if (tab.index == 3) {
+				// 	this.numOfStock()
+				// }
 			},
 
-			// 生成股份数统计表中的数据
-			numOfStock() {
-				for (var index in this.rowChecked) {
-					var i = this.rowChecked[index];
-					if (this.tableData[i].gzA > 0) {
-						console.log(this.tableData[i].gzA)
-						this.statistics.sumA += 1;
-						this.statistics.sumAChecked += this.tableData[i].gzA
-					} else if (this.tableData[i].gzB > 0) {
-						console.log(this.tableData[i].gzB)
-						this.statistics.sumB += 1;
-						this.statistics.sumBChecked += this.tableData[i].gzB
-					}
-				};
-
-
-				// 求占公司所有A股股份数百分比
-				// for (var i in this.tableData) {
-
-				// 	this.statistics.sumAStock += this.tableData[i].gzA;
-				// 	this.statistics.sumBStock += this.tableData[i].gzB
-				// };
-				// this.statistics.percentA = this.sumAChecked / this.sumAStock;
-				// this.statistics.percentB = this.sumBChecked / this.sumBStock;
-				this.statistics.percentA = this.GetPercent(this.sumAChecked, this.AShareTotal);
-				this.statistics.percentB = this.GetPercent(this.sumBChecked, this.BShareTotal);
-
-				console.log('A股人数是：' + this.statistics.sumA + ' 股份数：' + this.statistics.sumAStock + ' B股人数: ' + this.statistics.sumB +
-					' B股数是:' + this.statistics.sumBStock +
-					' A百分比：' + this.statistics.percentA +
-					' B百分比:' + this.statistics.percentB)
-			},
+			
 			// 求百分比
 			GetPercent(num, total) {
-				/// <summary>
-				/// 求百分比
-				/// </summary>
-				/// <param name="num">当前数</param>
-				/// <param name="total">总数</param>
 				num = parseFloat(num);
 				total = parseFloat(total);
 				if (isNaN(num) || isNaN(total)) {
@@ -312,15 +362,13 @@
 				return total <= 0 ? "0%" : (Math.round(num / total * 10000) / 100.00) + "%";
 			},
 
-			//保存总股本，流通A股，流通B股的数据到后台
-			saveShare() {},
-
 			// 触发搜索按钮
 			async handleSearch() {
 				// 等待异步请求axios处理完成后再执行initSelectRow操作，因为后者需要等到tableData拿到数据后进行操作
 				await this.getData();
 				// 初始化rowChecked中的数据
 				this.initSelectRow()
+				this.handleCheckedData();
 
 			},
 
@@ -354,8 +402,12 @@
 			printOnSite() {
 				// 现将操作列隐藏起来，以免打印这一列
 				
-				if(this.showColum == true){
-					this.showColum = false
+				if(this.disabled == false){
+					this.$message({
+					          showClose: true,
+					          message: '请保存信息后再打印',
+					          type: 'warning'
+					        });
 				}else{
 					Print('#onSite', {
 						// 以下class属性的div元素不会打印
@@ -391,21 +443,25 @@
 			},
 
 			// 更新表数据
-			updateTable() {},
+			updateTable() {
+				this.disabled = true;
+				this.$message.success(`数据保存成功！`);
+				this.handleCheckedData();
+			},
 
 			// 当点击“出席”列的复选框时，记录点击行的行号（从0开始），存储在rowChecked中
-			handleCheckOneChange(row) {
+			handleCheckOneChange(rowNum) {
 				// console.log('勾选的下标值：' + row + ' 对应值为' + this.tableData[row].gdxm + '出席' + this.tableData[row].cx)
 				// 当为true时将该行的行号添加追加到列表后重新排序，为false将其剔除
-				if (this.tableData[row].cx == true) {
-					this.rowChecked.push(row);
+				if (this.tableData[rowNum].cx == true) {
+					this.rowChecked.push(rowNum);
 					this.rowChecked.sort(function(a, b) {
 						return a - b
 					})
 					// console.log(this.rowChecked)
 				} else {
 					// console.log(this.rowChecked)
-					var index = this.rowChecked.indexOf(row)
+					var index = this.rowChecked.indexOf(rowNum)
 					this.rowChecked.splice(index, 1)
 					// console.log(this.rowChecked)					
 				}
@@ -429,6 +485,7 @@
 				this.form = row;
 				console.log(index)
 				this.editVisible = true;
+				
 			},
 
 
@@ -438,6 +495,7 @@
 				this.editVisible = false;
 				this.$message.success(`修改第 ${this.idx + 1} 行成功`);
 				this.$set(this.tableData, this.idx, this.form);
+				this.addRow()
 			},
 			// 分页导航
 			handlePageChange(val) {
@@ -561,7 +619,7 @@
 
 	.sharemsg .el-input {
 		/* display: inline-block; */
-		width: 12%;
+		width: 10%;
 		margin-right: 10px;
 	}
 
@@ -570,8 +628,9 @@
 	}
 
 	.search-box {
-		margin-top: 20px;
-		display: inline-block;
+		margin-bottom: 20px;
+		/* display: inline-block; */
+		text-align: right;
 
 	}
 
@@ -582,9 +641,10 @@
 	.button-group {
 		/* font-size: 0; */
 		/* Inline block elements gap - fix */
-		margin: 0;
+		margin-bottom: 10px;
 		padding: 0;
-		background: rgba(0, 0, 0, .1);
+		/* background: rgba(255, 170, 127, 0.1); */
+		background: linear-gradient(to top, rgba(255,255,255,1), rgba(255,255,255,0));
 		border-bottom: 1px solid rgba(0, 0, 0, .1);
 		padding: 7px;
 		-moz-border-radius: 7px;

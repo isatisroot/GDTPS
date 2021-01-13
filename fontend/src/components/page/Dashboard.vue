@@ -28,6 +28,7 @@
 					</div>
 					<el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" class="demo-ruleForm">
 						<el-form-item prop="year">
+							<!-- .number限制输入的只能是数值 -->
 							<el-input v-model.number="ruleForm.year" placeholder="请输入年份" style="width: 50%;"></el-input>
 						</el-form-item>
 						<el-form-item>
@@ -373,7 +374,8 @@
 		},
 		watch: {
 			// 侦听年度会议功能卡中的年份发生变化时立马向后台发起数据请求
-			year: function(newVal) {
+			"ruleForm.year": function(newVal) {
+				
 				if (newVal) {
 					// alert(this.year)
 					// console.log()

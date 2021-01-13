@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<!-- <button v-print="'#printTest'">打印</button> -->
-		<el-button class="button" icon="el-icon-printer" v-print="'#printVote'">打印</el-button>
+		<!-- <el-button class="button" icon="el-icon-printer" v-print="'#printVote'">打印</el-button> -->
 		<div id="printVote" class="print-vote">
 			<ul id="uvote">　
 				<li style="page-break-after:always" v-for="(row,index) in checkedData" :key="index">
