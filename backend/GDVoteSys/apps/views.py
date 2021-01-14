@@ -104,8 +104,8 @@ class QueryDetail(View):
         try:
             m = Meeting.objects.get(year=year,name=meeting_name)
             queryset = m.onsitemeeting_set.all()
-            _d = m.date + timedelta(minutes=-10)
-            str_date = _d.strftime('%Y年%m月%d日 %H时%M分')
+            # _d = m.date + timedelta(minutes=-10)
+            str_date = m.date.strftime('%Y-%m-%d %H:%M:%S')
             motion = m.motion.split(";")
             motion.pop()
             print(motion)
