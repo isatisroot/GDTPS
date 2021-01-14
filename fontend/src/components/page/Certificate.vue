@@ -40,8 +40,8 @@
 			<ul id="t1">
 				<li style="page-break-after:always " v-for="(row,index) in checkedData" :key="index">
 					<p class="title1" >佛山电器照明股份有限公司</p>
-					<p class="title2">{{year+name}}登记凭证</p>
-					<p class="text">此据为参加{{year+name}}现场会议登记凭证，请凭此据于{{date}}到本公司办公楼五楼会议室（佛山市禅城区汾江北路64号），领取会议材料，并参加股东大会。</p>
+					<p class="title2">{{query.year+query.name}}登记凭证</p>
+					<p class="text">此据为参加{{query.year+query.name}}现场会议登记凭证，请凭此据于{{meetingDate}}到本公司办公楼五楼会议室（佛山市禅城区汾江北路64号），领取会议材料，并参加股东大会。</p>
 					<table border="1" class="table1" >
 						<tr>
 							<th rowspan="2">登记日期</th>
@@ -82,13 +82,24 @@
 <script>
 	export default {
 		name: 'certificate',
-		props: ['year', 'name', 'date', 'checkedData'],
+		props: ['query', 'checkedData'],
 		data() {
 			return {
 				currentDate: this.dateToString(),
 				sumShare: this.Share(),
 				currentPage: 1,
 				pagesize: 1,
+			}
+		},
+		computed:{
+			meetingDate: function(){
+				var datetimeArray = this.query.date.split(' ')
+				var dateArray = datetimeArray[0].split('-')
+				var timeArray = datetimeArray[1].split(':')
+				var date = dateArray[0] + '年' + dateArray[1] + '月' + dateArray[2] + '日'
+				var min = parseInt(timeArray[1]) - 10
+				var time = timeArray[0] + '时' + min + '分'
+				return date + time
 			}
 		},
 		methods: {
@@ -136,6 +147,7 @@
 
 			list-style-type: none;
 			position: absolute;
+			left:0px;
 		}
 		
 	

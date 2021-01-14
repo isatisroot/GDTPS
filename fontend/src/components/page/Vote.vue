@@ -7,7 +7,7 @@
 				<li style="page-break-after:always" v-for="(row,index) in checkedData" :key="index">
 					<p class="title1">佛山电器照明股份有限公司</p>
 					<p class="title2">{{year+name}}议案表决票</p>
-					<table class="table2">
+					<table class="table1">
 						<tr>
 							<th rowspan="2">股东姓名</th>
 							<th rowspan="2">股东代码</th>
@@ -29,7 +29,7 @@
 					</table>
 					<br>
 					<p class="text">说明：每项议案均有一张表决票，请使用“✓”符号在赞成、反对或弃权栏中选择其中一项投出表决票，多选无效。</p>
-					<table class="table3">
+					<table class="table1">
 						<tr>
 							<th>议案编号</th>
 							<th>议案主题</th>
@@ -106,6 +106,8 @@
 		.print-vote ul {
 			list-style-type: none;
 			position: absolute;
+			left:0px;
+			width: 100%;
 		}
 
 

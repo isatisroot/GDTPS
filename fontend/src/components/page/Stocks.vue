@@ -36,8 +36,9 @@
 				<td>占公司总股本%</td>
 			</tr>
 		</table>
+		<br>
 		<p align="right" class="bottom-p">统计人签字：____________</p>
-		<p> 注：统计至开会开始前{{query.date}},请在{{query.date}}前送到主席台</p>
+		<p class="bottom-p"> 注：统计截止时间为{{meetingTime.t1}}，请在{{meetingTime.t2}}前送到主席台</p>
 		<p align="right" class="bottom-p">佛山电器照明股份有限公司</p>
 		<p align="right" class="bottom-p">{{currentDate}}</p>
 	</div>
@@ -53,8 +54,21 @@
 				currentDate: this.dateToString(),
 			}
 		},
-		created(){
-
+		computed:{
+			meetingTime: function(){
+				
+				var datetimeArray = this.query.date.split(' ')
+				// var dateArray = datetimeArray[0].split('-')
+				var timeArray = datetimeArray[1].split(':')
+				// var date = dateArray[0] + '-' + dateArray[1] + '-' + dateArray[2] + ' '
+				var min1 = parseInt(timeArray[1]) - 10
+				var min2 = parseInt(timeArray[1]) - 5
+				var time1 = timeArray[0] + ':' + min1 
+				var time2 = timeArray[0] + ':' + min2 
+				var time = {t1: time1, t2: time2}
+				return time
+			},
+			
 		},
 		methods:{
 			dateToString() {
