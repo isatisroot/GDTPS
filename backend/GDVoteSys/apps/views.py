@@ -2,7 +2,7 @@ import json
 from django.shortcuts import render
 from django.views.generic import View
 from django.http.response import JsonResponse, HttpResponseBadRequest
-from .models import Meeting, ShareholderInfo
+from .models import Meeting, ShareholderInfo,OnSiteMeeting
 
 from datetime import datetime,date,timedelta
 
@@ -12,9 +12,9 @@ class QueryYear(View):
         try:
             m = Meeting.objects.get(current_year=1)
             # 将时间提前10分钟并转化为字符串格式
-            m.date = m.date + timedelta(minutes=-10)
-            str_date = m.date.strftime('%Y年%m月%d日 %H时%M分')
-            print(str_date)
+            # m.date = m.date + timedelta(minutes=-10)
+            str_date = m.date.strftime('%Y-%m-%d %H:%M:%S')
+            # print(str_date)
             qs = Meeting.objects.filter(year=m.year)
             meeting_list = []
             for q in qs:
@@ -49,11 +49,11 @@ class AddMeeting(View):
         date1 = meeting.get("date1")
         date2 = meeting.get('date2')
         year = date1.split("-")[0]
-        print(motion)
+
         text = ''
         for i in motion:
             text += i['motion']+ ";"
-        print(text)
+
         try:
             try:
                 q = Meeting.objects.get(current_year=1)
@@ -71,8 +71,6 @@ class AddMeeting(View):
             return HttpResponseBadRequest(content_type="'application/json'")
 
 
-
-
 class QueryMeeting(View):
 #     """
 #     通过年份查询该年份一共有多少会议，返回该年份所有的会议名称
@@ -87,10 +85,6 @@ class QueryMeeting(View):
         data[year] = meeting_list
 #         # 使用safe = False可以将字典中包含的列表直接转换成json
         response = JsonResponse(data, safe=False)
-#         # response["Access-Control-Allow-Origin"] = "*"
-#         # response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
-#         # response["Access-Control-Max-Age"] = "1000"
-#         # response["Access-Control-Allow-Headers"] = "*"
         return response
 #
 class QueryDetail(View):
@@ -108,11 +102,12 @@ class QueryDetail(View):
             str_date = m.date.strftime('%Y-%m-%d %H:%M:%S')
             motion = m.motion.split(";")
             motion.pop()
-            print(motion)
+            # print(motion)
             for i in queryset:
                 q = i.shareholder
-                print(i.cx)
+                # print(i.cx)
                 data = {
+                    'id':i.shareholder_id,
                     'cx': i.cx,
                     'xc': i.xcorwl,
                     'gdxm': q.gdxm,
@@ -120,17 +115,46 @@ class QueryDetail(View):
                     'gddmk': q.gddmk,
                     'sfz': q.sfz,
                     'rs': q.rs,
-                    'frA': q.frA,
+                    # 'frA': q.frA,
                     'gzA': q.gzA,
                     'gzB': q.gzB,
-                    'dlr': q.dlr,
+                    # 'dlr': q.dlr,
                     'meno': q.meno
                 }
                 detail_list.append(data)
         except Exception as e:
             print(e)
 
-        # print(detail_list)
-
-
         return JsonResponse({'date': str_date, 'motion':motion, 'list':detail_list})
+
+class UpdateMeeting(View):
+    def post(self, request):
+        json_str = request.body.decode()
+        req_data = json.loads(json_str)
+        year = req_data.get("year")
+        meeting_name = req_data.get("meeting")
+        tableData = req_data.get("tableData",None)
+        try:
+            m = Meeting.objects.get(year=year,name=meeting_name)
+            for data in tableData:
+                id = data.get("id",None)
+                OnSiteMeeting.objects.filter(meeting_id=m.id, shareholder=id).update(
+                    cx=data.get("cx"),
+                    xcorwl=data.get("xc"),
+                    gzA=int(data.get("gzA")),
+                    gzB=int(data.get("gzB")),
+                    meno = data.get("meno")
+                )
+                ShareholderInfo.objects.filter(id=id).update(
+                    gdxm=data.get("gdxm"),
+                    gdtype = data.get("gdtype"),
+                    gddmk = data.get("gddmk"),
+                    sfz = data.get("sfz"),
+                    rs = data.get("rs"),
+                    gzA = data.get("gzA"),
+                    gzB = data.get("gzB")
+                )
+                return JsonResponse({'code':200, 'msg':'更新成功'})
+        except Exception as e:
+            print(e)
+            return HttpResponseBadRequest(content_type="'application/json'")

@@ -25,7 +25,7 @@ SECRET_KEY = '1!6(!^8qhh48764n-(6#zm@w+70j!6v4xsg0=v182s8k-&d8h1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -40,14 +40,11 @@ INSTALLED_APPS = [
     'apps.apps.AppsConfig',
     'corsheaders',
 ]
-
-
-
 MIDDLEWARE = [
 
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -56,14 +53,18 @@ MIDDLEWARE = [
 
 ]
 
+
+
+
 # CORS_ALLOWED_ORIGINS = {
 #     '127.0.0.1:8080',
 #     'localhost:8080',
 # }
-CORS_ORIGIN_WHITELIST = (
-    'http://127.0.0.1:8080',
-    'http://localhost:8080',
-)
+# CORS_ORIGIN_WHITELIST = (
+#     'http://127.0.0.1:8080',
+#     'http://localhost:8080',
+#     'http://172.30.1.126:8080'
+# )
 
 CORS_ALLOW_ALL_ORIGINS = True
 # CORS_ORIGIN_ALLOW_ALL = True

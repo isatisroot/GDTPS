@@ -56,16 +56,21 @@
 		},
 		computed:{
 			meetingTime: function(){
-				
-				var datetimeArray = this.query.date.split(' ')
-				// var dateArray = datetimeArray[0].split('-')
-				var timeArray = datetimeArray[1].split(':')
-				// var date = dateArray[0] + '-' + dateArray[1] + '-' + dateArray[2] + ' '
-				var min1 = parseInt(timeArray[1]) - 10
-				var min2 = parseInt(timeArray[1]) - 5
-				var time1 = timeArray[0] + ':' + min1 
-				var time2 = timeArray[0] + ':' + min2 
-				var time = {t1: time1, t2: time2}
+				var time = {};
+				if(this.query.date){
+					var datetimeArray = this.query.date.split(' ')
+					// var dateArray = datetimeArray[0].split('-')
+					var timeArray = datetimeArray[1].split(':')
+					// var date = dateArray[0] + '-' + dateArray[1] + '-' + dateArray[2] + ' '
+					var min1 = parseInt(timeArray[1]) - 10
+					var min2 = parseInt(timeArray[1]) - 5
+					var time1 = timeArray[0] + ':' + min1 
+					var time2 = timeArray[0] + ':' + min2 
+					time = {t1: time1, t2: time2}
+				}else{
+					time = {t1: "", t2: ""}
+				}
+
 				return time
 			},
 			

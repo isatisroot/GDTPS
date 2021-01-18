@@ -62,6 +62,9 @@ class OnSiteMeeting(models.Model):
     meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
     cx = models.BooleanField(default=False, verbose_name="是否出席")
     xcorwl = models.BooleanField(default=False,verbose_name="是否出席现场")
+    gzA = models.IntegerField(default=0)
+    gzB = models.IntegerField(default=0)
+    meno = models.CharField(max_length=20, default=None) # 备注
 
     class Meta:
         db_table = 'on_site_meeting'

@@ -25,6 +25,9 @@
 				<el-button type="primary" icon="el-icon-circle-plus">新增</el-button>
 			</div>
 			<div class="sharemsg">
+				
+					
+				
 				<span>总股本：</span>
 				<el-input v-model="share.totalShare" :disabled="disabled"></el-input>
 				<span>流通A股：</span>
@@ -37,21 +40,21 @@
 				<template v-if="tab==0">
 					<el-tooltip class="item" effect="dark" placement="bottom-start">
 						<!-- <el-alert title="请保存信息后再打印" type="warning" > -->
-						<span slot="content" v-show="disabled">打印建议:横向-缩放61%,勾选背景图形</span>
+						<span slot="content" v-show="disabled">打印建议:布局-横向；更多设置-调整缩放</span>
 						<span slot="content" v-show="!disabled">请保存信息后再打印</span>
-						<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印</el-button>
+						<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印预览</el-button>
 					</el-tooltip>
-
+				
 					</el-alert>
 				</template>
 				<template v-else-if="tab == 1">
-					<el-button class="button" icon="el-icon-printer" v-print="'#printCerificate'">打印</el-button>
+					<el-button class="button" icon="el-icon-printer" v-print="'#printCerificate'">打印预览</el-button>
 				</template>
 				<template v-else-if="tab == 2">
-					<el-button class="button" icon="el-icon-printer" v-print="'#printVote'">打印</el-button>
+					<el-button class="button" icon="el-icon-printer" v-print="'#printVote'">打印预览</el-button>
 				</template>
 				<template v-else-if="tab == 3">
-					<el-button class="button" icon="el-icon-printer" v-print="'#printStock'">打印</el-button>
+					<el-button class="button" icon="el-icon-printer" v-print="'#printStock'">打印预览</el-button>
 				</template>
 			</div>
 		</ul>
@@ -113,6 +116,7 @@
 			</el-tabs>
 			<el-dialog title="编辑" :visible.sync="editVisible" width="30%">
 				<el-form ref="form" :model="form" label-width="90px">
+					
 					<el-form-item label="人数">
 						<el-input v-model="form.rs"></el-input>
 					</el-form-item>
@@ -240,7 +244,8 @@
 				this.query.date = param.date;
 				this.query.name = param.meetingName;
 				this.motion = param.motion;
-				this.initSelectRow()
+				this.initSelectRow();
+				this.handleCheckedData();
 
 			});
 			// console.log(this.tableData)
@@ -342,6 +347,7 @@
 
 			// 初始化rowChecked数据
 			initSelectRow() {
+				this.rowChecked = [];
 				if (this.tableData) {
 					for (let i = 0; i < this.tableData.length; i++) {
 						if (this.tableData[i].cx == true) {
@@ -387,13 +393,12 @@
 					xc: '',
 					rs: '',
 					gdtype: '',
-					name: '',
+					gdxm:'',
 					gddmk: '',
 					sfz: '',
-					frA: '',
-					frB: '',
-					qm: '',
-					bz: ''
+					gzA: '',
+					gzB: '',
+					meno: ''
 				};
 				this.tableData.push(newValue)
 			},
@@ -401,8 +406,15 @@
 			// 更新表数据
 			updateTable() {
 				this.disabled = true;
-				this.$message.success(`数据保存成功！`);
+				if(this.tableData[this.tableData.length-1].gddmk == ""){
+					this.tableData.pop()
+				}
 				this.handleCheckedData();
+				axios.post(this.host + 'update', {year:this.query.year, meeting:this.query.name, tableData: this.tableData})
+				.then(response => (this.$message.success('数据更新成功！')))
+				.catch(error => (alert('error'),console.log(error.response.data)));
+				// this.$message.success(`${this.idx + 1}数据保存成功！`);
+				
 			},
 
 			// 当点击“出席”列的复选框时，记录点击行的行号（从0开始），存储在rowChecked中
@@ -426,7 +438,7 @@
 
 			// 将存储在rowChecked列表中的行号对应的行数据添加至checkedData列表中，使其传递给子组件
 			handleCheckedData() {
-				console.log(this.rowChecked)
+
 				this.checkedData = []
 				// index是rowChecked的下标，
 				for (var i in this.rowChecked) {
@@ -438,8 +450,10 @@
 			// 编辑操作
 			handleEdit(index, row) {
 				this.idx = index;
+				console.log(row.cx)
+				row.update = true;
 				this.form = row;
-				console.log(index)
+
 				this.editVisible = true;
 
 			},
@@ -449,9 +463,13 @@
 			// 保存编辑
 			saveEdit() {
 				this.editVisible = false;
+				// console.log(this.)
 				this.$message.success(`修改第 ${this.idx + 1} 行成功`);
 				this.$set(this.tableData, this.idx, this.form);
-				this.addRow()
+				if(this.tableData[this.tableData.length-1].gddmk != ""){
+					this.addRow()
+				}
+				
 			},
 			// 分页导航
 			handlePageChange(val) {
@@ -505,7 +523,7 @@
 
 
 	.button {
-		border-top: 1px solid #97f7df;
+		/* border-top: 1px solid #97f7df; */
 		background: #1ABC9C;
 		padding: 9px 15px;
 		border-radius: 3px;
@@ -545,7 +563,9 @@
 
 	.sharemsg {
 		/* display: inline-block; */
+		/* margin-left: 513px; */
 		text-align: right;
+		/* right: 10px; */
 	}
 
 	.sharemsg .el-input {

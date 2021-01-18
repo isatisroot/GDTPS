@@ -139,8 +139,8 @@ export default {
         content: "";
         position: absolute;
         width: 700px; /**光标扫过的宽度**/
-        height: 50px; /**光标的宽度，可根据实际调整**/
-        background-image: linear-gradient(to bottom,transparent,rgba(255,255,255,.3),transparent);
+        height: 30px; /**光标的宽度，可根据实际调整**/
+        background-image: linear-gradient(to right,transparent,rgba(255,255,255,.3),transparent);
         -webkit-transform: rotate(-45deg);
         -moz-transform: rotate(-45deg);
         -ms-transform: rotate(-45deg);
