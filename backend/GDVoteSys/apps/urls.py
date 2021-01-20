@@ -9,6 +9,6 @@ urlpatterns = [
     url(r'add_meeting', views.AddMeeting.as_view()),
     url(r'get_detail/(?P<year>\d{4})/(?P<meeting_name>\w+)', views.QueryDetail.as_view()),
     url(r'update', views.UpdateMeeting.as_view()),
-
+    url(r'api/posts/upload', views.Upload.as_view()),
     # url(r'add/', views.Add.as_view()),
 ]

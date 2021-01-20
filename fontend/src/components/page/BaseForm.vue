@@ -22,18 +22,18 @@
 				</el-select>
 
 				<el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
-				<el-button type="primary" icon="el-icon-circle-plus">新增</el-button>
+				<!-- <el-button type="primary" icon="el-icon-circle-plus">新增</el-button> -->
 			</div>
 			<div class="sharemsg">
 				
 					
 				
 				<span>总股本：</span>
-				<el-input v-model="share.totalShare" :disabled="disabled"></el-input>
+				<el-input v-model="share.gb" :disabled="disabled"></el-input>
 				<span>流通A股：</span>
-				<el-input v-model="share.AShareTotal" :disabled="disabled"></el-input>
+				<el-input v-model="share.ltag" :disabled="disabled"></el-input>
 				<span>流通B股：</span>
-				<el-input v-model="share.BShareTotal" :disabled="disabled"></el-input>
+				<el-input v-model="share.ltbg" :disabled="disabled"></el-input>
 				<el-button type="info" @click="editTable" icon="el-icon-edit">编辑</el-button>
 				<!-- <el-button type="primary" icon="el-icon-circle-plus" @click="addRow">新增行</el-button> -->
 				<el-button type="success" icon="el-icon-success" @click="updateTable">保存</el-button>
@@ -43,19 +43,23 @@
 						<span slot="content" v-show="disabled">打印建议:布局-横向；更多设置-调整缩放</span>
 						<span slot="content" v-show="!disabled">请保存信息后再打印</span>
 						<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印预览</el-button>
+						<!-- <el-button class="button" icon="el-icon-printer" v-print="'#onSite'">打印预览</el-button> -->
 					</el-tooltip>
 				
 					</el-alert>
 				</template>
-				<template v-else-if="tab == 1">
-					<el-button class="button" icon="el-icon-printer" v-print="'#printCerificate'">打印预览</el-button>
+				<template v-else>
+					<el-button class="button" icon="el-icon-printer" v-print="printObj" @click="printTab(tab)">打印预览</el-button>
+				</template>
+				<!-- <template v-else-if="tab == 1">
+					<el-button class="button" icon="el-icon-printer" v-print="'#printCerificate'">打印预览1</el-button>
 				</template>
 				<template v-else-if="tab == 2">
-					<el-button class="button" icon="el-icon-printer" v-print="'#printVote'">打印预览</el-button>
+					<el-button class="button" icon="el-icon-printer" v-print="'#printVote'">打印预览2</el-button>
 				</template>
 				<template v-else-if="tab == 3">
-					<el-button class="button" icon="el-icon-printer" v-print="'#printStock'">打印预览</el-button>
-				</template>
+					<el-button class="button" icon="el-icon-printer" v-print="'#printStock'">打印预览3</el-button>
+				</template> -->
 			</div>
 		</ul>
 		<!-- </div> -->
@@ -182,18 +186,25 @@
 		data() {
 			var currenYear = new Date().getFullYear();
 			return {
+
+				printObj:{
+					id:"printStock",
+					mode:0
+				},
 				warning: false,
 				tab: 0,
 				headerCellStyle: {
 					background: '#00dea3 !important',
 					color: '#7100aa',
-					'border-bottom': 'solid 1px #000000 !important',
-					'border-right': 'solid 1px #000000 !important',
+					'border': 'solid 1px #000000 !important',
+					// 'border-right': 'solid 1px #000000 !important',
 
 				},
 				cellStyle: {
-					'border-bottom': 'solid 1px #000000',
-					'border-right': 'solid 1px #000000 !important',
+					// 'border-bottom': 'solid 1px #000000',
+					'border': 'solid 1px #000000 !important',
+					// 'border-bottom': 'solid 1px red',
+					'border-collapse':'collapse ! important',
 
 				},
 
@@ -203,9 +214,13 @@
 
 				disabled: true, // 为true时无法编辑
 				share: {
-					totalShare: 1399346154,
-					AShareTotal: 1077274404,
-					BShareTotal: 322071750,
+					gb: "",
+					ltag: "",
+					ltbg: "",
+					totalShare:0,
+					AShareTotal:0,
+					BShareTotal:0,
+					
 				},
 
 				editVisible: false,
@@ -219,7 +234,7 @@
 					pageSize: 15
 				},
 				yearList: [currenYear, currenYear + 1],
-				meetingName: ["第一次临时股东大会", "第二次临时股东大会", "第三次临时股东大会"],
+				meetingName: [],
 				tableData: [],
 				rowChecked: [], // 存储“出席”列中勾选的复选框所在行的行号（下标从0开始）
 				checkedData: [],
@@ -232,10 +247,7 @@
 		},
 
 		created() {
-			// 将数字转换为千位分隔符字符串
-			// this.share.totalShare = String(1399346154).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
-			// this.share.AShareTotal = String(1077274404).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
-			// this.share.BShareTotal = String(322071750).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
+					
 			// 处理从主页查询传过来的数据
 			EventBus.$on('addition', param => {
 				this.tableData = param.tableData;
@@ -244,26 +256,31 @@
 				this.query.date = param.date;
 				this.query.name = param.meetingName;
 				this.motion = param.motion;
+				this.share = param.sharehold;
+				this.transferFormat();
+				
 				this.initSelectRow();
 				this.handleCheckedData();
+				
+				
 
 			});
-			// console.log(this.tableData)
+			
 		},
 		mounted() {
 			if (!this.query.year) {
 				axios.get(this.host + 'get_year')
 					.then(response => (
-						// console.log(response.data['date']),
 						this.query.year = response.data['year'],
 						this.query.name = response.data['name'],
-						// this.date = response.data['date'],
-						this.meetingName = response.data['meeting_list']
+						this.share = response.data['sharehold'],
+						this.meetingName = response.data['meeting_list'],
+						this.transferFormat()
 					)).catch(error => {
-						// alert('error')
-						console.log(error.response.data);
+
 					})
 			}
+			
 		},
 		computed: {
 			countCheckedData: function() {
@@ -295,6 +312,19 @@
 			}
 		},
 		methods: {
+			printTab(tab){
+				if(tab == 1){this.printObj.id = "printCertificate"}
+				else if(tab == 2){this.printObj.id = "printVote"}
+				else if(tab == 3){this.printObj.id = "printStock"}
+				
+				console.log(this.printObj.id)
+			},
+			transferFormat(){
+				// 将数字转换为千位分隔符字符串
+				this.share.gb = String(this.share.totalShare).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
+				this.share.ltag = String(this.share.AShareTotal).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
+				this.share.ltbg = String(this.share.BShareTotal).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
+			},
 			editTable() {
 				this.disabled = false;
 				this.addRow()
@@ -304,6 +334,9 @@
 				if (this.disabled == false) {
 					this.$message.success(`请先保存当前信息`);
 				}
+				if(tab.index == 1){this.id="printCerificate"}
+				else if(tab.index == 2){this.id = "printVote"}
+				else if(tab.index == 3){this.id = "printStock"}
 				this.tab = tab.index
 				// this.handleCheckedData();
 				// 如果切换到统计表，则调用方法进行统计计算
@@ -328,7 +361,8 @@
 				// 等待异步请求axios处理完成后再执行initSelectRow操作，因为后者需要等到tableData拿到数据后进行操作
 				await this.getData();
 				// 初始化rowChecked中的数据
-				this.initSelectRow()
+				this.transferFormat();
+				this.initSelectRow();
 				this.handleCheckedData();
 
 			},
@@ -340,6 +374,7 @@
 						this.query.date = response.data['date'],
 						this.tableData = response.data['list'],
 						this.pageTotal = this.tableData.length,
+						this.share = response.data['sharehold'],
 						this.motion = response.data['motion']
 					)).catch(error => {})
 
@@ -363,7 +398,6 @@
 			// 打印现场会议登记表
 			printOnSite() {
 				// 现将操作列隐藏起来，以免打印这一列
-
 				if (this.disabled == false) {
 					this.$message({
 						showClose: true,
@@ -406,32 +440,27 @@
 			// 更新表数据
 			updateTable() {
 				this.disabled = true;
-				if(this.tableData[this.tableData.length-1].gddmk == ""){
+				if(this.tableData[this.tableData.length-1].gdxm == ""){
 					this.tableData.pop()
 				}
 				this.handleCheckedData();
 				axios.post(this.host + 'update', {year:this.query.year, meeting:this.query.name, tableData: this.tableData})
 				.then(response => (this.$message.success('数据更新成功！')))
-				.catch(error => (alert('error'),console.log(error.response.data)));
-				// this.$message.success(`${this.idx + 1}数据保存成功！`);
+				.catch(error => (console.log(error.response.data)));
 				
 			},
 
 			// 当点击“出席”列的复选框时，记录点击行的行号（从0开始），存储在rowChecked中
 			handleCheckOneChange(rowNum) {
-				// console.log('勾选的下标值：' + row + ' 对应值为' + this.tableData[row].gdxm + '出席' + this.tableData[row].cx)
 				// 当为true时将该行的行号添加追加到列表后重新排序，为false将其剔除
 				if (this.tableData[rowNum].cx == true) {
 					this.rowChecked.push(rowNum);
 					this.rowChecked.sort(function(a, b) {
 						return a - b
 					})
-					// console.log(this.rowChecked)
 				} else {
-					// console.log(this.rowChecked)
 					var index = this.rowChecked.indexOf(rowNum)
-					this.rowChecked.splice(index, 1)
-					// console.log(this.rowChecked)					
+					this.rowChecked.splice(index, 1)					
 				}
 
 			},
@@ -450,10 +479,8 @@
 			// 编辑操作
 			handleEdit(index, row) {
 				this.idx = index;
-				console.log(row.cx)
 				row.update = true;
 				this.form = row;
-
 				this.editVisible = true;
 
 			},
@@ -463,7 +490,6 @@
 			// 保存编辑
 			saveEdit() {
 				this.editVisible = false;
-				// console.log(this.)
 				this.$message.success(`修改第 ${this.idx + 1} 行成功`);
 				this.$set(this.tableData, this.idx, this.form);
 				if(this.tableData[this.tableData.length-1].gddmk != ""){
@@ -542,8 +568,17 @@
 		border-top-color: #3162a7;
 		background: #1b365c;
 	}
+	/* 解决el-table表头和列不对齐 */
+	.el-table th.gutter{
+			display: table-cell !important;
+		}
+		
+	table {
+		border-collapse: collapse;
+	}
 </style>
 <style scoped>
+	
 	.el-table--border:after,
 	.el-table--group:after,
 	.el-table:before {
@@ -553,12 +588,16 @@
 	.el-table--border,
 	.el-table--group {
 		border-color: #000000;
+		/* border: solid 1px #000000 !important; */
+		
+		border-bottom: solid 1px #000000;
 	}
+	
+	
 
-
-	.table-header {
+	/* .table-header {
 		background: #07C4A8;
-	}
+	} */
 
 
 	.sharemsg {

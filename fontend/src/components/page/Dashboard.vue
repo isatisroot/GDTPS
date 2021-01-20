@@ -61,9 +61,9 @@
 
 				</el-card>
 				<!-- 点击新增button之后弹出具有填写表单功能的弹窗 -->
-				<el-dialog :visible.sync="dialogFormVisible"><span slot="title" style="margin-left: 400px;font-size: 30px;">新增会议</span>
-					<el-form :model="form">
-						<el-form-item label="会议名称" :label-width="formLabelWidth">
+				<el-dialog  :visible.sync="dialogFormVisible"><span slot="title" style="margin-left: 400px;font-size: 30px;">新增会议</span>
+					<el-form :model="form" :rules="rules" ref="form">
+						<el-form-item label="会议名称" prop="name" :label-width="formLabelWidth">
 							<el-input v-model="form.name" autocomplete="off"></el-input>
 						</el-form-item>
 
@@ -111,7 +111,7 @@
 
 					<div slot="footer" class="dialog-footer">
 						<el-button @click="dialogFormVisible = false">取 消</el-button>
-						<el-button type="primary" @click="submitAdd">确 定</el-button>
+						<el-button type="primary" @click="submitAdd(form)">确 定</el-button>
 						<!-- <el-button type="primary">
 							<router-link :to="'/table'"><span style="color: white;">确定</span></router-link>
 						</el-button> -->
@@ -230,6 +230,13 @@
 					}
 				}, 1000);
 			};
+			var checkName = (rule, value, callback) => {
+				if(!value){
+					return callback(new Error('会议名称不能为空'))
+				}else if(value.length > 20){
+					return callback(new Error('长度不能超过20个字符'))
+				}
+			}
 
 			return {
 				res_data:{},
@@ -267,7 +274,10 @@
 					year: [{
 						validator: checkYear,
 						trigger: 'blur'
-					}]
+					}],
+					name: [
+						{validator: checkName, trigger: 'blur'}
+					]
 				},
 				tableData: [],
 				gddata: [],
@@ -418,7 +428,8 @@
 							date: this.date,
 							meetingName: this.meetingName,
 							tableData: this.tableData,
-							motion:this.res_data.motion
+							motion:this.res_data.motion,
+							sharehold: this.res_data.sharehold
 						})
 					)).catch(error => {
 						// console.log(error.response);
@@ -434,7 +445,14 @@
 					}
 				});
 			},
-			submitAdd() {
+			submitAdd(formName) {
+				this.$refs[formName].validate((valid) => {
+					if(valid){
+						alert("ok")
+					}else{
+						alert('failed')
+					}
+				})
 				this.dialogFormVisible = false;
 				// console.log(this.form.date2)
 				// console.log(this.value)
@@ -443,7 +461,15 @@
 					meeting: this.form,
 					motion: this.motionArray,
 					gdid: this.value
-				}).then(response => (this.$message.success('提交成功！'))).catch(error => (alert('error'),console.log(error.response.data)))
+				}).then(response => (
+				this.$message.success('提交成功！'),
+				location.reload()
+				// EventBus.$emit('addition',{
+				// 	year:this.form.year,
+				// 	meetingName: this.form.name
+				// })
+				// this.$router.push({name:'form'})
+				)).catch(error => (this.$message(error.response.data.msg)))
 				
 			},
 			changeDate() {

@@ -34,6 +34,7 @@ export default new Router({
                 },
                 {
                     path: '/form',
+					name:'form',
                     component: () => import(/* webpackChunkName: "form" */ '../components/page/BaseForm.vue'),
                     meta: { title: '会议信息' }
                 },

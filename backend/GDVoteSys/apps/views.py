@@ -2,10 +2,10 @@ import json
 from django.shortcuts import render
 from django.views.generic import View
 from django.http.response import JsonResponse, HttpResponseBadRequest
-from .models import Meeting, ShareholderInfo,OnSiteMeeting
+from .models import Meeting, ShareholderInfo,OnSiteMeeting,GB
 
 from datetime import datetime,date,timedelta
-
+# from django.utils import timezone as datetime
 
 class QueryYear(View):
     def get(self, request):
@@ -19,7 +19,9 @@ class QueryYear(View):
             meeting_list = []
             for q in qs:
                 meeting_list.append(q.name)
-            return JsonResponse({"year": m.year, "name": m.name, "date": str_date, "meeting_list": meeting_list})
+            sharehold = {"totalShare": m.gb.gb, "AShareTotal": m.gb.ltag, "BShareTotal": m.gb.ltbg}
+
+            return JsonResponse({"year": m.year, "name": m.name, "date": str_date, "meeting_list": meeting_list, 'sharehold': sharehold})
         except Exception as e:
             print(e)
             # 如果没有在表中查询到最近一次会议的年份则返回系统当前年份
@@ -49,12 +51,16 @@ class AddMeeting(View):
         date1 = meeting.get("date1")
         date2 = meeting.get('date2')
         year = date1.split("-")[0]
+        if not all((date1, date2, address)):
+            return HttpResponseBadRequest(json.dumps({'msg': '请填写时间和日期'}))
 
         text = ''
         for i in motion:
-            text += i['motion']+ ";"
+            text += i.get('motion','')+ ";"
 
         try:
+            if Meeting.objects.filter(year=year, name=name):
+                return HttpResponseBadRequest( json.dumps({'msg':'会议已存在，无需添加'}))
             try:
                 q = Meeting.objects.get(current_year=1)
                 q.current_year = False
@@ -63,9 +69,21 @@ class AddMeeting(View):
                 print(e)
 
             stru_date = datetime.strptime(date1 +"\xa0" + date2, "%Y-%m-%d %H:%M")
-            m = Meeting.objects.create(year=year, date=stru_date, name=name, current_year=1, address=address,motion=text)
+            gb =  GB.objects.last()
+            m = Meeting.objects.create(
+                year=year,
+                date=stru_date,
+                name=name,
+                current_year=1,
+                address=address,
+                motion=text,
+                gb=gb
+            )
             m.members.set(gdid_list)
-            return JsonResponse({'msg': 'success'})
+            for i in gdid_list:
+                gd = ShareholderInfo.objects.get(id=i)
+                OnSiteMeeting.objects.filter(meeting_id=m.id, shareholder_id=i).update(gzA=gd.gzA, gzB=gd.gzB)
+            return JsonResponse({'code':200, 'msg': 'success'})
         except Exception as e:
             print(e)
             return HttpResponseBadRequest(content_type="'application/json'")
@@ -92,11 +110,18 @@ class QueryDetail(View):
 #         # year = request.GET.get('year')
 #         # meeting_name = request.GET.get('meeting_name')
 #         print(year, meeting_name)
-        global str_date
+        global str_date, sharehold
+        str_date = ""
+        sharehold = {}
         detail_list = []
         motion = []
         try:
+            # m是annual_meeting年度会议表的模型类对象
             m = Meeting.objects.get(year=year,name=meeting_name)
+            if m.gb:
+                # 通过年度会议查找股本信息
+                sharehold = {"totalShare": m.gb.gb, "AShareTotal": m.gb.ltag, "BShareTotal": m.gb.ltbg}
+            # 通过m查找现场会议登记的中间表
             queryset = m.onsitemeeting_set.all()
             # _d = m.date + timedelta(minutes=-10)
             str_date = m.date.strftime('%Y-%m-%d %H:%M:%S')
@@ -104,6 +129,7 @@ class QueryDetail(View):
             motion.pop()
             # print(motion)
             for i in queryset:
+                # 根据中间表查找到股东信息表
                 q = i.shareholder
                 # print(i.cx)
                 data = {
@@ -119,13 +145,13 @@ class QueryDetail(View):
                     'gzA': q.gzA,
                     'gzB': q.gzB,
                     # 'dlr': q.dlr,
-                    'meno': q.meno
+                    'meno': i.meno
                 }
                 detail_list.append(data)
         except Exception as e:
             print(e)
 
-        return JsonResponse({'date': str_date, 'motion':motion, 'list':detail_list})
+        return JsonResponse({'date': str_date, 'motion':motion, 'list':detail_list, 'sharehold': sharehold})
 
 class UpdateMeeting(View):
     def post(self, request):
@@ -154,7 +180,14 @@ class UpdateMeeting(View):
                     gzA = data.get("gzA"),
                     gzB = data.get("gzB")
                 )
-                return JsonResponse({'code':200, 'msg':'更新成功'})
+            return JsonResponse({'code':200, 'msg':'更新成功'})
         except Exception as e:
             print(e)
             return HttpResponseBadRequest(content_type="'application/json'")
+
+
+
+class Upload(View):
+    def post(self, request):
+        print(request.body)
+        return JsonResponse({'code': 200, 'msg': '上传成功'})
