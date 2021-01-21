@@ -62,7 +62,7 @@
 
 <script>
 	export default{
-		name: 'addMeeting',
+		name: 'newmeeting',
 		data(){
 			
 		}

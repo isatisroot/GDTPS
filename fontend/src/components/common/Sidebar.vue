@@ -63,11 +63,12 @@
 					},
 
 
-					// {
-					//     icon: 'el-icon-lx-copy',
-					//     index: 'tabs',
-					//     title: '表决统计'
-					// },
+					{
+					    icon: 'el-icon-lx-copy',
+					    index: 'tabs',
+					    title: '股东信息'
+					},
+					
 					// {
 					//     icon: 'el-icon-lx-calendar',
 					//     index: '3',

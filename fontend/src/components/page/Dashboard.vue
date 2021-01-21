@@ -515,8 +515,11 @@
 <style scoped>
 	.edit_dev>>>.el-transfer-panel {
 
-		width: 350px;
+		/* width: 300px; */
+		margin: 0 auto;
+		width:40%
 	}
+
 
 	.search-box {
 		font-family: "ms sans serif";

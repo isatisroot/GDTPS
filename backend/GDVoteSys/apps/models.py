@@ -13,15 +13,15 @@ class ShareholderInfo(models.Model):
     # cx = models.SmallIntegerField(choices=BE_PRESENT_CHOICE, verbose_name="是否出席")
     # xcorwl = models.SmallIntegerField(choices=BE_PRESENT_CHOICE,verbose_name="是否出席现场")
     gdxm = models.CharField(max_length=20) # 股东姓名
-    gdtype = models.CharField(max_length=20) # 股东类型
-    gddmk = models.CharField(max_length=15)
-    sfz = models.CharField(max_length=25)
+    gdtype = models.CharField(max_length=20, null=True) # 股东类型
+    gddmk = models.CharField(max_length=15, null=True)
+    sfz = models.CharField(max_length=25, null=True)
 
-    rs = models.SmallIntegerField()
-    frA = models.IntegerField()
-    gzA = models.IntegerField()
-    gzB = models.IntegerField()
-    dlr = models.CharField(max_length=10)  # 代理人
+    rs = models.SmallIntegerField(null=True)
+    frA = models.IntegerField(null=True)
+    gzA = models.IntegerField(null=True)
+    gzB = models.IntegerField(null=True)
+    dlr = models.CharField(max_length=10, null=True)  # 代理人
     # meno = models.CharField(max_length=20) # 备注
 
     # hconference = models.ForeignKey(Conference, on_delete=models.CASCADE, verbose_name="会议类型")

@@ -78,7 +78,7 @@
 				// this.currentPage = currentPage;
 				var oUl = document.getElementById('t1');
 				console.log(currentPage)
-				oUl.style.top = -490*(currentPage-1) + 'px'
+				oUl.style.top = -455*(currentPage-1) + 'px'
 
 			},
 		}
@@ -92,7 +92,7 @@
 			padding-left: 100px;
 			padding-right: 100px;
 			overflow-y: hidden;
-			height: 490px;
+			height: 455px;
 			position: relative;
 
 			

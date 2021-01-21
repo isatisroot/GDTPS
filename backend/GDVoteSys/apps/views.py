@@ -25,7 +25,6 @@ class QueryYear(View):
         except Exception as e:
             print(e)
             # 如果没有在表中查询到最近一次会议的年份则返回系统当前年份
-
             year = date.today().year
             return JsonResponse({"year": year})
 
@@ -121,7 +120,7 @@ class QueryDetail(View):
             if m.gb:
                 # 通过年度会议查找股本信息
                 sharehold = {"totalShare": m.gb.gb, "AShareTotal": m.gb.ltag, "BShareTotal": m.gb.ltbg}
-            # 通过m查找现场会议登记的中间表
+            # 通过m查找现场会议登记的中间表queset
             queryset = m.onsitemeeting_set.all()
             # _d = m.date + timedelta(minutes=-10)
             str_date = m.date.strftime('%Y-%m-%d %H:%M:%S')
@@ -129,7 +128,7 @@ class QueryDetail(View):
             motion.pop()
             # print(motion)
             for i in queryset:
-                # 根据中间表查找到股东信息表
+                # 根据中间表查找到股东信息表q
                 q = i.shareholder
                 # print(i.cx)
                 data = {
@@ -142,8 +141,8 @@ class QueryDetail(View):
                     'sfz': q.sfz,
                     'rs': q.rs,
                     # 'frA': q.frA,
-                    'gzA': q.gzA,
-                    'gzB': q.gzB,
+                    'gzA': i.gzA,
+                    'gzB': i.gzB,
                     # 'dlr': q.dlr,
                     'meno': i.meno
                 }
@@ -160,13 +159,28 @@ class UpdateMeeting(View):
         year = req_data.get("year")
         meeting_name = req_data.get("meeting")
         tableData = req_data.get("tableData",None)
+        if not tableData:
+            return HttpResponseBadRequest(content=json.dumps({'msg':'更新失败'}),content_type="'application/json'")
         try:
             m = Meeting.objects.get(year=year,name=meeting_name)
             for data in tableData:
                 id = data.get("id",None)
+                if not id:
+                    s = ShareholderInfo.objects.create(
+                        gdxm=data.get('gdxm'),
+                        gdtype=data.get('gdtype',None), # cannot be null
+                        gddmk=data.get('gddmk', None),
+                        sfz=data.get('sfz', None),
+                        rs=data.get('rs',0),
+                        frA=data.get("frA",0),
+                        gzA=data.get('gzA',0),
+                        gzB=data.get('gzB',0),
+                        dlr=data.get('dlr',None)
+                    )
+                    id = s.id
                 OnSiteMeeting.objects.filter(meeting_id=m.id, shareholder=id).update(
-                    cx=data.get("cx"),
-                    xcorwl=data.get("xc"),
+                    cx=data.get("cx") if data.get("cx") else False,
+                    xcorwl=data.get("xc") if data.get("xc") else False,
                     gzA=int(data.get("gzA")),
                     gzB=int(data.get("gzB")),
                     meno = data.get("meno")
@@ -183,7 +197,7 @@ class UpdateMeeting(View):
             return JsonResponse({'code':200, 'msg':'更新成功'})
         except Exception as e:
             print(e)
-            return HttpResponseBadRequest(content_type="'application/json'")
+            return HttpResponseBadRequest(content=json.dumps({'msg':'更新失败'}),content_type="'application/json'")
 
 
 

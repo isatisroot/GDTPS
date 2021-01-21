@@ -96,7 +96,7 @@
 							<el-table-column prop="meno" label="备注" align="center"></el-table-column>
 							<el-table-column label="操作" width="180" align="center" v-if="!disabled">
 								<template slot-scope="scope">
-									<el-button type="text" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+									<el-button type="text" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)" >编辑</el-button>
 									<el-button type="text" icon="el-icon-delete" class="red" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
 								</template>
 							</el-table-column>
@@ -118,35 +118,37 @@
 				</el-tab-pane>
 
 			</el-tabs>
-			<el-dialog title="编辑" :visible.sync="editVisible" width="30%">
-				<el-form ref="form" :model="form" label-width="90px">
-					
-					<el-form-item label="人数">
-						<el-input v-model="form.rs"></el-input>
-					</el-form-item>
-					<el-form-item label="股东类型">
-						<el-input v-model="form.gdtype"></el-input>
-					</el-form-item>
-					<el-form-item label="股东姓名">
-						<el-input v-model="form.gdxm"></el-input>
-					</el-form-item>
-					<el-form-item label="股东代码卡">
-						<el-input v-model="form.gddmk"></el-input>
-					</el-form-item>
-					<el-form-item label="身份证号">
-						<el-input v-model="form.sfz"></el-input>
-					</el-form-item>
-					<el-form-item label="A股">
-						<el-input v-model="form.gzA"></el-input>
-					</el-form-item>
-					<el-form-item label="B股">
-						<el-input v-model="form.gzB"></el-input>
-					</el-form-item>
-					<el-form-item label="备注">
-						<el-input v-model="form.meno"></el-input>
-					</el-form-item>
+			<el-dialog title="编辑" :visible.sync="editVisible" width="40%">
 
-				</el-form>
+						<el-form ref="form" :model="form" label-width="90px">						
+							<el-form-item label="人数">
+								<el-input v-model="form.rs"></el-input>
+							</el-form-item>
+							<el-form-item label="股东类型">
+								<el-input v-model="form.gdtype"></el-input>
+							</el-form-item>
+							<el-form-item label="股东姓名">
+								<el-input v-model="form.gdxm"></el-input>
+							</el-form-item>
+							<el-form-item label="股东代码卡">
+								<el-input v-model="form.gddmk"></el-input>
+							</el-form-item>
+							<el-form-item label="身份证号">
+								<el-input v-model="form.sfz"></el-input>
+							</el-form-item>
+							<el-form-item label="A股">
+								<el-input v-model="form.gzA"></el-input>
+							</el-form-item>
+							<el-form-item label="B股">
+								<el-input v-model="form.gzB"></el-input>
+							</el-form-item>
+							<el-form-item label="备注">
+								<el-input v-model="form.meno"></el-input>
+							</el-form-item>						
+						</el-form>
+
+
+				
 				<span slot="footer" class="dialog-footer">
 					<el-button @click="editVisible = false">取 消</el-button>
 					<el-button type="primary" @click="saveEdit">确 定</el-button>
@@ -186,7 +188,9 @@
 		data() {
 			var currenYear = new Date().getFullYear();
 			return {
-
+				autoplay: false,
+				value: [],
+				gddata: [],
 				printObj:{
 					id:"printStock",
 					mode:0
@@ -326,6 +330,17 @@
 				this.share.ltbg = String(this.share.BShareTotal).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
 			},
 			editTable() {
+				axios.get(this.host + 'get_shareholder')
+					.then(response => (
+						// console.log(response.data)
+						this.gddata = response.data['list']
+						// for(var i = 0; i <= response.data['list'].length; i++) {
+						// 		this.gddata.push({key: response.data['list'][i].id,	label: response.data['list'][i].name})
+						// }
+					)).catch(error => {
+						alert('error')
+						// console.log(error.response.data);
+					})
 				this.disabled = false;
 				this.addRow()
 			},
@@ -393,8 +408,6 @@
 				}
 			},
 
-
-
 			// 打印现场会议登记表
 			printOnSite() {
 				// 现将操作列隐藏起来，以免打印这一列
@@ -446,7 +459,7 @@
 				this.handleCheckedData();
 				axios.post(this.host + 'update', {year:this.query.year, meeting:this.query.name, tableData: this.tableData})
 				.then(response => (this.$message.success('数据更新成功！')))
-				.catch(error => (console.log(error.response.data)));
+				.catch(error => (this.$message.error("更新失败"),console.log(error.response.data)));
 				
 			},
 
@@ -476,11 +489,15 @@
 				}
 			},
 
-			// 编辑操作
+			// 编辑行操作
 			handleEdit(index, row) {
 				this.idx = index;
-				row.update = true;
+				
 				this.form = row;
+				
+				
+				row.update = true;
+				
 				this.editVisible = true;
 
 			},
@@ -578,6 +595,13 @@
 	}
 </style>
 <style scoped>
+	.edit-tran >>>
+	.el-transfer-panel {
+	
+		/* width: 300px; */
+		margin: 0 auto;
+		width:35% !important;
+	}
 	
 	.el-table--border:after,
 	.el-table--group:after,

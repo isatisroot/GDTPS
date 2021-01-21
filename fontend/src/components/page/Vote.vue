@@ -83,7 +83,7 @@
 				// this.currentPage = currentPage;
 				var oUl = document.getElementById('uvote');
 				console.log(currentPage)
-				oUl.style.top = -627 * (currentPage - 1) + 'px'
+				oUl.style.top = -800 * (currentPage - 1) + 'px'
 
 			},
 		},
@@ -96,7 +96,7 @@
 			padding-left: 100px;
 			padding-right: 100px;
 			overflow-y: hidden;
-			height: 627px;
+			height: 800px;
 			position: relative;
 
 
@@ -108,6 +108,10 @@
 			position: absolute;
 			left:0px;
 			width: 100%;
+		}
+		
+		.print-vote ul li{
+			height: 800px;
 		}
 
 

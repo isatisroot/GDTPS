@@ -30,7 +30,7 @@ export default new Router({
                 {
                     path: '/tabs',
                     component: () => import(/* webpackChunkName: "tabs" */ '../components/page/Tabs.vue'),
-                    meta: { title: '表决统计' }
+                    meta: { title: '股东信息' }
                 },
                 {
                     path: '/form',
@@ -62,6 +62,11 @@ export default new Router({
                     component: () => import(/* webpackChunkName: "chart" */ '../components/page/BaseCharts.vue'),
                     meta: { title: '图表统计' }
                 },
+				// {
+				// 	path:'/shareholders',
+				// 	component:()=> import(/* webpackChunkName: "shareholders" */'../components/page/ShareHolder.vue'),
+				// 	meta:{title:'股东信息维护'}
+				// },
                
                 
                 
