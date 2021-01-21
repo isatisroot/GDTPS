@@ -166,6 +166,11 @@ class UpdateMeeting(View):
             for data in tableData:
                 id = data.get("id",None)
                 if not id:
+                    gdxm=data.get('gdxm')
+                    sfz = data.get("sfz", None)
+                    qs = ShareholderInfo.objects.filter(gdxm=gdxm, sfz=sfz)
+                    if qs:
+                        return HttpResponseBadRequest(content=json.dumps({'msg': '更新失败，数据库已有该股东信息'}))
                     s = ShareholderInfo.objects.create(
                         gdxm=data.get('gdxm'),
                         gdtype=data.get('gdtype',None), # cannot be null
@@ -181,8 +186,8 @@ class UpdateMeeting(View):
                 OnSiteMeeting.objects.filter(meeting_id=m.id, shareholder=id).update(
                     cx=data.get("cx") if data.get("cx") else False,
                     xcorwl=data.get("xc") if data.get("xc") else False,
-                    gzA=int(data.get("gzA")),
-                    gzB=int(data.get("gzB")),
+                    gzA=int(data.get("gzA", 0)),
+                    gzB=int(data.get("gzB", 0)),
                     meno = data.get("meno")
                 )
                 ShareholderInfo.objects.filter(id=id).update(
@@ -191,8 +196,8 @@ class UpdateMeeting(View):
                     gddmk = data.get("gddmk"),
                     sfz = data.get("sfz"),
                     rs = data.get("rs"),
-                    gzA = data.get("gzA"),
-                    gzB = data.get("gzB")
+                    gzA = data.get("gzA", 0),
+                    gzB = data.get("gzB", 0)
                 )
             return JsonResponse({'code':200, 'msg':'更新成功'})
         except Exception as e:
@@ -205,3 +210,27 @@ class Upload(View):
     def post(self, request):
         print(request.body)
         return JsonResponse({'code': 200, 'msg': '上传成功'})
+
+class LoadAll(View):
+    def post(self, request):
+        json_str = request.body.decode()
+        req_data = json.loads(json_str)
+        idList = req_data.get("gdid",[])
+        data_list = []
+        qs = ShareholderInfo.objects.all()
+        for q in qs:
+            if q.id in idList:
+                continue
+            data = {
+                'id':q.id,
+                'value': q.gdxm,
+                'gdtype': q.gdtype,
+                'gddmk': q.gddmk,
+                'sfz': q.sfz,
+                'rs': q.rs,
+                'gzA': q.gzA,
+                'gzB': q.gzB,
+            }
+            data_list.append(data)
+
+        return JsonResponse(data_list, safe=False)

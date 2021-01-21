@@ -25,9 +25,9 @@
 				<!-- <el-button type="primary" icon="el-icon-circle-plus">新增</el-button> -->
 			</div>
 			<div class="sharemsg">
-				
-					
-				
+
+
+
 				<span>总股本：</span>
 				<el-input v-model="share.gb" :disabled="disabled"></el-input>
 				<span>流通A股：</span>
@@ -45,7 +45,7 @@
 						<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印预览</el-button>
 						<!-- <el-button class="button" icon="el-icon-printer" v-print="'#onSite'">打印预览</el-button> -->
 					</el-tooltip>
-				
+
 					</el-alert>
 				</template>
 				<template v-else>
@@ -96,7 +96,7 @@
 							<el-table-column prop="meno" label="备注" align="center"></el-table-column>
 							<el-table-column label="操作" width="180" align="center" v-if="!disabled">
 								<template slot-scope="scope">
-									<el-button type="text" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)" >编辑</el-button>
+									<el-button type="text" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
 									<el-button type="text" icon="el-icon-delete" class="red" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
 								</template>
 							</el-table-column>
@@ -120,35 +120,37 @@
 			</el-tabs>
 			<el-dialog title="编辑" :visible.sync="editVisible" width="40%">
 
-						<el-form ref="form" :model="form" label-width="90px">						
-							<el-form-item label="人数">
-								<el-input v-model="form.rs"></el-input>
-							</el-form-item>
-							<el-form-item label="股东类型">
-								<el-input v-model="form.gdtype"></el-input>
-							</el-form-item>
-							<el-form-item label="股东姓名">
-								<el-input v-model="form.gdxm"></el-input>
-							</el-form-item>
-							<el-form-item label="股东代码卡">
-								<el-input v-model="form.gddmk"></el-input>
-							</el-form-item>
-							<el-form-item label="身份证号">
-								<el-input v-model="form.sfz"></el-input>
-							</el-form-item>
-							<el-form-item label="A股">
-								<el-input v-model="form.gzA"></el-input>
-							</el-form-item>
-							<el-form-item label="B股">
-								<el-input v-model="form.gzB"></el-input>
-							</el-form-item>
-							<el-form-item label="备注">
-								<el-input v-model="form.meno"></el-input>
-							</el-form-item>						
-						</el-form>
+				<el-form ref="form" :model="form" label-width="90px">
+					<el-form-item label="股东姓名">
+						<!-- <template slot-scope="scope"> -->
+							<el-autocomplete class="inline-input" v-model="state" :fetch-suggestions="querySearch" placeholder="请输入内容"
+													 :trigger-on-focus="false" @select="handleSelect"  ></el-autocomplete>
+						<!-- </template> -->
+						
+					</el-form-item>
+					<el-form-item label="人数">
+						<el-input v-model="form.rs"></el-input>
+					</el-form-item>
+					<el-form-item label="股东类型">
+						<el-input v-model="form.gdtype"></el-input>
+					</el-form-item>
+					<el-form-item label="股东代码卡">
+						<el-input v-model="form.gddmk"></el-input>
+					</el-form-item>
+					<el-form-item label="身份证号">
+						<el-input v-model="form.sfz"></el-input>
+					</el-form-item>
+					<el-form-item label="A股">
+						<el-input v-model="form.gzA"></el-input>
+					</el-form-item>
+					<el-form-item label="B股">
+						<el-input v-model="form.gzB"></el-input>
+					</el-form-item>
+					<el-form-item label="备注">
+						<el-input v-model="form.meno"></el-input>
+					</el-form-item>
+				</el-form>
 
-
-				
 				<span slot="footer" class="dialog-footer">
 					<el-button @click="editVisible = false">取 消</el-button>
 					<el-button type="primary" @click="saveEdit">确 定</el-button>
@@ -188,12 +190,15 @@
 		data() {
 			var currenYear = new Date().getFullYear();
 			return {
+				
+				gdxmArray: [],
+				state: '',
 				autoplay: false,
 				value: [],
 				gddata: [],
-				printObj:{
-					id:"printStock",
-					mode:0
+				printObj: {
+					id: "printStock",
+					mode: 0
 				},
 				warning: false,
 				tab: 0,
@@ -208,7 +213,7 @@
 					// 'border-bottom': 'solid 1px #000000',
 					'border': 'solid 1px #000000 !important',
 					// 'border-bottom': 'solid 1px red',
-					'border-collapse':'collapse ! important',
+					'border-collapse': 'collapse ! important',
 
 				},
 
@@ -221,10 +226,10 @@
 					gb: "",
 					ltag: "",
 					ltbg: "",
-					totalShare:0,
-					AShareTotal:0,
-					BShareTotal:0,
-					
+					totalShare: 0,
+					AShareTotal: 0,
+					BShareTotal: 0,
+
 				},
 
 				editVisible: false,
@@ -251,7 +256,7 @@
 		},
 
 		created() {
-					
+
 			// 处理从主页查询传过来的数据
 			EventBus.$on('addition', param => {
 				this.tableData = param.tableData;
@@ -262,14 +267,10 @@
 				this.motion = param.motion;
 				this.share = param.sharehold;
 				this.transferFormat();
-				
 				this.initSelectRow();
 				this.handleCheckedData();
-				
-				
-
 			});
-			
+
 		},
 		mounted() {
 			if (!this.query.year) {
@@ -285,6 +286,7 @@
 					})
 			}
 			
+
 		},
 		computed: {
 			countCheckedData: function() {
@@ -316,14 +318,70 @@
 			}
 		},
 		methods: {
-			printTab(tab){
-				if(tab == 1){this.printObj.id = "printCertificate"}
-				else if(tab == 2){this.printObj.id = "printVote"}
-				else if(tab == 3){this.printObj.id = "printStock"}
+			querySearch(queryString, cb) {
+				var gdxmArray = this.gdxmArray;
+				console.log(this.createFilter(queryString))
+				console.log(gdxmArray.filter(this.createFilter(queryString)))
+				var results = queryString ? gdxmArray.filter(this.createFilter(queryString)) : gdxmArray;
+				// 调用 callback 返回建议列表的数据
+				console.log(results)
+				cb(results);
+			},
+
+			createFilter(queryString) {
+				return (gdxmArray) => {
+					
+					return (gdxmArray.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+				};
+			},
+			loadAll() {
+				var gdid = [];
+				for(var i in this.tableData){
+					gdid.push(this.tableData[i].id)
+				}
+				alert(gdid)
+				axios.post(this.host + 'loadall',{
+					gdid: gdid
+				}).then(response => {
+					this.gdxmArray = response.data
+				}).catch(error => {})
+				// return [{
+				// 		"value": "张学权",
+				// 		"gdtype":"董监高",
+				// 		"gddmk": "0061015908",
+				// 		"sfz": "422701197712100330",
+				// 		"rs": 1,
+						
+				// 	},
+				// 	{
+				// 		"value": "张勇",
+				// 		"gdtype":"董监高",
+				// 		"gddmk": "0101132526",
+				// 		"sfz": "430123197406144357",
+				// 		"rs": 1,
+				// 	},
+					
+				// ]
+			},
+			handleSelect(item) {
+				console.log(item);
+				this.form = item
 				
+				this.form.gdxm = item.value
+			},
+
+			printTab(tab) {
+				if (tab == 1) {
+					this.printObj.id = "printCertificate"
+				} else if (tab == 2) {
+					this.printObj.id = "printVote"
+				} else if (tab == 3) {
+					this.printObj.id = "printStock"
+				}
+
 				console.log(this.printObj.id)
 			},
-			transferFormat(){
+			transferFormat() {
 				// 将数字转换为千位分隔符字符串
 				this.share.gb = String(this.share.totalShare).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
 				this.share.ltag = String(this.share.AShareTotal).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
@@ -349,9 +407,13 @@
 				if (this.disabled == false) {
 					this.$message.success(`请先保存当前信息`);
 				}
-				if(tab.index == 1){this.id="printCerificate"}
-				else if(tab.index == 2){this.id = "printVote"}
-				else if(tab.index == 3){this.id = "printStock"}
+				if (tab.index == 1) {
+					this.id = "printCerificate"
+				} else if (tab.index == 2) {
+					this.id = "printVote"
+				} else if (tab.index == 3) {
+					this.id = "printStock"
+				}
 				this.tab = tab.index
 				// this.handleCheckedData();
 				// 如果切换到统计表，则调用方法进行统计计算
@@ -379,6 +441,7 @@
 				this.transferFormat();
 				this.initSelectRow();
 				this.handleCheckedData();
+				this.gdxmArray = this.loadAll();
 
 			},
 
@@ -440,7 +503,7 @@
 					xc: '',
 					rs: '',
 					gdtype: '',
-					gdxm:'',
+					gdxm: '',
 					gddmk: '',
 					sfz: '',
 					gzA: '',
@@ -452,15 +515,21 @@
 
 			// 更新表数据
 			updateTable() {
-				this.disabled = true;
-				if(this.tableData[this.tableData.length-1].gdxm == ""){
+				
+				if (this.tableData[this.tableData.length - 1].gdxm == "") {
 					this.tableData.pop()
 				}
 				this.handleCheckedData();
-				axios.post(this.host + 'update', {year:this.query.year, meeting:this.query.name, tableData: this.tableData})
-				.then(response => (this.$message.success('数据更新成功！')))
-				.catch(error => (this.$message.error("更新失败"),console.log(error.response.data)));
-				
+				axios.post(this.host + 'update', {
+						year: this.query.year,
+						meeting: this.query.name,
+						tableData: this.tableData,
+					})
+					.then(response => (
+					this.disabled = true,
+					this.$message.success('数据更新成功！')))
+					.catch(error => (this.$message.error(error.response.data.msg), console.log(error.response)));
+
 			},
 
 			// 当点击“出席”列的复选框时，记录点击行的行号（从0开始），存储在rowChecked中
@@ -473,7 +542,7 @@
 					})
 				} else {
 					var index = this.rowChecked.indexOf(rowNum)
-					this.rowChecked.splice(index, 1)					
+					this.rowChecked.splice(index, 1)
 				}
 
 			},
@@ -492,12 +561,12 @@
 			// 编辑行操作
 			handleEdit(index, row) {
 				this.idx = index;
-				
+
 				this.form = row;
-				
-				
+
+
 				row.update = true;
-				
+
 				this.editVisible = true;
 
 			},
@@ -509,10 +578,10 @@
 				this.editVisible = false;
 				this.$message.success(`修改第 ${this.idx + 1} 行成功`);
 				this.$set(this.tableData, this.idx, this.form);
-				if(this.tableData[this.tableData.length-1].gddmk != ""){
+				if (this.tableData[this.tableData.length - 1].gddmk != "") {
 					this.addRow()
 				}
-				
+
 			},
 			// 分页导航
 			handlePageChange(val) {
@@ -585,24 +654,24 @@
 		border-top-color: #3162a7;
 		background: #1b365c;
 	}
+
 	/* 解决el-table表头和列不对齐 */
-	.el-table th.gutter{
-			display: table-cell !important;
-		}
-		
+	.el-table th.gutter {
+		display: table-cell !important;
+	}
+
 	table {
 		border-collapse: collapse;
 	}
 </style>
 <style scoped>
-	.edit-tran >>>
-	.el-transfer-panel {
-	
+	.edit-tran>>>.el-transfer-panel {
+
 		/* width: 300px; */
 		margin: 0 auto;
-		width:35% !important;
+		width: 35% !important;
 	}
-	
+
 	.el-table--border:after,
 	.el-table--group:after,
 	.el-table:before {
@@ -613,11 +682,11 @@
 	.el-table--group {
 		border-color: #000000;
 		/* border: solid 1px #000000 !important; */
-		
+
 		border-bottom: solid 1px #000000;
 	}
-	
-	
+
+
 
 	/* .table-header {
 		background: #07C4A8;
