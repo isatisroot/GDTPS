@@ -1,13 +1,45 @@
 import json
 from django.shortcuts import render
 from django.views.generic import View
-from django.http.response import JsonResponse, HttpResponseBadRequest
+from django.http.response import JsonResponse, HttpResponseBadRequest, HttpResponseNotFound
 from .models import Meeting, ShareholderInfo,OnSiteMeeting,GB
-
-from datetime import datetime,date,timedelta
+from django.contrib.auth import login
+from rest_framework_jwt.settings import api_settings
+from datetime import datetime,date
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 # from django.utils import timezone as datetime
 
+class Login(View):
+    def post(self, request):
+        json_str = request.body.decode()
+        data = json.loads(json_str)
+        username = data.get('username')
+        password = data.get('password')
+        user = authenticate(username=username, password=password)
+        if not user:
+            return HttpResponseNotFound(json.dumps({'msg': '用户不存在'}))
+
+        # if not check_password(password,user.password):
+        # if user.password != password:
+        #     return JsonResponse({'msg': '密码错误'},status=400)
+
+        # 将登录成功的信息写入到session中
+        login(request,user)
+
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+
+        return JsonResponse({'username': username, 'user_id': user.id, 'token': token, 'msg': 'successful'})
+
+
+
 class QueryYear(View):
+    # @method_decorator(login_required)
     def get(self, request):
         try:
             m = Meeting.objects.get(current_year=1)
@@ -47,13 +79,15 @@ class AddMeeting(View):
         address = meeting.get("address")
         date1 = meeting.get("date1")
         date2 = meeting.get('date2')
+
         year = date1.split("-")[0]
         if not all((date1, date2, address)):
             return HttpResponseBadRequest(json.dumps({'msg': '请填写时间和日期'}))
 
         text = ''
         for i in motion:
-            text += i.get('motion','')+ ";"
+            if bool(i):
+                text += i.get('motion','')+ ";"
 
         try:
             if Meeting.objects.filter(year=year, name=name):
@@ -121,8 +155,9 @@ class QueryDetail(View):
             queryset = m.onsitemeeting_set.all()
             # _d = m.date + timedelta(minutes=-10)
             str_date = m.date.strftime('%Y-%m-%d %H:%M:%S')
-            motion = m.motion.split(";")
-            motion.pop()
+            if m.motion:
+                motion = m.motion.split(";")
+                motion.pop()
             # print(motion)
             for i in queryset:
                 # 根据中间表查找到股东信息表q
