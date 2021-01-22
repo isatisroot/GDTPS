@@ -189,8 +189,7 @@
 		},
 		data() {
 			var currenYear = new Date().getFullYear();
-			return {
-				
+			return {				
 				gdxmArray: [],
 				state: '',
 				autoplay: false,
@@ -216,11 +215,7 @@
 					'border-collapse': 'collapse ! important',
 
 				},
-
-				form: {
-
-				},
-
+				form: {},
 				disabled: true, // 为true时无法编辑
 				share: {
 					gb: "",
@@ -229,9 +224,7 @@
 					totalShare: 0,
 					AShareTotal: 0,
 					BShareTotal: 0,
-
 				},
-
 				editVisible: false,
 				message: 'first',
 				query: {
@@ -248,15 +241,11 @@
 				rowChecked: [], // 存储“出席”列中勾选的复选框所在行的行号（下标从0开始）
 				checkedData: [],
 				rowList: [],
-
 				motion: [],
-
-
 			};
 		},
 
 		created() {
-
 			// 处理从主页查询传过来的数据
 			EventBus.$on('addition', param => {
 				this.tableData = param.tableData;
@@ -270,7 +259,6 @@
 				this.initSelectRow();
 				this.handleCheckedData();
 			});
-
 		},
 		mounted() {
 			if (!this.query.year) {
@@ -318,6 +306,132 @@
 			}
 		},
 		methods: {
+			// 触发搜索按钮
+			async handleSearch() {
+				// 等待异步请求axios处理完成后再执行initSelectRow操作，因为后者需要等到tableData拿到数据后进行操作
+				await this.getData();
+				// 初始化rowChecked中的数据
+				this.transferFormat();
+				this.initSelectRow();
+				this.handleCheckedData();
+				
+			
+			},
+			
+			// 向后台请求详细数据
+			getData() {
+				return axios.get(this.host + 'get_detail/' + this.query.year + '/' + this.query.name)
+					.then(response => (
+						this.query.date = response.data['date'],
+						this.tableData = response.data['list'],
+						this.pageTotal = this.tableData.length,
+						this.share = response.data['sharehold'],
+						this.motion = response.data['motion']
+					)).catch(error => {})
+			
+			},
+			
+			// 将数字转换为千位分隔符字符串， 用于显示股本数
+			transferFormat() {	
+				this.share.gb = String(this.share.totalShare).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
+				this.share.ltag = String(this.share.AShareTotal).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
+				this.share.ltbg = String(this.share.BShareTotal).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
+			},
+						
+			// 初始化rowChecked数据
+			initSelectRow() {
+				this.rowChecked = [];
+				if (this.tableData) {
+					for (let i = 0; i < this.tableData.length; i++) {
+						if (this.tableData[i].cx == true) {
+							// this.checkedData.push(this.tableData[i])
+							this.rowChecked.push(i)
+						}
+					}
+				}
+			},
+			
+			// 将存储在rowChecked列表中的行号对应的行数据添加至checkedData列表中，使其传递给子组件
+			handleCheckedData() {
+				this.checkedData = []
+				// index是rowChecked的下标，
+				for (var i in this.rowChecked) {
+					var index = this.rowChecked[i];
+					this.checkedData.push(this.tableData[index])
+				}
+			},
+			
+			// 当点击“出席”列的复选框时，记录点击行的行号（从0开始），存储在rowChecked中
+			handleCheckOneChange(rowNum) {
+				// 当为true时将该行的行号添加追加到列表后重新排序，为false将其剔除
+				if (this.tableData[rowNum].cx == true) {
+					this.rowChecked.push(rowNum);
+					this.rowChecked.sort(function(a, b) {
+						return a - b
+					})
+				} else {
+					var index = this.rowChecked.indexOf(rowNum)
+					this.rowChecked.splice(index, 1)
+				}
+			
+			},
+									
+			// 编辑登记表
+			editTable() {
+				this.disabled = false;
+				this.addRow();
+				this.gdxmArray = this.loadAll();								
+			},	
+			
+			// 更新表数据
+			updateTable() {
+				if (this.tableData[this.tableData.length - 1].gdxm == "") {
+					this.tableData.pop()
+				}
+				this.handleCheckedData();
+				axios.post(this.host + 'update', {
+						year: this.query.year,
+						meeting: this.query.name,
+						tableData: this.tableData,
+					})
+					.then(response => (
+					this.disabled = true,
+					this.$message.success('数据更新成功！')))
+					.catch(error => (this.$message.error(error.response.data.msg), console.log(error.response)));
+			},		
+			
+			// 新增行
+			addRow() {
+				var newValue = {
+					id: '',
+					cx: '',
+					xc: '',
+					rs: '',
+					gdtype: '',
+					gdxm: '',
+					gddmk: '',
+					sfz: '',
+					gzA: '',
+					gzB: '',
+					meno: ''
+				};
+				this.tableData.push(newValue)
+			},
+						
+			// 向服务端缓存将与输入相关的内容
+			loadAll() {
+				var gdid = [];
+				for(var i in this.tableData){
+					gdid.push(this.tableData[i].id)
+				}
+				axios.post(this.host + 'loadall',{
+					gdid: gdid
+				}).then(response => {
+					this.gdxmArray = response.data
+				}).catch(error => {})
+			},
+												
+			// 输入建议，queryString用户输入字符， cb回调函数返回建议内容
 			querySearch(queryString, cb) {
 				var gdxmArray = this.gdxmArray;
 				console.log(this.createFilter(queryString))
@@ -327,49 +441,22 @@
 				console.log(results)
 				cb(results);
 			},
-
+			
+			// 将用户输入字符串转小写后与输入内容进行匹配返回对象
 			createFilter(queryString) {
-				return (gdxmArray) => {
-					
+				return (gdxmArray) => {					
 					return (gdxmArray.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
 				};
 			},
-			loadAll() {
-				var gdid = [];
-				for(var i in this.tableData){
-					gdid.push(this.tableData[i].id)
-				}
-				alert(gdid)
-				axios.post(this.host + 'loadall',{
-					gdid: gdid
-				}).then(response => {
-					this.gdxmArray = response.data
-				}).catch(error => {})
-				// return [{
-				// 		"value": "张学权",
-				// 		"gdtype":"董监高",
-				// 		"gddmk": "0061015908",
-				// 		"sfz": "422701197712100330",
-				// 		"rs": 1,
 						
-				// 	},
-				// 	{
-				// 		"value": "张勇",
-				// 		"gdtype":"董监高",
-				// 		"gddmk": "0101132526",
-				// 		"sfz": "430123197406144357",
-				// 		"rs": 1,
-				// 	},
-					
-				// ]
-			},
+			// 处理用户选择的建议项
 			handleSelect(item) {
 				console.log(item);
-				this.form = item
-				
+				this.form = item				
 				this.form.gdxm = item.value
 			},
-
+			
+			// 根据用户切换选项卡匹配不同打印内容
 			printTab(tab) {
 				if (tab == 1) {
 					this.printObj.id = "printCertificate"
@@ -378,30 +465,8 @@
 				} else if (tab == 3) {
 					this.printObj.id = "printStock"
 				}
-
-				console.log(this.printObj.id)
 			},
-			transferFormat() {
-				// 将数字转换为千位分隔符字符串
-				this.share.gb = String(this.share.totalShare).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
-				this.share.ltag = String(this.share.AShareTotal).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
-				this.share.ltbg = String(this.share.BShareTotal).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
-			},
-			editTable() {
-				axios.get(this.host + 'get_shareholder')
-					.then(response => (
-						// console.log(response.data)
-						this.gddata = response.data['list']
-						// for(var i = 0; i <= response.data['list'].length; i++) {
-						// 		this.gddata.push({key: response.data['list'][i].id,	label: response.data['list'][i].name})
-						// }
-					)).catch(error => {
-						alert('error')
-						// console.log(error.response.data);
-					})
-				this.disabled = false;
-				this.addRow()
-			},
+									
 			// 处理选项卡的点击事件
 			handleTabClick(tab, event) {
 				if (this.disabled == false) {
@@ -421,8 +486,7 @@
 				// 	this.numOfStock()
 				// }
 			},
-
-
+			
 			// 求百分比
 			GetPercent(num, total) {
 				num = parseFloat(num);
@@ -432,45 +496,7 @@
 				}
 				return total <= 0 ? "0%" : (Math.round(num / total * 10000) / 100.00) + "%";
 			},
-
-			// 触发搜索按钮
-			async handleSearch() {
-				// 等待异步请求axios处理完成后再执行initSelectRow操作，因为后者需要等到tableData拿到数据后进行操作
-				await this.getData();
-				// 初始化rowChecked中的数据
-				this.transferFormat();
-				this.initSelectRow();
-				this.handleCheckedData();
-				this.gdxmArray = this.loadAll();
-
-			},
-
-			// 向后台请求详细数据
-			getData() {
-				return axios.get(this.host + 'get_detail/' + this.query.year + '/' + this.query.name)
-					.then(response => (
-						this.query.date = response.data['date'],
-						this.tableData = response.data['list'],
-						this.pageTotal = this.tableData.length,
-						this.share = response.data['sharehold'],
-						this.motion = response.data['motion']
-					)).catch(error => {})
-
-			},
-
-			// 初始化rowChecked数据
-			initSelectRow() {
-				this.rowChecked = [];
-				if (this.tableData) {
-					for (let i = 0; i < this.tableData.length; i++) {
-						if (this.tableData[i].cx == true) {
-							// this.checkedData.push(this.tableData[i])
-							this.rowChecked.push(i)
-						}
-					}
-				}
-			},
-
+			
 			// 打印现场会议登记表
 			printOnSite() {
 				// 现将操作列隐藏起来，以免打印这一列
@@ -494,86 +520,35 @@
 				}
 
 			},
-
-			// 新增行
-			addRow() {
-				var newValue = {
-					id: '',
-					cx: '',
-					xc: '',
-					rs: '',
-					gdtype: '',
-					gdxm: '',
-					gddmk: '',
-					sfz: '',
-					gzA: '',
-					gzB: '',
-					meno: ''
-				};
-				this.tableData.push(newValue)
-			},
-
-			// 更新表数据
-			updateTable() {
-				
-				if (this.tableData[this.tableData.length - 1].gdxm == "") {
-					this.tableData.pop()
-				}
-				this.handleCheckedData();
-				axios.post(this.host + 'update', {
-						year: this.query.year,
-						meeting: this.query.name,
-						tableData: this.tableData,
-					})
-					.then(response => (
-					this.disabled = true,
-					this.$message.success('数据更新成功！')))
-					.catch(error => (this.$message.error(error.response.data.msg), console.log(error.response)));
-
-			},
-
-			// 当点击“出席”列的复选框时，记录点击行的行号（从0开始），存储在rowChecked中
-			handleCheckOneChange(rowNum) {
-				// 当为true时将该行的行号添加追加到列表后重新排序，为false将其剔除
-				if (this.tableData[rowNum].cx == true) {
-					this.rowChecked.push(rowNum);
-					this.rowChecked.sort(function(a, b) {
-						return a - b
-					})
-				} else {
-					var index = this.rowChecked.indexOf(rowNum)
-					this.rowChecked.splice(index, 1)
-				}
-
-			},
-
-			// 将存储在rowChecked列表中的行号对应的行数据添加至checkedData列表中，使其传递给子组件
-			handleCheckedData() {
-
-				this.checkedData = []
-				// index是rowChecked的下标，
-				for (var i in this.rowChecked) {
-					var index = this.rowChecked[i];
-					this.checkedData.push(this.tableData[index])
-				}
-			},
-
+						
 			// 编辑行操作
-			handleEdit(index, row) {
+			handleEdit(index, row) {			
 				this.idx = index;
-
 				this.form = row;
-
-
-				row.update = true;
-
 				this.editVisible = true;
 
 			},
+			
+			// 删除行操作
+			handleDelete(index, row){
+				// 二次确认删除
+				    this.$confirm('确定要删除吗？', '提示', {
+				        type: 'warning'
+				    })
+				        .then(() => {							
+							var a = this.tableData.splice(index, 1);
+							console.log(a[0].id)
+							axios.delete(this.host + 'delete', {
+								data:{id:a[0].id, 
+								year: this.query.year,
+								meeting: this.query.name}}).then(response => {
+								 this.$message.success('删除成功');
+							}).catch(()=>{})
+				        })
+				        .catch(() => {});
+				},
 
-
-
-			// 保存编辑
+			// 保存行编辑
 			saveEdit() {
 				this.editVisible = false;
 				this.$message.success(`修改第 ${this.idx + 1} 行成功`);
@@ -583,11 +558,7 @@
 				}
 
 			},
-			// 分页导航
-			handlePageChange(val) {
-				this.$set(this.query, 'pageIndex', val);
-				this.getData();
-			}
+						
 		}
 	};
 </script>
@@ -632,7 +603,6 @@
 		border-radius: 5px;
 		font-weight: 600;
 	}
-
 
 	.button {
 		/* border-top: 1px solid #97f7df; */

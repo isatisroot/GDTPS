@@ -28,8 +28,6 @@ class QueryYear(View):
             year = date.today().year
             return JsonResponse({"year": year})
 
-
-
 class AddMeeting(View):
     def get(self, request):
         queryset = ShareholderInfo.objects.all()
@@ -86,7 +84,6 @@ class AddMeeting(View):
         except Exception as e:
             print(e)
             return HttpResponseBadRequest(content_type="'application/json'")
-
 
 class QueryMeeting(View):
 #     """
@@ -165,12 +162,14 @@ class UpdateMeeting(View):
             m = Meeting.objects.get(year=year,name=meeting_name)
             for data in tableData:
                 id = data.get("id",None)
+                # id是随着查询时发送到前端的，返回后如果没有id表示是前端新增的数据
                 if not id:
                     gdxm=data.get('gdxm')
                     sfz = data.get("sfz", None)
                     qs = ShareholderInfo.objects.filter(gdxm=gdxm, sfz=sfz)
                     if qs:
                         return HttpResponseBadRequest(content=json.dumps({'msg': '更新失败，数据库已有该股东信息'}))
+
                     s = ShareholderInfo.objects.create(
                         gdxm=data.get('gdxm'),
                         gdtype=data.get('gdtype',None), # cannot be null
@@ -183,28 +182,43 @@ class UpdateMeeting(View):
                         dlr=data.get('dlr',None)
                     )
                     id = s.id
-                OnSiteMeeting.objects.filter(meeting_id=m.id, shareholder=id).update(
+
+                # 如果存在则对股东信息进行修改
+                else:
+                    s = ShareholderInfo.objects.get(id=id)
+                    s.gdxm=data.get("gdxm")
+                    s.gdtype = data.get("gdtype")
+                    s.gddmk = data.get("gddmk", None)
+                    s.sfz = data.get("sfz", None)
+                    s.rs = data.get("rs", 1)
+                    s.gzA = data.get("gzA", 0)
+                    s.gzB = data.get("gzB", 0)
+
+                qs = OnSiteMeeting.objects.filter(meeting_id=m.id, shareholder=id)
+                # 判断登记表中是否有该条记录，有则修改，没有则添加
+                if qs:
+                    qs.update(
                     cx=data.get("cx") if data.get("cx") else False,
                     xcorwl=data.get("xc") if data.get("xc") else False,
                     gzA=int(data.get("gzA", 0)),
                     gzB=int(data.get("gzB", 0)),
-                    meno = data.get("meno")
+                    meno = data.get("meno", None)
                 )
-                ShareholderInfo.objects.filter(id=id).update(
-                    gdxm=data.get("gdxm"),
-                    gdtype = data.get("gdtype"),
-                    gddmk = data.get("gddmk"),
-                    sfz = data.get("sfz"),
-                    rs = data.get("rs"),
-                    gzA = data.get("gzA", 0),
-                    gzB = data.get("gzB", 0)
-                )
+                else:
+                    OnSiteMeeting.objects.create(
+                        meeting_id=m.id,
+                        shareholder=s,
+                        cx=data.get("cx") if data.get("cx") else False,
+                        xcorwl=data.get("xc") if data.get("xc") else False,
+                        gzA=int(data.get("gzA", 0)),
+                        gzB=int(data.get("gzB", 0)),
+                        meno = data.get("meno", None)
+                    )
+
             return JsonResponse({'code':200, 'msg':'更新成功'})
         except Exception as e:
             print(e)
             return HttpResponseBadRequest(content=json.dumps({'msg':'更新失败'}),content_type="'application/json'")
-
-
 
 class Upload(View):
     def post(self, request):
@@ -234,3 +248,18 @@ class LoadAll(View):
             data_list.append(data)
 
         return JsonResponse(data_list, safe=False)
+
+class Delete(View):
+    def delete(self, request):
+        json_str = request.body.decode()
+        req_data = json.loads(json_str)
+        id = req_data.get("id")
+        year = req_data.get("year")
+        meeting = req_data.get("meeting")
+
+        if id:
+            m = Meeting.objects.get(year=year, name=meeting)
+            OnSiteMeeting.objects.filter(meeting=m.id, shareholder=id).delete()
+
+        return JsonResponse({'code':200, 'msg':'删除成功'})
+
