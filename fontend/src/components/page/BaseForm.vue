@@ -37,27 +37,17 @@
 				<el-button type="success" icon="el-icon-success" @click="updateTable">保存</el-button>
 				<template v-if="tab==0">
 					<el-tooltip class="item" effect="dark" placement="bottom-start">
-						<!-- <el-alert title="请保存信息后再打印" type="warning" > -->
 						<span slot="content" v-show="disabled">打印建议:布局-横向；更多设置-调整缩放</span>
 						<span slot="content" v-show="!disabled">请保存信息后再打印</span>
 						<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印预览</el-button>
 						<!-- <el-button class="button" icon="el-icon-printer" v-print="'#onSite'">打印预览</el-button> -->
 					</el-tooltip>
 
-<!--					</el-alert>-->
 				</template>
 				<template v-else>
 					<el-button class="button" icon="el-icon-printer" v-print="printObj" @click="printTab(tab)">打印预览</el-button>
 				</template>
-				<!-- <template v-else-if="tab == 1">
-					<el-button class="button" icon="el-icon-printer" v-print="'#printCerificate'">打印预览1</el-button>
-				</template>
-				<template v-else-if="tab == 2">
-					<el-button class="button" icon="el-icon-printer" v-print="'#printVote'">打印预览2</el-button>
-				</template>
-				<template v-else-if="tab == 3">
-					<el-button class="button" icon="el-icon-printer" v-print="'#printStock'">打印预览3</el-button>
-				</template> -->
+
 			</div>
 		</ul>
 		<!-- </div> -->
@@ -244,34 +234,24 @@
 		},
 
 		created() {
-			// 处理从主页查询传过来的数据
-			EventBus.$on('addition', param => {
-				this.tableData = param.tableData;
-				this.pageTotal = this.tableData.length;
-				this.query.year = param.year;
-				this.query.date = param.date;
-				this.query.name = param.meetingName;
-				this.motion = param.motion;
-				this.share = param.sharehold;
-				this.transferFormat();
-				this.initSelectRow();
-				this.handleCheckedData();
-			});
+
+
 		},
 		mounted() {
-			if (!this.query.year) {
-				axios.get(this.host + 'get_year')
-					.then(response => (
-						this.query.year = response.data['year'],
-						this.query.name = response.data['name'],
-						this.share = response.data['sharehold'],
-						this.meetingName = response.data['meeting_list'],
-						this.transferFormat()
-					)).catch(error => {
+			// if (!this.query.year) {
+			// 	axios.get(this.host + 'get_year')
+			// 		.then(response => (
+			// 			this.query.year = response.data['year'],
+			// 			this.query.name = response.data['name'],
+			// 			this.share = response.data['sharehold'],
+			// 			this.meetingName = response.data['meeting_list'],
+			// 			this.transferFormat()
+			// 		)).catch(error => {
+      //
+			// 		})
+			// };
+      this.init();
 
-					})
-			}
-			
 
 		},
 		computed: {
@@ -304,6 +284,30 @@
 			}
 		},
 		methods: {
+		  async init() {
+		    try {
+		      await this.currentData('current');
+          this.transferFormat();
+          console.log(this.share)
+        }catch (error){
+		      console.log(error)
+        }
+      },
+		  // 向后台自动请求当前会议数据
+      currentData(url){
+        return axios.get(this.host + url, ).then(response => {
+          this.tableData = response.data['detail_list']
+          this.query.year = response.data['current']['year']
+          this.query.date = response.data['current']['date']
+          this.query.name = response.data['current']['name']
+          this.motion = response.data['current']['motion']
+          this.meetingName = response.data['meeting_list']
+          this.share = response.data['sharehold']
+
+
+        })
+      },
+
 			// 触发搜索按钮
 			async handleSearch() {
 				// 等待异步请求axios处理完成后再执行initSelectRow操作，因为后者需要等到tableData拿到数据后进行操作

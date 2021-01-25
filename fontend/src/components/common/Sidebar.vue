@@ -35,22 +35,17 @@
 		data() {
 			return {
 				collapse: false,
-				items: [{
-						icon: 'el-icon-lx-home',
-						index: 'dashboard',
-						title: '系统首页'
-					},
-					// {
-					// 	icon: 'el-icon-lx-cascades',
-					// 	index: 'table',
-					// 	title: '会议信息',
-
-					// },
+				items: [
 					{
 						icon: 'el-icon-lx-copy',
 						index: 'form',
-						title: '会议信息'
+						title: '股权登记统计'
 					},
+          {
+            icon: 'el-icon-lx-home',
+            index: 'dashboard',
+            title: '系统首页'
+          },
 					{
 						icon: 'el-icon-lx-home',
 						index: 'editor',
