@@ -71,7 +71,7 @@
 						<p class="title1">佛山电器照明股份有限公司</p>
 						<p class="title2" v-show="query.year!=''">{{query.year+query.name}}现场会议登记表</p>
 						<el-table :data="tableData" border class="table" ref="multipleTable" :header-cell-style="headerCellStyle"
-						 :cell-style="cellStyle">
+						 :cell-style="cellStyle" @row-click="rowClick">
 							<el-table-column label="序号" width="55" align="center" type="index">
 							</el-table-column>
 							<el-table-column prop="cx" label="出席" width="55">
@@ -375,7 +375,11 @@
 				}
 			
 			},
-									
+
+			rowClick(row){
+				console.log(row)
+			},
+			
 			// 编辑登记表
 			editTable() {
 				this.disabled = false;
@@ -635,6 +639,10 @@
 	}
 </style>
 <style scoped>
+
+	/* 鼠标移入行时改变背景色 */
+	/deep/ .el-table tbody tr:hover>td { background-color: lightpink }
+	
 	.edit-tran>>>.el-transfer-panel {
 
 		/* width: 300px; */

@@ -69,7 +69,6 @@ class Meeting(models.Model):
         verbose_name_plural = verbose_name
 
 
-
 class OnSiteMeeting(models.Model):
     BE_PRESENT_CHOICE = (
         (0,'否'),
