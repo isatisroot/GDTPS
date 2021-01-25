@@ -26,8 +26,6 @@
 			</div>
 			<div class="sharemsg">
 
-
-
 				<span>总股本：</span>
 				<el-input v-model="share.gb" :disabled="disabled"></el-input>
 				<span>流通A股：</span>
@@ -46,7 +44,7 @@
 						<!-- <el-button class="button" icon="el-icon-printer" v-print="'#onSite'">打印预览</el-button> -->
 					</el-tooltip>
 
-					</el-alert>
+<!--					</el-alert>-->
 				</template>
 				<template v-else>
 					<el-button class="button" icon="el-icon-printer" v-print="printObj" @click="printTab(tab)">打印预览</el-button>
@@ -377,7 +375,7 @@
 			},
 
 			rowClick(row){
-				console.log(row)
+				// console.log(row)
 			},
 			
 			// 编辑登记表
