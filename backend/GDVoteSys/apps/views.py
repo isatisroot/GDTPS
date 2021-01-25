@@ -20,7 +20,9 @@ class Login(View):
         password = data.get('password')
         user = authenticate(username=username, password=password)
         if not user:
-            return HttpResponseNotFound(json.dumps({'msg': '用户不存在'}))
+            return HttpResponseNotFound(json.dumps({"errCode": "0001",
+                                                    "msg": "登录失败，错误原因:用户不存在",
+                                                    "success": 0}))
 
         # if not check_password(password,user.password):
         # if user.password != password:
@@ -34,7 +36,7 @@ class Login(View):
         payload = jwt_payload_handler(user)
         token = jwt_encode_handler(payload)
 
-        return JsonResponse({'username': username, 'user_id': user.id, 'token': token, 'msg': 'successful'})
+        return JsonResponse({'username': username, 'user_id': user.id, 'token': token, 'msg': '登录成功', "success": 1})
 
 
 
@@ -59,6 +61,56 @@ class QueryYear(View):
             # 如果没有在表中查询到最近一次会议的年份则返回系统当前年份
             year = date.today().year
             return JsonResponse({"year": year})
+
+class Current(View):
+    def get(self, request):
+        """
+        向数据库中查询标记为最近一次会议的会议信息
+        :return: 当前会议信息：年份，名称，时间, 参会股东信息; 当前年份下所有会议信息的列表; 股本数;
+        """
+        motion = []
+        detail_list = []
+        meeting_list = []
+        m = Meeting.objects.get(current_year=1)
+        str_date = m.date.strftime('%Y-%m-%d %H:%M:%S')
+        # 会议议案
+        if m.motion:
+            motion = m.motion.split(";")
+            motion.pop()
+
+        current = {"year": m.year, "name": m.name, "date": str_date, "motion": motion}
+
+        # 查询该会议现场登记表信息
+        qs1 = m.onsitemeeting_set.all()
+        for q in qs1:
+            # 根据登记表查找到股东信息表q
+            s = q.shareholder
+            data = {
+                'id':q.shareholder_id,
+                'cx': q.cx,
+                'xc': q.xcorwl,
+                'gdxm': s.gdxm,
+                'gdtype': s.gdtype,
+                'gddmk': s.gddmk,
+                'sfz': s.sfz,
+                'rs': s.rs,
+                'gzA': q.gzA,
+                'gzB': q.gzB,
+                'meno': q.meno  # 备注信息
+            }
+            detail_list.append(data)
+
+        # 查询当前年份下有多少个会议
+        qs2 = Meeting.objects.filter(year=m.year)
+        for q in qs2:
+            meeting_list.append(q.name)
+
+        # 查询股本数
+        sharehold = {"totalShare": m.gb.gb, "AShareTotal": m.gb.ltag, "BShareTotal": m.gb.ltbg}
+
+        return JsonResponse({"current": current, "detail_list": detail_list,
+                             "meeting_list": meeting_list, 'sharehold': sharehold})
+
 
 class AddMeeting(View):
     def get(self, request):
