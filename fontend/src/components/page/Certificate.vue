@@ -1,8 +1,8 @@
 <template>
 	<div>
 		<div id="printCertificate" class="print-cerificate">
-			<ul id="t1">
-				<li style="page-break-after:always " v-for="(row,index) in checkedData" :key="index">
+<!--			<ul id="t1">-->
+<!--				<li style="page-break-after:always " v-for="(row,index) in checkedData" :key="index">-->
 					<p class="title1" >佛山电器照明股份有限公司</p>
 					<p class="title2">{{query.year+query.name}}登记凭证</p>
 					<p class="text">此据为参加{{query.year+query.name}}现场会议登记凭证，请凭此据于{{meetingDate}}到本公司办公楼五楼会议室（佛山市禅城区汾江北路64号），领取会议材料，并参加股东大会。</p>
@@ -22,7 +22,7 @@
 
 						<tr>
 							<td>{{currentDate}}</td>
-							<td>{{index+1}}</td>
+							<td>{{row.index+1}}</td>
 							<td>{{row.gdxm}}</td>
 							<td>{{row.gddmk}}</td>
 							<td>{{row.gzA}}</td>
@@ -33,18 +33,19 @@
 					</table>
 					<p align="right" class="bottom-p">佛山电器照明股份有限公司</p>
 					<p align="right" class="bottom-p">{{currentDate}}</p>
-				</li>
-			</ul>
+<!--				</li>-->
+<!--			</ul>-->
 		</div>
-		<el-pagination layout="prev, pager, next" background @current-change="current_change" :total="10*checkedData.length">
-		</el-pagination>
+<!--		<el-pagination layout="prev, pager, next" background @current-change="current_change" :total="10*checkedData.length">-->
+<!--		</el-pagination>-->
 	</div>
 </template>
 
 <script>
 	export default {
 		name: 'certificate',
-		props: ['query', 'checkedData'],
+		// props: ['query', 'checkedData'],
+    props: ['query','row'],
 		data() {
 			return {
 				currentDate: this.dateToString(),
@@ -120,8 +121,8 @@
 
 	@media print {
 		.print-cerificate {
-			padding-left: 100px;
-			padding-right: 100px;
+			/*padding-left: 50px;*/
+			/*padding-right: 50px;*/
 
 
 		}

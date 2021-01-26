@@ -35,59 +35,72 @@
 				<el-button type="info" @click="editTable" icon="el-icon-edit">编辑</el-button>
 				<!-- <el-button type="primary" icon="el-icon-circle-plus" @click="addRow">新增行</el-button> -->
 				<el-button type="success" icon="el-icon-success" @click="updateTable">保存</el-button>
-				<template v-if="tab==0">
-					<el-tooltip class="item" effect="dark" placement="bottom-start">
-						<span slot="content" v-show="disabled">打印建议:布局-横向；更多设置-调整缩放</span>
-						<span slot="content" v-show="!disabled">请保存信息后再打印</span>
-						<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印预览</el-button>
-						<!-- <el-button class="button" icon="el-icon-printer" v-print="'#onSite'">打印预览</el-button> -->
-					</el-tooltip>
+<!--				<template v-if="tab==0">-->
+<!--					<el-tooltip class="item" effect="dark" placement="bottom-start">-->
+<!--						<span slot="content" v-show="disabled">打印建议:布局-横向；更多设置-调整缩放</span>-->
+<!--						<span slot="content" v-show="!disabled">请保存信息后再打印</span>-->
+<!--						<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印预览</el-button>-->
+<!--&lt;!&ndash;						 <el-button class="button" icon="el-icon-printer" v-print="'#onSite'">打印预览</el-button>&ndash;&gt;-->
+<!--					</el-tooltip>-->
 
-				</template>
-				<template v-else>
-					<el-button class="button" icon="el-icon-printer" v-print="printObj" @click="printTab(tab)">打印预览</el-button>
-				</template>
+<!--				</template>-->
+<!--				<template v-else>-->
+					<el-button class="button" icon="el-icon-printer" v-print="printObj" @click="printTab(2)">打印预览</el-button>
+<!--				</template>-->
 
 			</div>
 		</ul>
 		<!-- </div> -->
 		<div class="container">
 			<!-- <div id="onSite" v-show="showOnSite"> -->
-			<el-tabs v-model="message" type="border-card" @tab-click="handleTabClick">
+			<el-tabs v-model="message" type="border-card" @tab-click="handleTabClick" v-print="printObj">
 				<el-tab-pane name="first"><span slot="label"><i class="el-icon-tickets"></i> 年度会议</span>
 					<div id="onSite">
 						<p class="title1">佛山电器照明股份有限公司</p>
 						<p class="title2" v-show="query.year!=''">{{query.year+query.name}}现场会议登记表</p>
 						<el-table :data="tableData" border class="table" ref="multipleTable" :header-cell-style="headerCellStyle"
-						 :cell-style="cellStyle" @row-click="rowClick">
-							<el-table-column label="序号" width="55" align="center" type="index">
+						 :cell-style="cellStyle" @row-click="rowClick" highlight-current-row :row-class-name="tableRowClassName">
+							<el-table-column label="序号"  align="center" type="index" prop="index">
+<!--                <template slot-scope="scope">-->
+<!--                  {{ scope.$index }}-->
+<!--                </template>-->
 							</el-table-column>
 							<el-table-column prop="cx" label="出席" width="55">
+<!--                <el-table-column prop="cx" label="出席" >-->
 								<template slot-scope="scope">
 									<el-checkbox :disabled="disabled" v-model="scope.row.cx" @change="handleCheckOneChange(scope.$index)"></el-checkbox>
+<!--                  <el-checkbox :disabled="disabled" v-model="scope.row.cx"></el-checkbox>-->
 								</template>
 							</el-table-column>
 							<el-table-column prop="xc" label="现场" width="55">
+<!--                <el-table-column prop="xc" label="现场" >-->
 								<template slot-scope="scope">
 									<el-checkbox :disabled="disabled" v-model="scope.row.xc"></el-checkbox>
 								</template>
 							</el-table-column>
-							<el-table-column prop="rs" label="人数" width="55"> </el-table-column>
-							<el-table-column prop="gdtype" label="股东类型" width="85"> </el-table-column>
+							<el-table-column prop="rs" label="人数" width="55">
+<!--							<el-table-column prop="rs" label="人数">-->
+              </el-table-column>
+							<el-table-column prop="gdtype" label="股东类型" width="85">
+<!--							<el-table-column prop="gdtype" label="股东类型" >-->
+              </el-table-column>
 							<el-table-column prop="gdxm" label="股东姓名(单位)" width="255">
+<!--							<el-table-column prop="gdxm" label="股东姓名(单位)" >-->
 							</el-table-column>
 							<el-table-column prop="gddmk" label="股东代码卡"> </el-table-column>
-							<el-table-column prop="sfz" label="身份证号码 " width="190"> </el-table-column>
+							<el-table-column prop="sfz" label="身份证号码 " width="190">
+<!--							<el-table-column prop="sfz" label="身份证号码 ">-->
+              </el-table-column>
 							<el-table-column prop="gzA" label="A股" align="right"> </el-table-column>
 							<el-table-column prop="gzB" label="B股" align="right"> </el-table-column>
 							<el-table-column label="签名" align=center> </el-table-column>
 							<el-table-column prop="meno" label="备注" align="center"></el-table-column>
-							<el-table-column label="操作" width="180" align="center" v-if="!disabled">
-								<template slot-scope="scope">
-									<el-button type="text" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-									<el-button type="text" icon="el-icon-delete" class="red" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-								</template>
-							</el-table-column>
+<!--							<el-table-column label="操作" width="180" align="center" v-if="!disabled">-->
+<!--								<template slot-scope="scope">-->
+<!--									<el-button type="text" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>-->
+<!--									<el-button type="text" icon="el-icon-delete" class="red" @click="handleDelete(scope.$index, scope.row)">删除</el-button>-->
+<!--								</template>-->
+<!--							</el-table-column>-->
 						</el-table>
 					</div>
 
@@ -95,7 +108,8 @@
 
 
 				<el-tab-pane :disabled="!disabled" name="second"><span slot="label"><i class="el-icon-tickets"></i>预览登记凭证</span>
-					<certificate :query="query" :checkedData="checkedData"></certificate>
+<!--					<certificate :query="query" :checkedData="checkedData"></certificate>-->
+          <certificate :query="query" :row="row"></certificate>
 				</el-tab-pane>
 				<el-tab-pane :disabled="!disabled" label="预览议案表决票" name="third">
 					<vote :year="query.year" :name="query.name" :checkedData="checkedData" :motion="motion"></vote>
@@ -177,14 +191,15 @@
 		},
 		data() {
 			var currenYear = new Date().getFullYear();
-			return {				
+			return {
+
 				gdxmArray: [],
 				state: '',
 				autoplay: false,
 				value: [],
 				gddata: [],
 				printObj: {
-					id: "printStock",
+					id: "onSite",
 					mode: 0
 				},
 				warning: false,
@@ -230,11 +245,13 @@
 				checkedData: [],
 				rowList: [],
 				motion: [],
+        row: [], //选中的行
+        index: null,
 			};
 		},
 
 		created() {
-
+      this.init();
 
 		},
 		mounted() {
@@ -250,7 +267,7 @@
       //
 			// 		})
 			// };
-      this.init();
+
 
 
 		},
@@ -287,8 +304,8 @@
 		  async init() {
 		    try {
 		      await this.currentData('current');
-          this.transferFormat();
-          console.log(this.share)
+          this.initSelectRow();
+          this.handleCheckedData();
         }catch (error){
 		      console.log(error)
         }
@@ -303,8 +320,7 @@
           this.motion = response.data['current']['motion']
           this.meetingName = response.data['meeting_list']
           this.share = response.data['sharehold']
-
-
+          this.transferFormat();
         })
       },
 
@@ -378,8 +394,14 @@
 			
 			},
 
-			rowClick(row){
-				// console.log(row)
+      tableRowClassName({row, rowIndex}) {
+        //把每一行的索引放进row
+        row.index = rowIndex;
+      },
+
+			rowClick(row, column, event){
+				console.log(row)
+        this.row = row
 			},
 			
 			// 编辑登记表
@@ -394,6 +416,7 @@
 				if (this.tableData[this.tableData.length - 1].gdxm == "") {
 					this.tableData.pop()
 				}
+
 				this.handleCheckedData();
 				axios.post(this.host + 'update', {
 						year: this.query.year,
@@ -526,6 +549,8 @@
 				}
 
 			},
+
+
 						
 			// 编辑行操作
 			handleEdit(index, row) {			
@@ -584,7 +609,7 @@
 		/* margin-bottom: 20px; */
 		line-height: 80px;
 		text-align: center;
-		font-size: 38px;
+		font-size: 32px;
 		color: indianred
 	}
 
@@ -643,8 +668,12 @@
 <style scoped>
 
 	/* 鼠标移入行时改变背景色 */
-	/deep/ .el-table tbody tr:hover>td { background-color: lightpink }
-	
+	/*/deep/ .el-table tbody tr:hover>td { background-color: lightpink }*/
+  /deep/ .el-table__body tr.current-row>td{
+    background-color: #69A8EA !important;
+    color: #fff;
+  }
+
 	.edit-tran>>>.el-transfer-panel {
 
 		/* width: 300px; */
@@ -739,7 +768,7 @@
 	}
 
 	.table {
-		width: 100%;
+		/*width: 100%;*/
 		font-size: 14px;
 
 	}
