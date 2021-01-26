@@ -39,7 +39,7 @@
 					{
 						icon: 'el-icon-lx-copy',
 						index: 'form',
-						title: '股权登记统计'
+						title: '股权登记'
 					},
           {
             icon: 'el-icon-lx-home',

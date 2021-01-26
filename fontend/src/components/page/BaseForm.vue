@@ -10,20 +10,31 @@
 		</div> -->
 		<!-- <div class="topDiv"> -->
 		<ul class="button-group">
-			<div class="search-box">
-				<el-select v-model="query.year" placeholder="年份" class="handle-select mr10" filterable allow-create
-				 default-first-option clearable>
 
-					<el-option v-for="(val, id) in yearList" :key="id" :value="val"></el-option>
-				</el-select>
+<!--			<div class="search-box">-->
+<!--				<el-select v-model="query.year" placeholder="年份" class="handle-select mr10" filterable allow-create-->
+<!--				 default-first-option clearable>-->
 
-				<el-select v-model="query.name" label="会议类型" required placeholder="请选择会议类型">
-					<el-option v-for="(val, id) in meetingName" :key="id" :value="val"></el-option>
-				</el-select>
+<!--					<el-option v-for="(val, id) in yearList" :key="id" :value="val"></el-option>-->
+<!--				</el-select>-->
 
-				<el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
-				<!-- <el-button type="primary" icon="el-icon-circle-plus">新增</el-button> -->
-			</div>
+<!--				<el-select v-model="query.name" label="会议类型" required placeholder="请选择会议类型">-->
+<!--					<el-option v-for="(val, id) in meetingName" :key="id" :value="val"></el-option>-->
+<!--				</el-select>-->
+
+<!--				<el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>-->
+<!--				&lt;!&ndash; <el-button type="primary" icon="el-icon-circle-plus">新增</el-button> &ndash;&gt;-->
+<!--			</div>-->
+      <div class="button-group-left">
+        <el-button class="button" icon="el-icon-circle-plus" @click="addRow">增加</el-button>
+        <el-button class="button" icon="el-icon-printer" @click="printOnSite">登记表</el-button>
+
+        <el-button class="button" icon="el-icon-printer" v-print="'#printCertificate'">登记凭证</el-button>
+        <el-button class="button" icon="el-icon-printer" @click="printVote" v-print="'#printVote'">表决表</el-button>
+        <el-button class="button" icon="el-icon-printer" @click="printStock" v-print="'#printStock'">统计表</el-button>
+        <el-button type="success" icon="el-icon-success" @click="updateTable">保存</el-button>
+      </div>
+
 			<div class="sharemsg">
 
 				<span>总股本：</span>
@@ -32,9 +43,9 @@
 				<el-input v-model="share.ltag" :disabled="disabled"></el-input>
 				<span>流通B股：</span>
 				<el-input v-model="share.ltbg" :disabled="disabled"></el-input>
-				<el-button type="info" @click="editTable" icon="el-icon-edit">编辑</el-button>
+<!--				<el-button type="info" @click="editTable" icon="el-icon-edit">编辑</el-button>-->
 				<!-- <el-button type="primary" icon="el-icon-circle-plus" @click="addRow">新增行</el-button> -->
-				<el-button type="success" icon="el-icon-success" @click="updateTable">保存</el-button>
+<!--				<el-button type="success" icon="el-icon-success" @click="updateTable">保存</el-button>-->
 <!--				<template v-if="tab==0">-->
 <!--					<el-tooltip class="item" effect="dark" placement="bottom-start">-->
 <!--						<span slot="content" v-show="disabled">打印建议:布局-横向；更多设置-调整缩放</span>-->
@@ -45,21 +56,23 @@
 
 <!--				</template>-->
 <!--				<template v-else>-->
-					<el-button class="button" icon="el-icon-printer" v-print="printObj" @click="printTab(2)">打印预览</el-button>
+<!--					<el-button class="button" icon="el-icon-printer" v-print="printObj" >打印预览</el-button>-->
 <!--				</template>-->
 
 			</div>
+
+<!--      <el-button class="button" icon="el-icon-back" @click="goback">返回</el-button>-->
 		</ul>
 		<!-- </div> -->
 		<div class="container">
 			<!-- <div id="onSite" v-show="showOnSite"> -->
-			<el-tabs v-model="message" type="border-card" @tab-click="handleTabClick" v-print="printObj">
-				<el-tab-pane name="first"><span slot="label"><i class="el-icon-tickets"></i> 年度会议</span>
+			<el-tabs v-model="message" type="border-card" @tab-click="handleTabClick" >
+				<el-tab-pane name="first" >
 					<div id="onSite">
 						<p class="title1">佛山电器照明股份有限公司</p>
 						<p class="title2" v-show="query.year!=''">{{query.year+query.name}}现场会议登记表</p>
 						<el-table :data="tableData" border class="table" ref="multipleTable" :header-cell-style="headerCellStyle"
-						 :cell-style="cellStyle" @row-click="rowClick" highlight-current-row :row-class-name="tableRowClassName">
+						 :cell-style="cellStyle" @row-click="rowClick" highlight-current-row :row-class-name="tableRowClassName" @row-dblclick="dbclick">
 							<el-table-column label="序号"  align="center" type="index" prop="index">
 <!--                <template slot-scope="scope">-->
 <!--                  {{ scope.$index }}-->
@@ -107,19 +120,20 @@
 				</el-tab-pane>
 
 
-				<el-tab-pane :disabled="!disabled" name="second"><span slot="label"><i class="el-icon-tickets"></i>预览登记凭证</span>
+				<el-tab-pane :disabled="!disabled" name="second">
 <!--					<certificate :query="query" :checkedData="checkedData"></certificate>-->
           <certificate :query="query" :row="row"></certificate>
 				</el-tab-pane>
-				<el-tab-pane :disabled="!disabled" label="预览议案表决票" name="third">
+				<el-tab-pane :disabled="!disabled" name="third">
 					<vote :year="query.year" :name="query.name" :checkedData="checkedData" :motion="motion"></vote>
 				</el-tab-pane>
-				<el-tab-pane :disabled="!disabled" label="股东,股份数统计表" name="fouth">
+				<el-tab-pane :disabled="!disabled"name="fouth">
 					<stock :share="share" :query="query" :summary="countCheckedData">
 					</stock>
 				</el-tab-pane>
 
 			</el-tabs>
+
 			<el-dialog title="编辑" :visible.sync="editVisible" width="40%">
 
 				<el-form ref="form" :model="form" label-width="90px">
@@ -219,7 +233,7 @@
 
 				},
 				form: {},
-				disabled: true, // 为true时无法编辑
+				disabled: false, // 为true时无法编辑
 				share: {
 					gb: "",
 					ltag: "",
@@ -320,6 +334,8 @@
           this.motion = response.data['current']['motion']
           this.meetingName = response.data['meeting_list']
           this.share = response.data['sharehold']
+          this.gdxmArray = response.data['extr_shareholds']
+          console.log(this.gdxmArray)
           this.transferFormat();
         })
       },
@@ -403,6 +419,12 @@
 				console.log(row)
         this.row = row
 			},
+
+      dbclick(row){
+        this.editVisible = true;
+        this.idx = row.index;
+        this.form = row;
+      },
 			
 			// 编辑登记表
 			editTable() {
@@ -613,26 +635,32 @@
 		color: indianred
 	}
 
+  .el-tabs__nav-scroll {
+      background: #FFF;
+  }
 	.el-tabs__nav {
+    background: #FFF;
 		/* border-radius: 13px; */
-		background: #6666ff;
-		-moz-box-shadow: rgba(152, 152, 152, 1.0) 0 1px 0;
-		box-shadow: rgba(127, 127, 127, 1.0) 0 1px 0;
+		/*background: #6666ff;*/
+		/*-moz-box-shadow: rgba(152, 152, 152, 1.0) 0 1px 0;*/
+		/*box-shadow: rgba(127, 127, 127, 1.0) 0 1px 0;*/
 		/* text-shadow: rgba(0, 0, 0, .4) 0 1px 0; */
 	}
 
-	.el-tabs--border-card>.el-tabs__header .el-tabs__item {
-		border: 3px solid #FFFFFF;
-		border-radius: 5px;
-		color: white
-	}
+	/*.el-tabs--border-card>.el-tabs__header .el-tabs__item {*/
+	/*	border: 3px solid #FFFFFF;*/
+	/*	border-radius: 5px;*/
+	/*	color: white*/
+	/*}*/
 
 	.el-tabs--border-card>.el-tabs__header .el-tabs__item.is-active {
-		color: #3f51b5;
-		/* background-color: #00BCD4; */
-		background: -webkit-gradient(linear, left top, left bottom, from(#6699ff), to(#ffffff));
-		border-radius: 5px;
-		font-weight: 600;
+    border-right-color:#FFF;
+    border-left-color: #FFF;
+	/*	color: #3f51b5;*/
+	/*	!* background-color: #00BCD4; *!*/
+	/*	background: -webkit-gradient(linear, left top, left bottom, from(#6699ff), to(#ffffff));*/
+	/*	border-radius: 5px;*/
+	/*	font-weight: 600;*/
 	}
 
 	.button {
@@ -701,10 +729,14 @@
 		background: #07C4A8;
 	} */
 
+  .button-group-left{
+    display: inline;
+    text-align: left;
+  }
 
 	.sharemsg {
-		/* display: inline-block; */
-		/* margin-left: 513px; */
+		 display: inline;
+		 margin-left: 53px;
 		text-align: right;
 		/* right: 10px; */
 	}
