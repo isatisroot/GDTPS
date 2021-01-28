@@ -30,92 +30,91 @@
 </template>
 
 <script>
-	import bus from '../common/bus';
-	export default {
-		data() {
-			return {
-				collapse: false,
-				items: [
-					{
-						icon: 'el-icon-lx-copy',
-						index: 'form',
-						title: '股权登记'
-					},
-          {
-            icon: 'el-icon-lx-home',
-            index: 'dashboard',
-            title: '系统首页'
-          },
-					{
-						icon: 'el-icon-lx-home',
-						index: 'editor',
-						title: '修改模板'
-					},
-					{
-						icon: 'el-icon-lx-home',
-						index: 'upload',
-						title: '文件上传'
-					},
+	import bus from '../common/bus'
+export default {
+	  data () {
+	    return {
+	      collapse: false,
+	      items: [
+	        {
+	          icon: 'el-icon-lx-copy',
+	          index: 'form',
+	          title: '股权登记'
+	        },
+        {
+          icon: 'el-icon-lx-copy',
+          index: 'tabs',
+          title: '议案表决统计'
+        },
+        {
+          icon: 'el-icon-lx-home',
+          index: 'editor',
+          title: '董事表决统计'
+        },
+        {
+          icon: 'el-icon-lx-home',
+          index: 'dashboard',
+          title: '选择表决年度'
+        }
+	
+	        // {
+	        //   icon: 'el-icon-lx-home',
+	        //   index: 'upload',
+	        //   title: '文件上传'
+	        // },
+	
+	        // {
+	        //     icon: 'el-icon-lx-calendar',
+	        //     index: '3',
+	        //     title: '新增表单',
+	        //     subs: [
+	        //         {
+	        //             index: 'form',
+	        //             title: '新增会议'
+	        //         },
+	        //         {
+	        //             index: '3-2',
+	        //             title: '修改内容',
+	        //             subs: [
+	        //                 {
+	        //                     index: 'editor',
+	        //                     title: '富文本编辑器'
+	        //                 },
+	        //                 {
+	        //                     index: 'markdown',
+	        //                     title: 'markdown编辑器'
+	        //                 }
+	        //             ]
+	        //         },
+	        //         {
+	        //             index: 'upload',
+	        //             title: '文件上传'
+	        //         }
+	        //     ]
+	        // },
 
+	        // {
+	        //   icon: 'el-icon-lx-home',
+	        //   index: 'charts',
+	        //   title: '图表统计'
+	        // }
 
-					{
-					    icon: 'el-icon-lx-copy',
-					    index: 'tabs',
-					    title: '股东信息'
-					},
-					
-					// {
-					//     icon: 'el-icon-lx-calendar',
-					//     index: '3',
-					//     title: '新增表单',
-					//     subs: [
-					//         {
-					//             index: 'form',
-					//             title: '新增会议'
-					//         },
-					//         {
-					//             index: '3-2',
-					//             title: '修改内容',
-					//             subs: [
-					//                 {
-					//                     index: 'editor',
-					//                     title: '富文本编辑器'
-					//                 },
-					//                 {
-					//                     index: 'markdown',
-					//                     title: 'markdown编辑器'
-					//                 }
-					//             ]
-					//         },
-					//         {
-					//             index: 'upload',
-					//             title: '文件上传'
-					//         }
-					//     ]
-					// },
-
-					{
-						icon: 'el-icon-lx-home',
-						index: 'charts',
-						title: '图表统计'
-					},
-
-				]
-			};
-		},
-		computed: {
-			onRoutes() {
-				return this.$route.path.replace('/', '');
-			}
-		},
-		created() {
-			// 通过 Event Bus 进行组件间通信，来折叠侧边栏
-			bus.$on('collapse', msg => {
-				this.collapse = msg;
-				bus.$emit('collapse-content', msg);
-			});
-		}
-	};
+	      ]
+	    }
+  },
+	  computed: {
+	    onRoutes () {
+	      return this.$route.path.replace('/', '')
+	    }
+	  },
+	  created () {
+	    // 通过 Event Bus 进行组件间通信，来折叠侧边栏
+	    bus.$on('collapse', msg => {
+	      this.collapse = msg
+	      bus.$emit('collapse-content', msg)
+	    })
+  }
+	}
 </script>
 
 <style scoped>

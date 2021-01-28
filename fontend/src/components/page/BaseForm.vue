@@ -27,22 +27,22 @@
 <!--			</div>-->
       <div class="button-group-left">
         <el-button class="button" icon="el-icon-circle-plus" @click="addRow">增加</el-button>
+        <el-button class="button" icon="el-icon-delete" @click="handleDelete(row.index,row)" >删除</el-button>
         <el-button class="button" icon="el-icon-printer" @click="printOnSite">登记表</el-button>
 
-        <el-button class="button" icon="el-icon-printer" v-print="'#printCertificate'">登记凭证</el-button>
+        <el-button class="button" icon="el-icon-printer" @click="printCeritficate" v-print="'#printCertificate'">登记凭证</el-button>
         <el-button class="button" icon="el-icon-printer" @click="printVote" v-print="'#printVote'">表决表</el-button>
         <el-button class="button" icon="el-icon-printer" @click="printStock" v-print="'#printStock'">统计表</el-button>
         <el-button type="success" icon="el-icon-success" @click="updateTable">保存</el-button>
       </div>
 
 			<div class="sharemsg">
-
 				<span>总股本：</span>
-				<el-input v-model="share.gb" :disabled="disabled"></el-input>
+				<el-input v-model="share.gb"></el-input>
 				<span>流通A股：</span>
-				<el-input v-model="share.ltag" :disabled="disabled"></el-input>
+				<el-input v-model="share.ltag" ></el-input>
 				<span>流通B股：</span>
-				<el-input v-model="share.ltbg" :disabled="disabled"></el-input>
+				<el-input v-model="share.ltbg"></el-input>
 <!--				<el-button type="info" @click="editTable" icon="el-icon-edit">编辑</el-button>-->
 				<!-- <el-button type="primary" icon="el-icon-circle-plus" @click="addRow">新增行</el-button> -->
 <!--				<el-button type="success" icon="el-icon-success" @click="updateTable">保存</el-button>-->
@@ -51,7 +51,7 @@
 <!--						<span slot="content" v-show="disabled">打印建议:布局-横向；更多设置-调整缩放</span>-->
 <!--						<span slot="content" v-show="!disabled">请保存信息后再打印</span>-->
 <!--						<el-button class="button" icon="el-icon-printer" @click="printOnSite">打印预览</el-button>-->
-<!--&lt;!&ndash;						 <el-button class="button" icon="el-icon-printer" v-print="'#onSite'">打印预览</el-button>&ndash;&gt;-->
+<!--						 <el-button class="button" icon="el-icon-printer" v-print="'#onSite'">打印预览</el-button>-->
 <!--					</el-tooltip>-->
 
 <!--				</template>-->
@@ -68,46 +68,46 @@
 			<!-- <div id="onSite" v-show="showOnSite"> -->
 			<el-tabs v-model="message" type="border-card" @tab-click="handleTabClick" >
 				<el-tab-pane name="first" >
-					<div id="onSite">
+					<div id="onSite" class="on-site">
 						<p class="title1">佛山电器照明股份有限公司</p>
 						<p class="title2" v-show="query.year!=''">{{query.year+query.name}}现场会议登记表</p>
 						<el-table :data="tableData" border class="table" ref="multipleTable" :header-cell-style="headerCellStyle"
-						 :cell-style="cellStyle" @row-click="rowClick" highlight-current-row :row-class-name="tableRowClassName" @row-dblclick="dbclick">
-							<el-table-column label="序号"  align="center" type="index" prop="index">
+						 :cell-style="cellStyle" @row-click="rowClick" highlight-current-row :row-class-name="tableRowClassName" :row-style="rowStyle" @row-dblclick="dbclick" >
+							<el-table-column label="序号"  align="center" type="index" prop="index" :width="38">
 <!--                <template slot-scope="scope">-->
 <!--                  {{ scope.$index }}-->
 <!--                </template>-->
 							</el-table-column>
-							<el-table-column prop="cx" label="出席" width="55">
-<!--                <el-table-column prop="cx" label="出席" >-->
+<!--							<el-table-column prop="cx" label="出席" width="55">-->
+                <el-table-column prop="cx" label="出席" width="38" align="center">
 								<template slot-scope="scope">
 									<el-checkbox :disabled="disabled" v-model="scope.row.cx" @change="handleCheckOneChange(scope.$index)"></el-checkbox>
 <!--                  <el-checkbox :disabled="disabled" v-model="scope.row.cx"></el-checkbox>-->
 								</template>
 							</el-table-column>
-							<el-table-column prop="xc" label="现场" width="55">
+							<el-table-column prop="xc" label="现场" width="38" align="center">
 <!--                <el-table-column prop="xc" label="现场" >-->
 								<template slot-scope="scope">
 									<el-checkbox :disabled="disabled" v-model="scope.row.xc"></el-checkbox>
 								</template>
 							</el-table-column>
-							<el-table-column prop="rs" label="人数" width="55">
+							<el-table-column prop="rs" label="人数" width="38" align="center">
 <!--							<el-table-column prop="rs" label="人数">-->
               </el-table-column>
-							<el-table-column prop="gdtype" label="股东类型" width="85">
-<!--							<el-table-column prop="gdtype" label="股东类型" >-->
+							<el-table-column prop="gdtype" label="股东类型" width="70" align="center">
+<!--							<el-table-column prop="gdtype" label="股东类型" align="center">-->
               </el-table-column>
-							<el-table-column prop="gdxm" label="股东姓名(单位)" width="255">
+							<el-table-column prop="gdxm" label="股东姓名(单位)"  width="215" >
 <!--							<el-table-column prop="gdxm" label="股东姓名(单位)" >-->
 							</el-table-column>
-							<el-table-column prop="gddmk" label="股东代码卡"> </el-table-column>
-							<el-table-column prop="sfz" label="身份证号码 " width="190">
+							<el-table-column prop="gddmk" label="股东代码卡" width="95"> </el-table-column>
+							<el-table-column prop="sfz" label="身份证号码(营业执照) " width="145">
 <!--							<el-table-column prop="sfz" label="身份证号码 ">-->
               </el-table-column>
-							<el-table-column prop="gzA" label="A股" align="right"> </el-table-column>
-							<el-table-column prop="gzB" label="B股" align="right"> </el-table-column>
-							<el-table-column label="签名" align=center> </el-table-column>
-							<el-table-column prop="meno" label="备注" align="center"></el-table-column>
+							<el-table-column prop="gzA" label="A股" align="right" width="95"> </el-table-column>
+							<el-table-column prop="gzB" label="B股" align="right" width="95"> </el-table-column>
+							<el-table-column label="签名" align=center width="96"> </el-table-column>
+							<el-table-column prop="meno" label="备注" align="center" width="80"></el-table-column>
 <!--							<el-table-column label="操作" width="180" align="center" v-if="!disabled">-->
 <!--								<template slot-scope="scope">-->
 <!--									<el-button type="text" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>-->
@@ -125,7 +125,7 @@
           <certificate :query="query" :row="row"></certificate>
 				</el-tab-pane>
 				<el-tab-pane :disabled="!disabled" name="third">
-					<vote :year="query.year" :name="query.name" :checkedData="checkedData" :motion="motion"></vote>
+					<vote :query="query" :row="row" :motion="motion"></vote>
 				</el-tab-pane>
 				<el-tab-pane :disabled="!disabled"name="fouth">
 					<stock :share="share" :query="query" :summary="countCheckedData">
@@ -139,7 +139,7 @@
 				<el-form ref="form" :model="form" label-width="90px">
 					<el-form-item label="股东姓名">
 						<!-- <template slot-scope="scope"> -->
-							<el-autocomplete class="inline-input" v-model="state" :fetch-suggestions="querySearch" placeholder="请输入内容"
+							<el-autocomplete class="inline-input" v-model="form.gdxm" :fetch-suggestions="querySearch" placeholder="请输入内容"
 													 :trigger-on-focus="false" @select="handleSelect"  ></el-autocomplete>
 						<!-- </template> -->
 						
@@ -171,456 +171,477 @@
 					<el-button @click="editVisible = false">取 消</el-button>
 					<el-button type="primary" @click="saveEdit">确 定</el-button>
 				</span>
-
 			</el-dialog>
 		</div>
 
 	</div>
 </template>
-
 <script>
-	import {
-		vm
-	} from '../../main.js'
-	import axios from 'axios';
-	import certificate from './Certificate.vue'
-	import stock from './Stocks.vue'
-	import vote from './Vote.vue'
-	import director from './Director.vue'
-	import oppose from './Oppose.vue'
-	import {
-		Print
-	} from "../../utils/Print.js"
-	import {
-		EventBus
-	} from '../../api/event_bus.js';
-	export default {
-		name: 'baseform',
-		components: {
-			certificate,
-			stock,
-			vote,
-			director,
-			oppose
-		},
-		data() {
-			var currenYear = new Date().getFullYear();
-			return {
+import axios from 'axios'
+import certificate from './Certificate.vue'
+import stock from './Stocks.vue'
+import vote from './Vote.vue'
+import director from './Director.vue'
+import oppose from './Oppose.vue'
+import {
+  Print
+} from '../../utils/Print.js'
+import {
+  EventBus
+} from '../../api/event_bus.js'
+export default {
+  name: 'baseform',
+  components: {
+    certificate,
+    stock,
+    vote,
+    director,
+    oppose
+  },
+  data () {
+    var currenYear = new Date().getFullYear()
+    return {
+      gdxmArray: [],
+      state: '',
+      autoplay: false,
+      value: [],
+      gddata: [],
+      printObj: {
+        id: 'onSite',
+        mode: 0
+      },
+      warning: false,
+      tab: 0,
+      rowStyle: {
+      // height: '2px'
+      },
+      headerCellStyle: {
+        background: '#00dea3 !important',
+        color: '#7100aa',
+        'border': 'solid 1px #000000 !important',
+        // 'border-right': 'solid 1px #000000 !important',
+        padding: '0px'
+      },
+      cellStyle: {
+        // 'border-bottom': 'solid 1px #000000',
+        'border': 'solid 1px #000000 !important',
+        // 'border-bottom': 'solid 1px red',
+        'border-collapse': 'collapse ! important',
+        // 让单元格缩小，不占用行高
+        padding: '0px'
 
-				gdxmArray: [],
-				state: '',
-				autoplay: false,
-				value: [],
-				gddata: [],
-				printObj: {
-					id: "onSite",
-					mode: 0
-				},
-				warning: false,
-				tab: 0,
-				headerCellStyle: {
-					background: '#00dea3 !important',
-					color: '#7100aa',
-					'border': 'solid 1px #000000 !important',
-					// 'border-right': 'solid 1px #000000 !important',
+      },
+      form: {},
+      disabled: false, // 为true时无法编辑
+      share: {
+        gb: '',
+        ltag: '',
+        ltbg: '',
+        totalShare: 0,
+        AShareTotal: 0,
+        BShareTotal: 0
+      },
+      editVisible: false,
+      message: 'first',
+      query: {
+        address: '',
+        year: '',
+        name: '',
+        date: null,
+        pageIndex: 1,
+        pageSize: 15
+      },
+      yearList: [currenYear, currenYear + 1],
+      meetingName: [],
+      tableData: [],
+      rowChecked: [], // 存储“出席”列中勾选的复选框所在行的行号（下标从0开始）
+      checkedData: [],
+      rowList: [],
+      motion: [],
+      row: [], // 选中的行
+      index: null
+    }
+  },
 
-				},
-				cellStyle: {
-					// 'border-bottom': 'solid 1px #000000',
-					'border': 'solid 1px #000000 !important',
-					// 'border-bottom': 'solid 1px red',
-					'border-collapse': 'collapse ! important',
-
-				},
-				form: {},
-				disabled: false, // 为true时无法编辑
-				share: {
-					gb: "",
-					ltag: "",
-					ltbg: "",
-					totalShare: 0,
-					AShareTotal: 0,
-					BShareTotal: 0,
-				},
-				editVisible: false,
-				message: 'first',
-				query: {
-					address: '',
-					year: '',
-					name: '',
-					date: null,
-					pageIndex: 1,
-					pageSize: 15
-				},
-				yearList: [currenYear, currenYear + 1],
-				meetingName: [],
-				tableData: [],
-				rowChecked: [], // 存储“出席”列中勾选的复选框所在行的行号（下标从0开始）
-				checkedData: [],
-				rowList: [],
-				motion: [],
-        row: [], //选中的行
-        index: null,
-			};
-		},
-
-		created() {
-      this.init();
-
-		},
-		mounted() {
-			// if (!this.query.year) {
-			// 	axios.get(this.host + 'get_year')
-			// 		.then(response => (
-			// 			this.query.year = response.data['year'],
-			// 			this.query.name = response.data['name'],
-			// 			this.share = response.data['sharehold'],
-			// 			this.meetingName = response.data['meeting_list'],
-			// 			this.transferFormat()
-			// 		)).catch(error => {
-      //
-			// 		})
-			// };
+  created () {
+    this.init()
+  },
+  mounted () {
+    // if (!this.query.year) {
+    //   axios.get(this.host + 'get_year').then(response => (
+    //       this.query.year = response.data['year']
+    //       this.query.name = response.data['name']
+    //       this.share = response.data['sharehold']
+    //       this.meetingName = response.data['meeting_list']
+    //       this.transferFormat()
+    //   		)).catch(error => {})
+    // }
 
 
-
-		},
-		computed: {
-			countCheckedData: function() {
-				var summary = {
-					PeopleA: 0,
-					PeopleB: 0,
-					AStock: 0,
-					BStock: 0,
-					PercentA: 0,
-					PercentB: 0,
-					PercentTotal: 0
-				}
-				for (var index in this.checkedData) {
-					var row = this.checkedData[index]
-					if (row.gzA > 0) {
-						summary.PeopleA += row.rs
-						summary.AStock += row.gzA
-					} else if (row.gzB > 0) {
-						summary.PeopleB += row.rs
-						summary.BStock += row.gzB
-					}
-				}
-
-				summary.PercentA = this.GetPercent(summary.AStock, this.share.AShareTotal);
-				summary.PercentB = this.GetPercent(summary.BStock, this.share.BShareTotal);
-				summary.PercentTotal = this.GetPercent(summary.AStock + summary.BStock, this.share.totalShare);
-
-				return summary
-			}
-		},
-		methods: {
-		  async init() {
-		    try {
-		      await this.currentData('current');
-          this.initSelectRow();
-          this.handleCheckedData();
-        }catch (error){
-		      console.log(error)
+  },
+  computed: {
+    countCheckedData: function () {
+      var summary = {
+        PeopleA: 0,
+        PeopleB: 0,
+        AStock: 0,
+        BStock: 0,
+        PercentA: 0,
+        PercentB: 0,
+        PercentTotal: 0
+      }
+      for (var index in this.checkedData) {
+        var row = this.checkedData[index]
+        if (row.gzA > 0) {
+          summary.PeopleA += row.rs
+          summary.AStock += row.gzA
+        } else if (row.gzB > 0) {
+          summary.PeopleB += row.rs
+          summary.BStock += row.gzB
         }
-      },
-		  // 向后台自动请求当前会议数据
-      currentData(url){
-        return axios.get(this.host + url, ).then(response => {
-          this.tableData = response.data['detail_list']
-          this.query.year = response.data['current']['year']
-          this.query.date = response.data['current']['date']
-          this.query.name = response.data['current']['name']
-          this.motion = response.data['current']['motion']
-          this.meetingName = response.data['meeting_list']
-          this.share = response.data['sharehold']
-          this.gdxmArray = response.data['extr_shareholds']
-          console.log(this.gdxmArray)
-          this.transferFormat();
+      }
+
+      summary.PercentA = this.GetPercent(summary.AStock, this.share.AShareTotal)
+      summary.PercentB = this.GetPercent(summary.BStock, this.share.BShareTotal)
+      summary.PercentTotal = this.GetPercent(summary.AStock + summary.BStock, this.share.totalShare)
+
+      return summary
+    }
+  },
+  // updated() {
+  //   EventBus.$emit('baseform', {
+  //     query: this.query
+  //   })
+  // },
+  methods: {
+    sendData () {
+      EventBus.$emit('baseform', {
+        query: this.query,
+        motion: this.motion
+      })
+    },
+    async init () {
+      try {
+        await this.currentData('current')
+        this.initSelectRow()
+        this.handleCheckedData()
+        this.sendData()
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    // 向后台自动请求当前会议数据
+    currentData (url) {
+      return axios.get(this.host + url).then(response => {
+        this.tableData = response.data['detail_list']
+        this.query.year = response.data['current']['year']
+        this.query.date = response.data['current']['date']
+        this.query.name = response.data['current']['name']
+        this.motion = response.data['current']['motion']
+        this.meetingName = response.data['meeting_list']
+        this.share = response.data['sharehold']
+        this.gdxmArray = response.data['extr_shareholds']
+        this.transferFormat()
+      })
+    },
+
+    // 触发搜索按钮
+    async handleSearch () {
+      // 等待异步请求axios处理完成后再执行initSelectRow操作，因为后者需要等到tableData拿到数据后进行操作
+      await this.getData()
+      // 初始化rowChecked中的数据
+      this.transferFormat()
+      this.initSelectRow()
+      this.handleCheckedData()
+    },
+
+    // 向后台请求详细数据
+    getData () {
+      return axios.get(this.host + 'get_detail/' + this.query.year + '/' + this.query.name)
+        .then(response => (
+          this.query.date = response.data['date'],
+          this.tableData = response.data['list'],
+          this.pageTotal = this.tableData.length,
+          this.share = response.data['sharehold'],
+          this.motion = response.data['motion']
+        )).catch(error => {})
+    },
+
+    // 将数字转换为千位分隔符字符串， 用于显示股本数
+    transferFormat () {
+      this.share.gb = String(this.share.totalShare).replace(/(\d)(?=(\d{3})+$)/g, '$1,')
+      this.share.ltag = String(this.share.AShareTotal).replace(/(\d)(?=(\d{3})+$)/g, '$1,')
+      this.share.ltbg = String(this.share.BShareTotal).replace(/(\d)(?=(\d{3})+$)/g, '$1,')
+    },
+
+    // 初始化rowChecked数据
+    initSelectRow () {
+      this.rowChecked = []
+      if (this.tableData) {
+        for (let i = 0; i < this.tableData.length; i++) {
+          if (this.tableData[i].cx == true) {
+            // this.checkedData.push(this.tableData[i])
+            this.rowChecked.push(i)
+          }
+        }
+      }
+    },
+
+    // 将存储在rowChecked列表中的行号对应的行数据添加至checkedData列表中，使其传递给子组件
+    handleCheckedData () {
+      this.checkedData = []
+      // index是rowChecked的下标，
+      for (var i in this.rowChecked) {
+        var index = this.rowChecked[i]
+        this.checkedData.push(this.tableData[index])
+      }
+    },
+
+    // 当点击“出席”列的复选框时，记录点击行的行号（从0开始），存储在rowChecked中
+    handleCheckOneChange (rowNum) {
+      // 当为true时将该行的行号添加追加到列表后重新排序，为false将其剔除
+      if (this.tableData[rowNum].cx == true) {
+        this.rowChecked.push(rowNum)
+        this.rowChecked.sort(function (a, b) {
+          return a - b
         })
-      },
+      } else {
+        var index = this.rowChecked.indexOf(rowNum)
+        this.rowChecked.splice(index, 1)
+      }
+    },
 
-			// 触发搜索按钮
-			async handleSearch() {
-				// 等待异步请求axios处理完成后再执行initSelectRow操作，因为后者需要等到tableData拿到数据后进行操作
-				await this.getData();
-				// 初始化rowChecked中的数据
-				this.transferFormat();
-				this.initSelectRow();
-				this.handleCheckedData();
-				
-			
-			},
-			
-			// 向后台请求详细数据
-			getData() {
-				return axios.get(this.host + 'get_detail/' + this.query.year + '/' + this.query.name)
-					.then(response => (
-						this.query.date = response.data['date'],
-						this.tableData = response.data['list'],
-						this.pageTotal = this.tableData.length,
-						this.share = response.data['sharehold'],
-						this.motion = response.data['motion']
-					)).catch(error => {})
-			
-			},
-			
-			// 将数字转换为千位分隔符字符串， 用于显示股本数
-			transferFormat() {	
-				this.share.gb = String(this.share.totalShare).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
-				this.share.ltag = String(this.share.AShareTotal).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
-				this.share.ltbg = String(this.share.BShareTotal).replace(/(\d)(?=(\d{3})+$)/g, "$1,");
-			},
-						
-			// 初始化rowChecked数据
-			initSelectRow() {
-				this.rowChecked = [];
-				if (this.tableData) {
-					for (let i = 0; i < this.tableData.length; i++) {
-						if (this.tableData[i].cx == true) {
-							// this.checkedData.push(this.tableData[i])
-							this.rowChecked.push(i)
-						}
-					}
-				}
-			},
-			
-			// 将存储在rowChecked列表中的行号对应的行数据添加至checkedData列表中，使其传递给子组件
-			handleCheckedData() {
-				this.checkedData = []
-				// index是rowChecked的下标，
-				for (var i in this.rowChecked) {
-					var index = this.rowChecked[i];
-					this.checkedData.push(this.tableData[index])
-				}
-			},
-			
-			// 当点击“出席”列的复选框时，记录点击行的行号（从0开始），存储在rowChecked中
-			handleCheckOneChange(rowNum) {
-				// 当为true时将该行的行号添加追加到列表后重新排序，为false将其剔除
-				if (this.tableData[rowNum].cx == true) {
-					this.rowChecked.push(rowNum);
-					this.rowChecked.sort(function(a, b) {
-						return a - b
-					})
-				} else {
-					var index = this.rowChecked.indexOf(rowNum)
-					this.rowChecked.splice(index, 1)
-				}
-			
-			},
+    tableRowClassName ({row, rowIndex}) {
+      // 把每一行的索引放进row
+      row.index = rowIndex
+    },
 
-      tableRowClassName({row, rowIndex}) {
-        //把每一行的索引放进row
-        row.index = rowIndex;
-      },
+    rowClick (row, column, event) {
+      this.row = row
+    },
 
-			rowClick(row, column, event){
-				console.log(row)
-        this.row = row
-			},
+    dbclick (row) {
+      this.editVisible = true
+      this.idx = row.index
+      this.form = row
+      // this.form = row.value
+    },
 
-      dbclick(row){
-        this.editVisible = true;
-        this.idx = row.index;
-        this.form = row;
-      },
-			
-			// 编辑登记表
-			editTable() {
-				this.disabled = false;
-				this.addRow();
-				this.gdxmArray = this.loadAll();								
-			},	
-			
-			// 更新表数据
-			updateTable() {
-				if (this.tableData[this.tableData.length - 1].gdxm == "") {
-					this.tableData.pop()
-				}
+    // 编辑登记表
+    editTable () {
+      this.disabled = false
+      this.addRow()
+      this.gdxmArray = this.loadAll()
+    },
 
-				this.handleCheckedData();
-				axios.post(this.host + 'update', {
-						year: this.query.year,
-						meeting: this.query.name,
-						tableData: this.tableData,
-					})
-					.then(response => (
-					this.disabled = true,
-					this.$message.success('数据更新成功！')))
-					.catch(error => (this.$message.error(error.response.data.msg), console.log(error.response)));
-			},		
-			
-			// 新增行
-			addRow() {
-				var newValue = {
-					id: '',
-					cx: '',
-					xc: '',
-					rs: '',
-					gdtype: '',
-					gdxm: '',
-					gddmk: '',
-					sfz: '',
-					gzA: '',
-					gzB: '',
-					meno: ''
-				};
-				this.tableData.push(newValue)
-			},
-						
-			// 向服务端缓存将与输入相关的内容
-			loadAll() {
-				var gdid = [];
-				for(var i in this.tableData){
-					gdid.push(this.tableData[i].id)
-				}
-				axios.post(this.host + 'loadall',{
-					gdid: gdid
-				}).then(response => {
-					this.gdxmArray = response.data
-				}).catch(error => {})
-			},
-												
-			// 输入建议，queryString用户输入字符， cb回调函数返回建议内容
-			querySearch(queryString, cb) {
-				var gdxmArray = this.gdxmArray;
-				console.log(this.createFilter(queryString))
-				console.log(gdxmArray.filter(this.createFilter(queryString)))
-				var results = queryString ? gdxmArray.filter(this.createFilter(queryString)) : gdxmArray;
-				// 调用 callback 返回建议列表的数据
-				console.log(results)
-				cb(results);
-			},
-			
-			// 将用户输入字符串转小写后与输入内容进行匹配返回对象
-			createFilter(queryString) {
-				return (gdxmArray) => {					
-					return (gdxmArray.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
-				};
-			},
-						
-			// 处理用户选择的建议项
-			handleSelect(item) {
-				console.log(item);
-				this.form = item				
-				this.form.gdxm = item.value
-			},
-			
-			// 根据用户切换选项卡匹配不同打印内容
-			printTab(tab) {
-				if (tab == 1) {
-					this.printObj.id = "printCertificate"
-				} else if (tab == 2) {
-					this.printObj.id = "printVote"
-				} else if (tab == 3) {
-					this.printObj.id = "printStock"
-				}
-			},
-									
-			// 处理选项卡的点击事件
-			handleTabClick(tab, event) {
-				if (this.disabled == false) {
-					this.$message.success(`请先保存当前信息`);
-				}
-				if (tab.index == 1) {
-					this.id = "printCerificate"
-				} else if (tab.index == 2) {
-					this.id = "printVote"
-				} else if (tab.index == 3) {
-					this.id = "printStock"
-				}
-				this.tab = tab.index
-				// this.handleCheckedData();
-				// 如果切换到统计表，则调用方法进行统计计算
-				// if (tab.index == 3) {
-				// 	this.numOfStock()
-				// }
-			},
-			
-			// 求百分比
-			GetPercent(num, total) {
-				num = parseFloat(num);
-				total = parseFloat(total);
-				if (isNaN(num) || isNaN(total)) {
-					return "-";
-				}
-				return total <= 0 ? "0%" : (Math.round(num / total * 10000) / 100.00) + "%";
-			},
-			
-			// 打印现场会议登记表
-			printOnSite() {
-				// 现将操作列隐藏起来，以免打印这一列
-				if (this.disabled == false) {
-					this.$message({
-						showClose: true,
-						message: '请保存信息后再打印',
-						type: 'warning'
-					});
-				} else {
-					Print('#onSite', {
-						// 以下class属性的div元素不会打印
-						noPrint: '.do-not-print-me',
-						onStart: function() {
-							console.log('onStart', new Date())
-						},
-						onEnd: function() {
-							console.log('onEnd', new Date())
-						}
-					})
-				}
+    // 更新表数据
+    updateTable () {
+      if (this.tableData[this.tableData.length - 1].gdxm == '') {
+        this.tableData.pop()
+      }
 
-			},
+      this.handleCheckedData()
+      axios.post(this.host + 'update', {
+        year: this.query.year,
+        meeting: this.query.name,
+        tableData: this.tableData
+      })
+        .then(response => (
+          // this.disabled = true,
+          this.$message.success('数据更新成功！')))
+        .catch(error => (this.$message.error(error.response.data.msg), console.log(error.response)))
+    },
 
+    // 新增行
+    addRow () {
+      var newValue = {
+        id: '',
+        cx: '',
+        xc: '',
+        rs: '',
+        gdtype: '',
+        gdxm: '',
+        gddmk: '',
+        sfz: '',
+        gzA: '',
+        gzB: '',
+        meno: ''
+      }
+      this.tableData.push(newValue)
+    },
 
-						
-			// 编辑行操作
-			handleEdit(index, row) {			
-				this.idx = index;
-				this.form = row;
-				this.editVisible = true;
+    // 向服务端缓存将与输入相关的内容
+    loadAll () {
+      var gdid = []
+      for (var i in this.tableData) {
+        gdid.push(this.tableData[i].id)
+      }
+      axios.post(this.host + 'loadall', {
+        gdid: gdid
+      }).then(response => {
+        this.gdxmArray = response.data
+      }).catch(error => {})
+    },
 
-			},
-			
-			// 删除行操作
-			handleDelete(index, row){
-				// 二次确认删除
-				    this.$confirm('确定要删除吗？', '提示', {
-				        type: 'warning'
-				    })
-				        .then(() => {							
-							var a = this.tableData.splice(index, 1);
-							console.log(a[0].id)
-							axios.delete(this.host + 'delete', {
-								data:{id:a[0].id, 
-								year: this.query.year,
-								meeting: this.query.name}}).then(response => {
-								 this.$message.success('删除成功');
-							}).catch(()=>{})
-				        })
-				        .catch(() => {});
-				},
+    // 输入建议，queryString用户输入字符， cb回调函数返回建议内容
+    querySearch (queryString, cb) {
+      var gdxmArray = this.gdxmArray
+      console.log(this.createFilter(queryString))
+      console.log(gdxmArray.filter(this.createFilter(queryString)))
+      var results = queryString ? gdxmArray.filter(this.createFilter(queryString)) : gdxmArray
+      // 调用 callback 返回建议列表的数据
+      console.log(results)
+      cb(results)
+    },
 
-			// 保存行编辑
-			saveEdit() {
-				this.editVisible = false;
-				this.$message.success(`修改第 ${this.idx + 1} 行成功`);
-				this.$set(this.tableData, this.idx, this.form);
-				if (this.tableData[this.tableData.length - 1].gddmk != "") {
-					this.addRow()
-				}
+    // 将用户输入字符串转小写后与输入内容进行匹配返回对象
+    createFilter (queryString) {
+      return (gdxmArray) => {
+        return (gdxmArray.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0)
+      }
+    },
 
-			},
-						
-		}
-	};
+    // 处理用户选择的建议项
+    handleSelect (item) {
+      console.log(item)
+      this.form = item
+      this.form.gdxm = item.value
+    },
+
+    // 根据用户切换选项卡匹配不同打印内容
+    printTab (tab) {
+      if (tab == 1) {
+        this.printObj.id = 'printCertificate'
+      } else if (tab == 2) {
+        this.printObj.id = 'printVote'
+      } else if (tab == 3) {
+        this.printObj.id = 'printStock'
+      }
+    },
+
+    // 处理选项卡的点击事件
+    handleTabClick (tab, event) {
+      if (this.disabled == false) {
+        this.$message.success(`请先保存当前信息`)
+      }
+      if (tab.index == 1) {
+        this.id = 'printCerificate'
+      } else if (tab.index == 2) {
+        this.id = 'printVote'
+      } else if (tab.index == 3) {
+        this.id = 'printStock'
+      }
+      this.tab = tab.index
+      // this.handleCheckedData();
+      // 如果切换到统计表，则调用方法进行统计计算
+      // if (tab.index == 3) {
+      // 	this.numOfStock()
+      // }
+    },
+
+    // 求百分比
+    GetPercent (num, total) {
+      num = parseFloat(num)
+      total = parseFloat(total)
+      if (isNaN(num) || isNaN(total)) {
+        return '-'
+      }
+      return total <= 0 ? '0%' : (Math.round(num / total * 10000) / 100.00) + '%'
+    },
+
+    //  改变打印方向，为1时横向
+    changePrint (type) {
+      let html = ''
+      type = type || 1
+      if (type == '1') {
+        html = '<style type="text/css" media="print">\n' + '  @page { size: landscape; }\n' + '</style>'
+      } else {
+        html = '<style type="text/css" media="print">\n' + '  @page { size: portrait; }\n' + '</style>'
+      }
+      return html
+    },
+
+    printCeritficate () {
+      $('#printCertificate').append(this.changePrint(2))
+    },
+
+    printStock () {
+      $('#printStock').append(this.changePrint(2))
+    },
+
+    printVote () {
+      $('#printVote').append(this.changePrint(2))
+    },
+    // 打印现场会议登记表
+    printOnSite () {
+      // 现将操作列隐藏起来，以免打印这一列
+      // if (this.disabled == false) {
+      //   this.$message({
+      //     showClose: true,
+      //     message: '请保存信息后再打印',
+      //     type: 'warning'
+      //   })
+      // } else {
+      //
+      // }
+      $('#onSite').append(this.changePrint(1))
+      Print('#onSite', {
+      // 以下class属性的div元素不会打印
+        noPrint: '.do-not-print-me',
+        onStart: function () {
+          console.log('onStart', new Date())
+        },
+        onEnd: function () {
+          console.log('onEnd', new Date())
+        }
+      })
+    },
+
+    // 编辑行操作
+    handleEdit (index, row) {
+      this.idx = index
+      this.form = row
+      this.editVisible = true
+    },
+
+    // 删除行操作
+    handleDelete (index, row) {
+      // 二次确认删除
+      this.$confirm('确定要删除吗？', '提示', {
+        type: 'warning'
+      })
+        .then(() => {
+          var a = this.tableData.splice(index, 1)
+          console.log(a[0].id)
+          axios.delete(this.host + 'delete', {
+            data: {id: a[0].id,
+              year: this.query.year,
+              meeting: this.query.name}}).then(response => {
+            this.$message.success('删除成功')
+          }).catch(() => {})
+        })
+        .catch(() => {})
+    },
+
+    // 保存行编辑
+    saveEdit () {
+      this.editVisible = false
+      this.$message.success(`修改第 ${this.idx + 1} 行成功`)
+      this.$set(this.tableData, this.idx, this.form)
+      if (this.tableData[this.tableData.length - 1].gddmk != '') {
+        this.addRow()
+      }
+    }
+
+  }
+}
 </script>
 <style>
 	.title1 {
 		/* margin-top: 30px; */
 		/* margin-bottom: 10px; */
 		text-align: center;
-		font-size: 36px;
+		font-size: 30px;
 		font-family: "LiSu";
 		color: orangered;
 
@@ -631,7 +652,7 @@
 		/* margin-bottom: 20px; */
 		line-height: 80px;
 		text-align: center;
-		font-size: 32px;
+		font-size: 28px;
 		color: indianred
 	}
 
@@ -683,7 +704,11 @@
 		border-top-color: #3162a7;
 		background: #1b365c;
 	}
-
+  /*固定表格总宽度，使其居中*/
+  .el-table{
+    width:1046px;
+    margin:auto;
+  }
 	/* 解决el-table表头和列不对齐 */
 	.el-table th.gutter {
 		display: table-cell !important;
@@ -691,19 +716,24 @@
 
 	table {
 		border-collapse: collapse;
+    font-size: 10px;
+    /*line-height: 3px;*/
 	}
+
+
+
 </style>
 <style scoped>
 
 	/* 鼠标移入行时改变背景色 */
 	/*/deep/ .el-table tbody tr:hover>td { background-color: lightpink }*/
+  /*鼠标点击行时改变颜色*/
   /deep/ .el-table__body tr.current-row>td{
     background-color: #69A8EA !important;
-    color: #fff;
+    /*color: #fff;*/
   }
 
 	.edit-tran>>>.el-transfer-panel {
-
 		/* width: 300px; */
 		margin: 0 auto;
 		width: 35% !important;
@@ -730,21 +760,23 @@
 	} */
 
   .button-group-left{
-    display: inline;
-    text-align: left;
+    /*display: inline;*/
+    /*text-align: left;*/
   }
 
 	.sharemsg {
-		 display: inline;
-		 margin-left: 53px;
-		text-align: right;
+    margin-top: 10px;
+		 /*display: inline;*/
+		 /*margin-left: 53px;*/
+		/*text-align: right;*/
 		/* right: 10px; */
 	}
 
 	.sharemsg .el-input {
 		/* display: inline-block; */
-		width: 10%;
+		width: 15%;
 		margin-right: 10px;
+
 	}
 
 	.sharemsg span {

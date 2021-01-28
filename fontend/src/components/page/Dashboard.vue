@@ -2,24 +2,6 @@
 	<div>
 		<el-row :gutter="20">
 			<el-col :span="8">
-				<!-- 管理员信息展示功能卡 -->
-				<el-card shadow="hover" class="mgb20" style="height:252px;">
-					<div class="user-info">
-						<img src="../../assets/img/img.jpg" class="user-avator" alt />
-						<div class="user-info-cont">
-							<div class="user-info-name">{{name}}</div>
-							<div>{{role}}</div>
-						</div>
-					</div>
-					<div class="user-info-list">
-						上次登录时间：
-						<span>2020-11-27</span>
-					</div>
-					<div class="user-info-list">
-						上次登录地点：
-						<span>佛山</span>
-					</div>
-				</el-card>
 
 				<!-- 查询与新增年度会议功能卡 -->
 				<el-card shadow="hover" style="height:252px;text-align: center;">
@@ -44,20 +26,6 @@
 						</el-form-item>
 					</el-form>
 
-					<!-- <el-select v-model="year" placeholder="年份" class="handle-select mr10" filterable allow-create default-first-option
-					 clearable>
-						<el-option v-for="(val, id) in yearList" :key="id" :value="val"></el-option>
-					</el-select> 
-					<div class="searchbox">
-						<el-select v-model="meetingName" label="会议类型" required placeholder="请选择会议类型">
-							<el-option v-for="(val, id) in meetingNameList" :key="id" :value="val"></el-option>
-						</el-select>
-					</div>
-					<el-button type="primary">
-						<router-link :to="'/table'"><span style="color: white;">确定</span></router-link>
-					</el-button>
-					
-					<el-button type="primary" @click="addMeeting">新增</el-button> -->
 
 				</el-card>
 				<!-- 点击新增button之后弹出具有填写表单功能的弹窗 -->
@@ -119,45 +87,8 @@
 						</el-button> -->
 					</div>
 				</el-dialog>
-
 			</el-col>
 			<el-col :span="16">
-				<el-row :gutter="20" class="mgb20">
-					<el-col :span="8">
-						<el-card shadow="hover" :body-style="{padding: '0px'}">
-							<div class="grid-content grid-con-1">
-								<i class="el-icon-lx-people grid-con-icon"></i>
-								<div class="grid-cont-right">
-									<div class="grid-num">1234</div>
-									<div>股东人数</div>
-								</div>
-							</div>
-						</el-card>
-					</el-col>
-					<el-col :span="8">
-						<el-card shadow="hover" :body-style="{padding: '0px'}">
-							<div class="grid-content grid-con-2">
-								<i class="el-icon-lx-notice grid-con-icon"></i>
-								<div class="grid-cont-right">
-									<div class="grid-num">321</div>
-									<div>系统消息</div>
-								</div>
-							</div>
-						</el-card>
-					</el-col>
-					<el-col :span="8">
-						<el-card shadow="hover" :body-style="{padding: '0px'}">
-							<div class="grid-content grid-con-3">
-								<i class="el-icon-lx-goods grid-con-icon"></i>
-								<div class="grid-cont-right">
-									<div class="grid-num">50</div>
-									<div>议案数量</div>
-								</div>
-							</div>
-						</el-card>
-					</el-col>
-				</el-row>
-
 				<!-- 会议文件展示功能卡 -->
 				<el-card shadow="hover" style="height:403px;">
 					<div slot="header" class="clearfix">
@@ -185,355 +116,332 @@
 				</el-card>
 			</el-col>
 		</el-row>
-
-		<!-- <el-row :gutter="20">
-			<el-col :span="12">
-				<el-card shadow="hover">
-					<schart ref="bar" class="schart" canvasId="bar" :options="options"></schart>
-				</el-card>
-			</el-col>
-			<el-col :span="12">
-				<el-card shadow="hover">
-					<schart ref="line" class="schart" canvasId="line" :options="options2"></schart>
-				</el-card>
-			</el-col>
-		</el-row>
-	 -->
+    
 	</div>
 </template>
 
 <script>
 	import {
-		EventBus
-	} from '../../api/event_bus.js';
-	import axios from 'axios';
-	import Schart from 'vue-schart';
-	import bus from '../common/bus';
-	import {
-		fetchData
-	} from '../../api/index';
-	export default {
-		name: 'dashboard',
-		data() {
-			// 检验方法：判断查询年度会议功能模块中输入的年份是否满足以下格式
-			var checkYear = (rule, value, callback) => {
-				if (!value) {
-					return callback(new Error('年份不能为空'));
-				}
-				setTimeout(() => {
-					if (!Number.isInteger(value)) {
-						callback(new Error('请输入数字值'));
-					} else {
-						if (value > 2100 || value < 2000) {
-							callback(new Error('年份需大于2000，小于2100'));
-						} else {
-							callback();
-						}
-					}
-				}, 1000);
-			};
+	  EventBus
+	} from '../../api/event_bus.js'
+import axios from 'axios'
+import Schart from 'vue-schart'
 
-			return {
-				username: sessionStorage.username || localStorage.username,
-				token: sessionStorage.token || localStorage.token,
-				res_data: {},
+export default {
+	  name: 'dashboard',
+	  data () {
+	    // 检验方法：判断查询年度会议功能模块中输入的年份是否满足以下格式
+	    var checkYear = (rule, value, callback) => {
+	      if (!value) {
+	        return callback(new Error('年份不能为空'))
+	      }
+	      setTimeout(() => {
+	        if (!Number.isInteger(value)) {
+	          callback(new Error('请输入数字值'))
+	        } else {
+	          if (value > 2100 || value < 2000) {
+	            callback(new Error('年份需大于2000，小于2100'))
+	          } else {
+	            callback()
+	          }
+	        }
+	      }, 1000)
+	    }
 
-				options: [{
-						value: 'headOffice',
-						label: '总部',
-						children: [{
-								value: 'officeBuilding',
-								label: '办公楼五楼',
-							},
+    return {
+	      username: sessionStorage.username || localStorage.username,
+	      token: sessionStorage.token || localStorage.token,
+	      res_data: {},
 
-						],
+	      options: [{
+	        value: 'headOffice',
+	        label: '总部',
+	        children: [{
+	          value: 'officeBuilding',
+	          label: '办公楼五楼'
+	        }
 
-					},
-					{
-						value: 'gaomingDistrict',
-						label: '高明区',
-						children: [{
-								value: 'changan',
-								label: '会议室一'
-							},
-							{
-								value: 'humen',
-								label: '会议室二'
-							}
-						]
-					}
+	        ]
 
-				],
-				ruleForm: {
-					year: null,
-				},
-				rules: {
-					year: [{
-						validator: checkYear,
-						trigger: 'blur'
-					}],
-					name: [{
-							required: true,
-							message: '请输入会议名称',
-							trigger: 'blur'
-						},
-						{
-							min: 1,
-							max: 25,
-							message: '长度在1 到 25 个字符',
-							trigger: 'blur'
-						}
-					],
-					address: [{
-						required: true,
-						trigger: 'blur',
-						message: '请输入会议地址'
-					}, ],
-					date0: [{
-						
-						// required: true,
-						message: '请选择日期',
-						trigger: 'change'
-					}],
-					date2: [{
-						
-						required: true,
-						message: '请选择时间',
-						trigger: 'change'
-					}],
-				},
-				tableData: [],
-				gddata: [],
-				value: [],
-				// dialogTableVisible: false,
-				dialogFormVisible: false,
-				form: {
-					name: '',
-					date1: '',
-					date2: '',
-					options: [],
-					address: '',
-					motion: ''
-				},
+	      },
+	      {
+	        value: 'gaomingDistrict',
+	        label: '高明区',
+	        children: [{
+	          value: 'changan',
+	          label: '会议室一'
+	        },
+	        {
+	          value: 'humen',
+	          label: '会议室二'
+	        }
+	        ]
+	      }
 
-				motionArray: [{}],
-				formLabelWidth: '120px',
+	      ],
+	      ruleForm: {
+	        year: null
+	      },
+	      rules: {
+	        year: [{
+	          validator: checkYear,
+	          trigger: 'blur'
+	        }],
+	        name: [{
+	          required: true,
+	          message: '请输入会议名称',
+	          trigger: 'blur'
+	        },
+	        {
+	          min: 1,
+	          max: 25,
+	          message: '长度在1 到 25 个字符',
+	          trigger: 'blur'
+	        }
+	        ],
+	        address: [{
+	          required: true,
+	          trigger: 'blur',
+	          message: '请输入会议地址'
+	        } ],
+	        date0: [{
+	
+	          // required: true,
+	          message: '请选择日期',
+	          trigger: 'change'
+	        }],
+	        date2: [{
+	
+	          required: true,
+	          message: '请选择时间',
+	          trigger: 'change'
+	        }]
+	      },
+	      tableData: [],
+	      gddata: [],
+	      value: [],
+	      // dialogTableVisible: false,
+	      dialogFormVisible: false,
+	      form: {
+	        name: '',
+	        date1: '',
+	        date2: '',
+	        options: [],
+	        address: '',
+	        motion: ''
+	      },
 
-				// year: null,
-				date: null,
-				meetingName: '',
-				yearList: [],
-				meetingNameList: [],
-				name: localStorage.getItem('ms_username'),
-				todoList: [{
-						title: '关于与广东省广晟财务有限公司签署《金融服务协议》的议案',
-						status: false
-					},
-					{
-						title: '关于修订《公司章程》的议案',
-						status: false
-					},
-					{
-						title: '关于续聘2020年度审计机构的议案',
-						status: false
-					},
-					{
-						title: '关于XXXXXX的议案',
-						status: false
-					},
-					{
-						title: '关于XXXXXX的议案',
-						status: false
-					},
-					// {
-					// 	title: '股东投票文件6',
-					// 	status: true
-					// }
-				],
-				data: [{
-						name: '2020/11/04',
-						value: 1083
-					},
-					{
-						name: '2020/11/05',
-						value: 941
-					},
-					{
-						name: '2020/11/06',
-						value: 1139
-					},
-					{
-						name: '2020/11/07',
-						value: 816
-					},
-					{
-						name: '2020/11/08',
-						value: 327
-					},
-					{
-						name: '2020/11/09',
-						value: 228
-					},
-					{
-						name: '2020/11/10',
-						value: 1065
-					}
-				],
+	      motionArray: [{}],
+	      formLabelWidth: '120px',
 
+	      // year: null,
+	      date: null,
+	      meetingName: '',
+	      yearList: [],
+	      meetingNameList: [],
+	      name: localStorage.getItem('ms_username'),
+	      todoList: [{
+	        title: '关于与广东省广晟财务有限公司签署《金融服务协议》的议案',
+	        status: false
+	      },
+	      {
+	        title: '关于修订《公司章程》的议案',
+	        status: false
+	      },
+	      {
+	        title: '关于续聘2020年度审计机构的议案',
+	        status: false
+	      },
+	      {
+	        title: '关于XXXXXX的议案',
+	        status: false
+	      },
+	      {
+	        title: '关于XXXXXX的议案',
+	        status: false
+	      }
 
-			};
-		},
-		components: {
-			Schart
-		},
-		computed: {
-			role() {
-				return this.name === 'admin' ? '超级管理员' : '普通用户';
-			}
-		},
+	      ],
+	      data: [{
+	        name: '2020/11/04',
+	        value: 1083
+	      },
+	      {
+	        name: '2020/11/05',
+	        value: 941
+	      },
+	      {
+	        name: '2020/11/06',
+	        value: 1139
+	      },
+	      {
+	        name: '2020/11/07',
+	        value: 816
+	      },
+	      {
+	        name: '2020/11/08',
+	        value: 327
+	      },
+	      {
+	        name: '2020/11/09',
+	        value: 228
+	      },
+	      {
+	        name: '2020/11/10',
+	        value: 1065
+	      }
+	      ]
 
-		mounted: function() {
-			axios.get(this.host + 'get_year', {
-					responseType: 'json',
-					headers: {
-						'Authorization': 'JWT ' + this.token
-					},
-					withCredentials: true, //跨域带上cookies
-				}, )
-				.then(response => (
-					// console.log(response.data['date']),
-					this.ruleForm.year = response.data['year'],
-					this.meetingName = response.data['name'],
-					this.date = response.data['date'],
-					this.meetingNameList = response.data['meeting_list']
-				)).catch(error => {
-					// alert('error')
-					console.log(error.response.data);
-				})
-		},
-		watch: {
-			// 侦听年度会议功能卡中的年份发生变化时立马向后台发起数据请求
-			"ruleForm.year": function(newVal) {
+	    }
+  },
+	  components: {
+	    Schart
+	  },
+	  computed: {
+	    role () {
+	      return this.name === 'admin' ? '超级管理员' : '普通用户'
+	    }
+	  },
 
-				if (newVal) {
-					// alert(this.year)
-					// console.log()
-					axios.get(this.host + 'get_meeting/' + newVal)
-						.then(response => (
-							// console.log(response.data[2020]),
-							this.meetingNameList = response.data[newVal]
-						)).catch(error => {
-							alert('error')
-							// console.log(error.response.data);
-						})
-				}
-			}
-		},
-		// created() {
-		//     this.handleListener();
-		//     this.changeDate();
-		// },
-		// activated() {
-		//     this.handleListener();
-		// },
-		// deactivated() {
-		//     window.removeEventListener('resize', this.renderChart);
-		//     bus.$off('collapse', this.handleBus);
-		// },
-		methods: {
-			addMotion() {
-				this.motionArray.push({})
-			},
-			getData(year, name) {
-				axios.get(this.host + 'get_detail/' + this.ruleForm.year + '/' + this.meetingName)
-					.then(response => (
-						this.res_data = response.data,
-						this.tableData = this.res_data.list,
-						// 事件总线，向BaseForm组件通信，共享数据
-						EventBus.$emit('addition', {
-							year: this.ruleForm.year,
-							date: this.date,
-							meetingName: this.meetingName,
-							tableData: this.tableData,
-							motion: this.res_data.motion,
-							sharehold: this.res_data.sharehold
-						})
-					)).catch(error => {
-						// console.log(error.response);
-					})
-			},
-			submitForm(formName) {
-				this.$refs[formName].validate((valid) => {
-					if (valid) {
-						this.getData();
-					} else {
-						console.log('error submit!!');
-						return false;
-					}
-				});
-			},
-			submitAdd(formName) {
-				console.log(formName)
-				this.$refs[formName].validate((valid) => {
-					if (valid) {
-						axios.post(this.host + 'add_meeting', {
-							meeting: this.form,
-							motion: this.motionArray,
-							gdid: this.value
-						}).then(response => (
-							this.$message.success('提交成功！'),
-							this.dialogFormVisible = false,
-							location.reload()
-							// EventBus.$emit('addition',{
-							// 	year:this.form.year,
-							// 	meetingName: this.form.name
-							// })
-							// this.$router.push({name:'form'})
-						)).catch(error => (this.$message(error.response.data.msg)))
-					} else {
-						this.$message.error("数据校验失败，请按格式填写！")
-					}
-				})
-				
-
-			},
-			changeDate() {
-				const now = new Date().getTime();
-				this.data.forEach((item, index) => {
-					const date = new Date(now - (6 - index) * 86400000);
-					item.name = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
-				});
-			},
-			addMeeting() {
-				this.dialogFormVisible = true;
-				axios.get(this.host + 'get_shareholder')
-					.then(response => (
-						// console.log(response.data)
-						this.gddata = response.data['list']
-						// for(var i = 0; i <= response.data['list'].length; i++) {
-						// 		this.gddata.push({key: response.data['list'][i].id,	label: response.data['list'][i].name})
-						// }
-					)).catch(error => {
-						alert('error')
-						// console.log(error.response.data);
-					})
-			}
-			// handleListener() {
-			//     bus.$on('collapse', this.handleBus);
-			//     // 调用renderChart方法对图表进行重新渲染
-			//     window.addEventListener('resize', this.renderChart);
-			// },
-			// handleBus(msg) {
-			//     setTimeout(() => {
-			//         this.renderChart();
-			//     }, 200);
-			// },
-			// renderChart() {
-			//     this.$refs.bar.renderChart();
-			//     this.$refs.line.renderChart();
-			// }
-		}
-	};
+	  mounted: function () {
+	    axios.get(this.host + 'get_year', {
+	      responseType: 'json',
+	      headers: {
+	        'Authorization': 'JWT ' + this.token
+	      },
+	      withCredentials: true // 跨域带上cookies
+	    })
+	      .then(response => (
+	        // console.log(response.data['date']),
+	        this.ruleForm.year = response.data['year'],
+	        this.meetingName = response.data['name'],
+	        this.date = response.data['date'],
+	        this.meetingNameList = response.data['meeting_list']
+	      )).catch(error => {
+	        // alert('error')
+	        console.log(error.response.data)
+	      })
+	  },
+	  watch: {
+	    // 侦听年度会议功能卡中的年份发生变化时立马向后台发起数据请求
+	    'ruleForm.year': function (newVal) {
+	      if (newVal) {
+	        // alert(this.year)
+	        // console.log()
+	        axios.get(this.host + 'get_meeting/' + newVal)
+	          .then(response => (
+	            // console.log(response.data[2020]),
+	            this.meetingNameList = response.data[newVal]
+	          )).catch(error => {
+	            alert('error')
+	            // console.log(error.response.data);
+	          })
+	      }
+	    }
+	  },
+	  // created() {
+	  //     this.handleListener();
+	  //     this.changeDate();
+	  // },
+	  // activated() {
+	  //     this.handleListener();
+	  // },
+	  // deactivated() {
+	  //     window.removeEventListener('resize', this.renderChart);
+	  //     bus.$off('collapse', this.handleBus);
+	  // },
+	  methods: {
+	    addMotion () {
+	      this.motionArray.push({})
+	    },
+	    getData (year, name) {
+	      axios.get(this.host + 'get_detail/' + this.ruleForm.year + '/' + this.meetingName)
+	        .then(response => (
+	          this.res_data = response.data,
+	          this.tableData = this.res_data.list,
+	          // 事件总线，向BaseForm组件通信，共享数据
+	          EventBus.$emit('addition', {
+	            year: this.ruleForm.year,
+	            date: this.date,
+	            meetingName: this.meetingName,
+	            tableData: this.tableData,
+	            motion: this.res_data.motion,
+	            sharehold: this.res_data.sharehold
+	          })
+	        )).catch(error => {
+	          // console.log(error.response);
+	        })
+	    },
+	    submitForm (formName) {
+	      this.$refs[formName].validate((valid) => {
+	        if (valid) {
+	          this.getData()
+	        } else {
+	          console.log('error submit!!')
+	          return false
+	        }
+	      })
+	    },
+	    submitAdd (formName) {
+	      console.log(formName)
+	      this.$refs[formName].validate((valid) => {
+	        if (valid) {
+	          axios.post(this.host + 'add_meeting', {
+	            meeting: this.form,
+	            motion: this.motionArray,
+	            gdid: this.value
+	          }).then(response => (
+	            this.$message.success('提交成功！'),
+	            this.dialogFormVisible = false,
+	            location.reload()
+	            // EventBus.$emit('addition',{
+	            // 	year:this.form.year,
+	            // 	meetingName: this.form.name
+	            // })
+	            // this.$router.push({name:'form'})
+	          )).catch(error => (this.$message(error.response.data.msg)))
+	        } else {
+	          this.$message.error('数据校验失败，请按格式填写！')
+	        }
+	      })
+	    },
+	    changeDate () {
+	      const now = new Date().getTime()
+	      this.data.forEach((item, index) => {
+	        const date = new Date(now - (6 - index) * 86400000)
+	        item.name = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
+	      })
+    },
+	    addMeeting () {
+	      this.dialogFormVisible = true
+	      axios.get(this.host + 'get_shareholder')
+	        .then(response => (
+	          // console.log(response.data)
+	          this.gddata = response.data['list']
+	          // for(var i = 0; i <= response.data['list'].length; i++) {
+	          // 		this.gddata.push({key: response.data['list'][i].id,	label: response.data['list'][i].name})
+	          // }
+	        )).catch(error => {
+	          alert('error')
+	          // console.log(error.response.data);
+	        })
+	    }
+	    // handleListener() {
+	    //     bus.$on('collapse', this.handleBus);
+	    //     // 调用renderChart方法对图表进行重新渲染
+	    //     window.addEventListener('resize', this.renderChart);
+	    // },
+	    // handleBus(msg) {
+	    //     setTimeout(() => {
+	    //         this.renderChart();
+	    //     }, 200);
+	    // },
+	    // renderChart() {
+	    //     this.$refs.bar.renderChart();
+	    //     this.$refs.line.renderChart();
+	    // }
+	  }
+	}
 </script>
 
 
