@@ -92,7 +92,7 @@
 				<!-- 会议文件展示功能卡 -->
 				<el-card shadow="hover" style="height:403px;">
 					<div slot="header" class="clearfix">
-						<span>会议文件</span>
+						<span>会议议案</span>
 						<el-button style="float: right; padding: 3px 0" type="text">添加</el-button>
 					</div>
 					<el-table :show-header="false" :data="todoList" style="width:100%;">
@@ -125,8 +125,6 @@
 	  EventBus
 	} from '../../api/event_bus.js'
 import axios from 'axios'
-import Schart from 'vue-schart'
-
 export default {
 	  name: 'dashboard',
 	  data () {
@@ -152,33 +150,6 @@ export default {
 	      username: sessionStorage.username || localStorage.username,
 	      token: sessionStorage.token || localStorage.token,
 	      res_data: {},
-
-	      options: [{
-	        value: 'headOffice',
-	        label: '总部',
-	        children: [{
-	          value: 'officeBuilding',
-	          label: '办公楼五楼'
-	        }
-
-	        ]
-
-	      },
-	      {
-	        value: 'gaomingDistrict',
-	        label: '高明区',
-	        children: [{
-	          value: 'changan',
-	          label: '会议室一'
-	        },
-	        {
-	          value: 'humen',
-	          label: '会议室二'
-	        }
-	        ]
-	      }
-
-	      ],
 	      ruleForm: {
 	        year: null
 	      },
@@ -233,8 +204,6 @@ export default {
 
 	      motionArray: [{}],
 	      formLabelWidth: '120px',
-
-	      // year: null,
 	      date: null,
 	      meetingName: '',
 	      yearList: [],
@@ -261,42 +230,10 @@ export default {
 	        status: false
 	      }
 
-	      ],
-	      data: [{
-	        name: '2020/11/04',
-	        value: 1083
-	      },
-	      {
-	        name: '2020/11/05',
-	        value: 941
-	      },
-	      {
-	        name: '2020/11/06',
-	        value: 1139
-	      },
-	      {
-	        name: '2020/11/07',
-	        value: 816
-	      },
-	      {
-	        name: '2020/11/08',
-	        value: 327
-	      },
-	      {
-	        name: '2020/11/09',
-	        value: 228
-	      },
-	      {
-	        name: '2020/11/10',
-	        value: 1065
-	      }
 	      ]
-
 	    }
   },
-	  components: {
-	    Schart
-	  },
+
 	  computed: {
 	    role () {
 	      return this.name === 'admin' ? '超级管理员' : '普通用户'

@@ -118,17 +118,8 @@
 
 	@media print {
 
-		.print-cerificate {
-			/*padding-left: 100px;*/
-			/*padding-right: 100px;*/
-
-		}
 	}
 
-	/* .printcss {
-		padding-left: 100px;
-		padding-right: 100px;
-	} */
 	.bottom-p {
 		/* margin-top: 30px; */
 		line-height: 55px;

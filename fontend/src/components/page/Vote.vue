@@ -119,16 +119,6 @@
 	}
 
 	@media print {
-		.print-cerificate {
-			padding-left: 100px;
-			padding-right: 100px;
-
-
-		}
-
-		.print-cerificate ul {
-			list-style-type: none;
-		}
 
 	}
 

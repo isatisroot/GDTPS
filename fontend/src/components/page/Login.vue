@@ -1,6 +1,14 @@
 <template>
+
     <div class="login-wrap">
-        <div class="ms-login">
+      <link href="https://cdn.jsdelivr.net/npm/animate.css@3.5.1" rel="stylesheet" type="text/css">
+
+<!--      <transition-->
+<!--          name="custom-classes-transition"-->
+<!--          enter-active-class="animated tada"-->
+<!--          leave-active-class="animated bounceOutDown"-->
+<!--      >-->
+        <div class="ms-login" v-if="show">
             <div class="ms-title">佛山照明股东投票系统</div>
             <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
                 <el-form-item prop="username">
@@ -24,52 +32,81 @@
                 <!-- <p class="login-tips">Tips : 测试阶段：用户名和密码随便填。</p> -->
             </el-form>
         </div>
+
+<!--      </transition>-->
+<!--      <transition enter-active-class="animated tada">-->
+        <div class="ms-login animated fadeInUp"  v-if="!show">
+          <div class="ms-title">选择年度会议</div>
+          <el-form>
+            <el-form-item>
+              <el-input></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-input></el-input>
+            </el-form-item>
+            <el-form-item>
+              <div class="login-btn">
+              <el-button type="primary" @click="submitForm('ruleForm')">
+                <router-link :to="'/form'"><span style="color: white;">查询</span></router-link>
+              </el-button>
+              <el-button type="primary" @click="addMeeting">新增</el-button>
+            </div>
+            </el-form-item>
+          </el-form>
+        </div>
+<!--      </transition>-->
+
     </div>
 </template>
 
 <script>
-	import axios from 'axios';
+	import axios from 'axios'
 export default {
-    data: function() {
-        return {
-            param: {
-                username: 'admin',
-                password: '',
-            },
-            rules: {
-                username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-                password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-            },
-        };
-    },
-    methods: {
-        submitForm() {
-            this.$refs.login.validate(valid => {
-                if (valid) {
-					axios.post(this.host + 'login', {
-						username: this.param.username,
-						password: this.param.password
-					}).then(response => {
-						this.$message.success('登录成功！');
-						localStorage.setItem('ms_username', response.data["username"]),
-						localStorage.setItem("token", response.data["token"]),
-						this.$router.push('/')
-					}).catch(error => {
-						this.$message.error("登录失败")
-					})
-                    
-                } else {
-                    this.$message.error('请输入账号和密码');
-                    console.log('error submit!!');
-                    return false;
-                }
-            });
-        },
-    },
-};
+  data: function () {
+    return {
+      show: true,
+      param: {
+        username: 'admin',
+        password: '123123'
+      },
+      rules: {
+        username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+      }
+    }
+  },
+  methods: {
+    submitForm () {
+      this.$refs.login.validate(valid => {
+        if (valid) {
+
+          // this.$router.push('/')
+          axios.post(this.host + 'login', {
+	            username: this.param.username,
+	            password: this.param.password
+	          }).then(response => {
+            this.$message.success('登录成功！')
+            this.show = false
+            localStorage.setItem('ms_username', this.param.username)
+            localStorage.setItem('ms_username', response.data['username'])
+            localStorage.setItem('token', response.data['token'])
+	            // this.$router.push('/')
+	          }).catch(error => {
+	            this.$message.error('登录失败')
+	          })
+        } else {
+          this.$message.error('请输入账号和密码')
+          console.log('error submit!!')
+          return false
+        }
+      })
+    }
+  }
+}
 </script>
 
 <style scoped>
+
 .login-wrap {
     position: relative;
     width: 100%;

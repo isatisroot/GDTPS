@@ -11,6 +11,8 @@ import './components/common/directives'
 import 'babel-polyfill'
 import Print from 'vue-print-nb'
 import $ from 'jquery'
+import animated from 'animate.css' // 引入
+Vue.use(animated) // 全局注册
 Vue.use(Print) // 注册
 
 Vue.config.productionTip = false

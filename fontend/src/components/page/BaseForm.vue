@@ -33,7 +33,7 @@
         <el-button class="button" icon="el-icon-printer" @click="printCeritficate" v-print="'#printCertificate'">登记凭证</el-button>
         <el-button class="button" icon="el-icon-printer" @click="printVote" v-print="'#printVote'">表决表</el-button>
         <el-button class="button" icon="el-icon-printer" @click="printStock" v-print="'#printStock'">统计表</el-button>
-        <el-button type="success" icon="el-icon-success" @click="updateTable">保存</el-button>
+        <el-button class="button" icon="el-icon-success" @click="updateTable">保存</el-button>
       </div>
 
 			<div class="sharemsg">
@@ -325,7 +325,6 @@ export default {
         await this.currentData('current')
         this.initSelectRow()
         this.handleCheckedData()
-        this.sendData()
       } catch (error) {
         console.log(error)
       }
@@ -342,6 +341,7 @@ export default {
         this.share = response.data['sharehold']
         this.gdxmArray = response.data['extr_shareholds']
         this.transferFormat()
+        this.sendData()
       })
     },
 
@@ -686,24 +686,30 @@ export default {
 
 	.button {
 		/* border-top: 1px solid #97f7df; */
-		background: #1ABC9C;
+		/*background: #1ABC9C;*/
+    background: linear-gradient(0.25turn, #3f87a6, #ebf8e1, #449abf);
 		padding: 9px 15px;
 		border-radius: 3px;
-		color: white;
+		color: #e45f23;
 		font-size: 12px;
+    font-weight: bolder;
+    font-family: "YouYuan";
+    opacity: 0.9;
 
 	}
 
 	.button:hover {
-		border-top-color: #287378;
-		background: #287378;
-		color: #ccc;
+		/*border-top-color: #287378;*/
+		background: #ebf8e1;
+		color: #1d1c1c;
 	}
 
 	.button:active {
-		border-top-color: #3162a7;
-		background: #1b365c;
+		/*border-top-color: #3162a7;*/
+		/*background: #1b365c;*/
+    background-color: #ffffff
 	}
+
   /*固定表格总宽度，使其居中*/
   .el-table{
     width:1046px;

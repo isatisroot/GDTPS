@@ -39,7 +39,7 @@ export default {
 	        {
 	          icon: 'el-icon-lx-copy',
 	          index: 'form',
-	          title: '股权登记'
+	          title: '股东登记'
 	        },
         {
           icon: 'el-icon-lx-copy',
