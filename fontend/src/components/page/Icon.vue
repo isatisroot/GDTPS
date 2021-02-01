@@ -190,10 +190,10 @@
     display: flex;
     align-items: center;
 }
-.search-box{
-    text-align: center;
-    margin-top: 10px;
-}
+/*.search-box{*/
+/*    text-align: center;*/
+/*    margin-top: 10px;*/
+/*}*/
 .search{
     width: 300px;
 }

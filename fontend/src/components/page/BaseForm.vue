@@ -10,30 +10,27 @@
 		</div> -->
 		<!-- <div class="topDiv"> -->
 		<ul class="button-group">
-
-<!--			<div class="search-box">-->
-<!--				<el-select v-model="query.year" placeholder="年份" class="handle-select mr10" filterable allow-create-->
-<!--				 default-first-option clearable>-->
-
-<!--					<el-option v-for="(val, id) in yearList" :key="id" :value="val"></el-option>-->
-<!--				</el-select>-->
-
-<!--				<el-select v-model="query.name" label="会议类型" required placeholder="请选择会议类型">-->
-<!--					<el-option v-for="(val, id) in meetingName" :key="id" :value="val"></el-option>-->
-<!--				</el-select>-->
-
-<!--				<el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>-->
-<!--				&lt;!&ndash; <el-button type="primary" icon="el-icon-circle-plus">新增</el-button> &ndash;&gt;-->
-<!--			</div>-->
       <div class="button-group-left">
         <el-button class="button" icon="el-icon-circle-plus" @click="addRow">增加</el-button>
         <el-button class="button" icon="el-icon-delete" @click="handleDelete(row.index,row)" >删除</el-button>
         <el-button class="button" icon="el-icon-printer" @click="printOnSite">登记表</el-button>
-
         <el-button class="button" icon="el-icon-printer" @click="printCeritficate" v-print="'#printCertificate'">登记凭证</el-button>
         <el-button class="button" icon="el-icon-printer" @click="printVote" v-print="'#printVote'">表决表</el-button>
         <el-button class="button" icon="el-icon-printer" @click="printStock" v-print="'#printStock'">统计表</el-button>
         <el-button class="button" icon="el-icon-success" @click="updateTable">保存</el-button>
+      </div>
+      <div class="search-box">
+        <el-select v-model="query.year" placeholder="年份" class="handle-select mr10" filterable allow-create
+                   default-first-option clearable>
+          <el-option v-for="(val, id) in yearList" :key="id" :value="val"></el-option>
+        </el-select>
+
+        <el-select v-model="query.name" label="会议类型" required placeholder="请选择会议类型">
+          <el-option v-for="(val, id) in meetingName" :key="id" :value="val"></el-option>
+        </el-select>
+
+        <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+        <!-- <el-button type="primary" icon="el-icon-circle-plus">新增</el-button> -->
       </div>
 
 			<div class="sharemsg">
@@ -43,6 +40,7 @@
 				<el-input v-model="share.ltag" ></el-input>
 				<span>流通B股：</span>
 				<el-input v-model="share.ltbg"></el-input>
+
 <!--				<el-button type="info" @click="editTable" icon="el-icon-edit">编辑</el-button>-->
 				<!-- <el-button type="primary" icon="el-icon-circle-plus" @click="addRow">新增行</el-button> -->
 <!--				<el-button type="success" icon="el-icon-success" @click="updateTable">保存</el-button>-->
@@ -219,13 +217,10 @@ export default {
         background: '#00dea3 !important',
         color: '#7100aa',
         'border': 'solid 1px #000000 !important',
-        // 'border-right': 'solid 1px #000000 !important',
         padding: '0px'
       },
       cellStyle: {
-        // 'border-bottom': 'solid 1px #000000',
         'border': 'solid 1px #000000 !important',
-        // 'border-bottom': 'solid 1px red',
         'border-collapse': 'collapse ! important',
         // 让单元格缩小，不占用行高
         padding: '0px'
@@ -264,20 +259,22 @@ export default {
   },
 
   created () {
-    this.init()
+    EventBus.$on('addition', param => {
+      this.query.year = param.year
+      this.query.name = param.meetingName
+      this.init('current')
+    })
   },
   mounted () {
-    // if (!this.query.year) {
-    //   axios.get(this.host + 'get_year').then(response => (
-    //       this.query.year = response.data['year']
-    //       this.query.name = response.data['name']
-    //       this.share = response.data['sharehold']
-    //       this.meetingName = response.data['meeting_list']
-    //       this.transferFormat()
-    //   		)).catch(error => {})
-    // }
 
-
+  },
+  beforeDestroy() {
+    EventBus.$off('addition')
+    EventBus.$emit('baseform', {
+      year: this.query.year,
+      meetingName: this.query.name,
+      motion: this.motion
+    })
   },
   computed: {
     countCheckedData: function () {
@@ -308,11 +305,7 @@ export default {
       return summary
     }
   },
-  // updated() {
-  //   EventBus.$emit('baseform', {
-  //     query: this.query
-  //   })
-  // },
+
   methods: {
     sendData () {
       EventBus.$emit('baseform', {
@@ -320,9 +313,14 @@ export default {
         motion: this.motion
       })
     },
-    async init () {
+    async init (url) {
       try {
-        await this.currentData('current')
+        // await this.currentData(url)
+        // this.initSelectRow()
+        // this.handleCheckedData()
+        await this.getData()
+        // 初始化rowChecked中的数据
+        this.transferFormat()
         this.initSelectRow()
         this.handleCheckedData()
       } catch (error) {
@@ -341,7 +339,7 @@ export default {
         this.share = response.data['sharehold']
         this.gdxmArray = response.data['extr_shareholds']
         this.transferFormat()
-        this.sendData()
+        // this.sendData()
       })
     },
 
@@ -358,13 +356,16 @@ export default {
     // 向后台请求详细数据
     getData () {
       return axios.get(this.host + 'get_detail/' + this.query.year + '/' + this.query.name)
-        .then(response => (
-          this.query.date = response.data['date'],
-          this.tableData = response.data['list'],
-          this.pageTotal = this.tableData.length,
-          this.share = response.data['sharehold'],
-          this.motion = response.data['motion']
-        )).catch(error => {})
+        .then(response => {
+          this.tableData = response.data['detail_list']
+          this.query.year = response.data['current']['year']
+          this.query.date = response.data['current']['date']
+          this.query.name = response.data['current']['name']
+          this.motion = response.data['current']['motion']
+          this.meetingName = response.data['meeting_list']
+          this.share = response.data['sharehold']
+          this.gdxmArray = response.data['extr_shareholds']
+        }).catch(error => {})
     },
 
     // 将数字转换为千位分隔符字符串， 用于显示股本数
@@ -766,8 +767,8 @@ export default {
 	} */
 
   .button-group-left{
-    /*display: inline;*/
-    /*text-align: left;*/
+    display: inline-block;
+    text-align: right;
   }
 
 	.sharemsg {
@@ -791,8 +792,9 @@ export default {
 
 	.search-box {
 		margin-bottom: 20px;
-		/* display: inline-block; */
-		text-align: right;
+    display: inline;
+		/*text-align: right;*/
+    right: 10px;
 
 	}
 

@@ -56,22 +56,24 @@
 	  },
 	  computed: {
 	    meetingDate: function () {
-	      var datetimeArray = this.query.date.split(' ')
-	      var dateArray = datetimeArray[0].split('-')
-	      var timeArray = datetimeArray[1].split(':')
-	      var date = dateArray[0] + '年' + dateArray[1] + '月' + dateArray[2] + '日'
-	      var _min = parseInt(timeArray[1])
-	      var time = ''
-	      var min = 0
-	      // 到会时间提前10分钟，如果分钟小于10分，则小时减1，如果大于10，则直接减10
-	      if (_min < 10) {
-	        min = 60 + _min - 10
-	        time = parseInt(timeArray[0]) - 1 + '时' + min + '分'
-	      } else {
-	        min = parseInt(timeArray[1]) - 10
-	        time = timeArray[0] + '时' + min + '分'
-	      }
-	      return date + time
+	      if (this.query.date) {
+        var datetimeArray = this.query.date.split(' ')
+        var dateArray = datetimeArray[0].split('-')
+        var timeArray = datetimeArray[1].split(':')
+        var date = dateArray[0] + '年' + dateArray[1] + '月' + dateArray[2] + '日'
+        var _min = parseInt(timeArray[1])
+        var time = ''
+        var min = 0
+        // 到会时间提前10分钟，如果分钟小于10分，则小时减1，如果大于10，则直接减10
+        if (_min < 10) {
+          min = 60 + _min - 10
+          time = parseInt(timeArray[0]) - 1 + '时' + min + '分'
+        } else {
+          min = parseInt(timeArray[1]) - 10
+          time = timeArray[0] + '时' + min + '分'
+        }
+        return date + time
+      }
 	    }
 	  },
 	  methods: {

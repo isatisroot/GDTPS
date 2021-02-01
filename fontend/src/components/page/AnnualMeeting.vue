@@ -22,7 +22,7 @@
 
 <script>
 import axios from 'axios'
-import {EventBus} from "@/api/event_bus";
+import {EventBus} from '@/api/event_bus'
 
 export default {
   name: 'AnnualMeeting',
@@ -49,7 +49,7 @@ export default {
       meetingNameList: [],
       ruleForm: {
         year: null,
-        meeting: ''
+        meetingName: ''
       },
       rules: {
         year: [{
@@ -79,6 +79,13 @@ export default {
       }
     }
   },
+  beforeDestroy () {
+    EventBus.$emit('addition', {
+      year: this.ruleForm.year,
+      meetingName: this.ruleForm.meetingName
+
+    })
+  },
   methods: {
     init () {
       axios.get(this.host + 'current').then(response => {
@@ -89,26 +96,27 @@ export default {
     },
     getData (year, name) {
       axios.get(this.host + 'get_detail/' + this.ruleForm.year + '/' + this.meetingName)
-          .then(response => (
-              this.res_data = response.data,
-                  this.tableData = this.res_data.list,
-                  // 事件总线，向BaseForm组件通信，共享数据
-                  EventBus.$emit('addition', {
-                    year: this.ruleForm.year,
-                    date: this.date,
-                    meetingName: this.meetingName,
-                    tableData: this.tableData,
-                    motion: this.res_data.motion,
-                    sharehold: this.res_data.sharehold
-                  })
-          )).catch(error => {
+        .then(response => (
+          this.res_data = response.data,
+          this.tableData = this.res_data.list,
+          // 事件总线，向BaseForm组件通信，共享数据
+          EventBus.$emit('addition', {
+            year: this.ruleForm.year,
+            // date: this.date,
+            meetingName: this.meetingName
+            // tableData: this.tableData,
+            // motion: this.res_data.motion,
+            // sharehold: this.res_data.sharehold
+          })
+        )).catch(error => {
         // console.log(error.response);
-      })
+        })
     },
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.getData()
+          // this.getData()
+          // alert(this.ruleForm.meetingName)
         } else {
           console.log('error submit!!')
           return false

@@ -104,17 +104,18 @@ export default {
       sumFan: null,
       sumQi: null,
       query: {
-        year: ''
+        year: '',
+        name: ''
       },
       motion: ['yianyi', 'yianaa']
     }
   },
   created () {
     EventBus.$on('baseform', param => {
-      this.query = param.query
+      this.query.year = param.year
+      this.query.name = param.meetingName
       this.motion = param.motion
     })
-    EventBus.$off('baseform', {})
   },
 
   methods: {
