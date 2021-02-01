@@ -8,86 +8,67 @@
 					<div slot="header" class="clearfix">
 						<span class="search-box">选择股东大会年度</span>
 					</div>
-<!--          <div>-->
-<!--					<el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" class="demo-ruleForm">-->
-<!--						<el-form-item prop="year">-->
-<!--							&lt;!&ndash; .number限制输入的只能是数值 &ndash;&gt;-->
-<!--							<el-input v-model.number="ruleForm.year" placeholder="请输入年份" style="width: 50%;"></el-input>-->
-<!--						</el-form-item>-->
-<!--						<el-form-item>-->
-<!--							<el-select v-model="meetingName" label="会议类型" required placeholder="请选择会议类型" style="width: 50%;">-->
-<!--								<el-option v-for="(val, id) in meetingNameList" :key="id" :value="val"></el-option>-->
-<!--							</el-select>-->
-<!--						</el-form-item>-->
-<!--						<el-form-item>-->
-<!--							<el-button type="primary" @click="submitForm('ruleForm')">-->
-<!--								<router-link :to="'/form'"><span style="color: white;">查询</span></router-link>-->
-<!--							</el-button>-->
-<!--							<el-button type="primary" @click="addMeeting">新增</el-button>-->
-<!--						</el-form-item>-->
-<!--					</el-form>-->
-<!--          </div>-->
-
-
+          <AnnualMeeting v-on:childByValue="childByValue"></AnnualMeeting>
 				</el-card>
 				<!-- 点击新增button之后弹出具有填写表单功能的弹窗 -->
-				<el-dialog :visible.sync="dialogFormVisible"><span slot="title" style="margin-left: 400px;font-size: 30px;">新增会议</span>
-					<el-form :model="form" :rules="rules" ref="form">
-						<el-form-item label="会议名称" prop="name" :label-width="formLabelWidth">
-							<el-input v-model="form.name" autocomplete="off"></el-input>
-						</el-form-item>
+				<el-dialog :visible.sync="dialogFormVisible"><span slot="title" style="margin-left: 300px;font-size: 30px;">新增会议</span>
+<!--					<el-form :model="form" :rules="rules" ref="form">-->
+<!--						<el-form-item label="会议名称" prop="name" :label-width="formLabelWidth">-->
+<!--							<el-input v-model="form.name" autocomplete="off"></el-input>-->
+<!--						</el-form-item>-->
 
-						<el-form-item label="会议时间" :label-width="formLabelWidth" required>
-							<el-col :span="10" style="padding-left: 0px">
-								<el-form-item prop="date0">
-									<el-date-picker placeholder="选择日期" v-model="form.date1" format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
-								</el-form-item>
-							</el-col>
-							<!-- <el-col class="line" :span="2">-</el-col> -->
-							<el-col :span="10">
-								<el-form-item prop="date2">
-									<el-time-picker placeholder="选择时间" v-model="form.date2" format="HH:mm" value-format="HH:mm"></el-time-picker>
-								</el-form-item>
-							</el-col>
-						</el-form-item>
-						<el-form-item prop="address" label="会议地点" :label-width="formLabelWidth" default-first-option>
-							<!-- <el-cascader :options="options" v-model="form.address"></el-cascader> -->
-							<el-input v-model="form.address"></el-input>
-						</el-form-item>
-						<el-form-item label="会议议案" :label-width="formLabelWidth">
-							<!-- <template slot-scope="scope"> -->
-							<div style="float: left; width: 90%">
-								<!-- <li v-for="(val, id) in motion.list" :key="id" style="list-style-type:none;">
-									<el-input type="text" style="margin-bottom: 5px;" v-model="val.text"></el-input>
-								</li> -->
-								<!-- 使用作用域插槽，el-table是子组件，现在往子组件传<template>的内容，并获取里面的内容 -->
-								<el-table :data="motionArray" :show-header="false">
-									<el-table-column prop=motion>
-										<template slot-scope="scope">
-											<el-input v-model="motionArray[scope.$index].motion"></el-input>
-										</template>
-									</el-table-column>
-								</el-table>
-								<!-- <el-input type="text" style="margin-bottom: 5px;"></el-input>
-								<el-input type="text" style="margin-bottom: 5px;"></el-input> -->
-							</div>
-							<div style="float:right">
-								<el-button icon="el-icon-circle-plus" type="success" @click="addMotion"></el-button>
-							</div>
-							<!-- </template> -->
-						</el-form-item>
-					</el-form>
-					<div class="edit_dev">
-						<el-transfer v-model="value" :data="gddata" :titles="['可添加股东信息列表', '已添加股东信息列表']"></el-transfer>
-					</div>
+<!--						<el-form-item label="会议时间" :label-width="formLabelWidth" required>-->
+<!--							<el-col :span="10" style="padding-left: 0px">-->
+<!--								<el-form-item prop="date0">-->
+<!--									<el-date-picker placeholder="选择日期" v-model="form.date1" format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>-->
+<!--								</el-form-item>-->
+<!--							</el-col>-->
+<!--							&lt;!&ndash; <el-col class="line" :span="2">-</el-col> &ndash;&gt;-->
+<!--							<el-col :span="10">-->
+<!--								<el-form-item prop="date2">-->
+<!--									<el-time-picker placeholder="选择时间" v-model="form.date2" format="HH:mm" value-format="HH:mm"></el-time-picker>-->
+<!--								</el-form-item>-->
+<!--							</el-col>-->
+<!--						</el-form-item>-->
+<!--						<el-form-item prop="address" label="会议地点" :label-width="formLabelWidth" default-first-option>-->
+<!--							&lt;!&ndash; <el-cascader :options="options" v-model="form.address"></el-cascader> &ndash;&gt;-->
+<!--							<el-input v-model="form.address"></el-input>-->
+<!--						</el-form-item>-->
+<!--						<el-form-item label="会议议案" :label-width="formLabelWidth">-->
+<!--							&lt;!&ndash; <template slot-scope="scope"> &ndash;&gt;-->
+<!--							<div style="float: left; width: 90%">-->
+<!--								&lt;!&ndash; <li v-for="(val, id) in motion.list" :key="id" style="list-style-type:none;">-->
+<!--									<el-input type="text" style="margin-bottom: 5px;" v-model="val.text"></el-input>-->
+<!--								</li> &ndash;&gt;-->
+<!--								&lt;!&ndash; 使用作用域插槽，el-table是子组件，现在往子组件传<template>的内容，并获取里面的内容 &ndash;&gt;-->
+<!--								<el-table :data="motionArray" :show-header="false">-->
+<!--									<el-table-column prop=motion>-->
+<!--										<template slot-scope="scope">-->
+<!--											<el-input v-model="motionArray[scope.$index].motion"></el-input>-->
+<!--										</template>-->
+<!--									</el-table-column>-->
+<!--								</el-table>-->
+<!--								&lt;!&ndash; <el-input type="text" style="margin-bottom: 5px;"></el-input>-->
+<!--								<el-input type="text" style="margin-bottom: 5px;"></el-input> &ndash;&gt;-->
+<!--							</div>-->
+<!--							<div style="float:right">-->
+<!--								<el-button icon="el-icon-circle-plus" type="success" @click="addMotion"></el-button>-->
+<!--							</div>-->
+<!--							&lt;!&ndash; </template> &ndash;&gt;-->
+<!--						</el-form-item>-->
+<!--					</el-form>-->
+<!--					<div class="edit_dev">-->
+<!--						<el-transfer v-model="value" :data="gddata" :titles="['可添加股东信息列表', '已添加股东信息列表']"></el-transfer>-->
+<!--					</div>-->
 
-					<div slot="footer" class="dialog-footer">
-						<el-button @click="dialogFormVisible = false">取 消</el-button>
-						<el-button type="primary" @click="submitAdd('form')">确 定</el-button>
-						<!-- <el-button type="primary">
-							<router-link :to="'/table'"><span style="color: white;">确定</span></router-link>
-						</el-button> -->
-					</div>
+<!--					<div slot="footer" class="dialog-footer">-->
+<!--						<el-button @click="dialogFormVisible = false">取 消</el-button>-->
+<!--						<el-button type="primary" @click="submitAdd('form')">确 定</el-button>-->
+<!--						&lt;!&ndash; <el-button type="primary">-->
+<!--							<router-link :to="'/table'"><span style="color: white;">确定</span></router-link>-->
+<!--						</el-button> &ndash;&gt;-->
+<!--					</div>-->
+          <AddMeeting></AddMeeting>
 				</el-dialog>
 			</el-col>
 			<el-col :span="16">
@@ -127,27 +108,11 @@
 	  EventBus
 	} from '../../api/event_bus.js'
 import axios from 'axios'
+  import AnnualMeeting from "@/components/page/AnnualMeeting";
+	import AddMeeting from "@/components/page/AddMeeting";
 export default {
 	  name: 'dashboard',
 	  data () {
-	    // 检验方法：判断查询年度会议功能模块中输入的年份是否满足以下格式
-	    var checkYear = (rule, value, callback) => {
-	      if (!value) {
-	        return callback(new Error('年份不能为空'))
-	      }
-	      setTimeout(() => {
-	        if (!Number.isInteger(value)) {
-	          callback(new Error('请输入数字值'))
-	        } else {
-	          if (value > 2100 || value < 2000) {
-	            callback(new Error('年份需大于2000，小于2100'))
-	          } else {
-	            callback()
-	          }
-	        }
-	      }, 1000)
-	    }
-
     return {
 	      username: sessionStorage.username || localStorage.username,
 	      token: sessionStorage.token || localStorage.token,
@@ -155,58 +120,23 @@ export default {
 	      ruleForm: {
 	        year: null
 	      },
-	      rules: {
-	        year: [{
-	          validator: checkYear,
-	          trigger: 'blur'
-	        }],
-	        name: [{
-	          required: true,
-	          message: '请输入会议名称',
-	          trigger: 'blur'
-	        },
-	        {
-	          min: 1,
-	          max: 25,
-	          message: '长度在1 到 25 个字符',
-	          trigger: 'blur'
-	        }
-	        ],
-	        address: [{
-	          required: true,
-	          trigger: 'blur',
-	          message: '请输入会议地址'
-	        } ],
-	        date0: [{
-	
-	          // required: true,
-	          message: '请选择日期',
-	          trigger: 'change'
-	        }],
-	        date2: [{
-	
-	          required: true,
-	          message: '请选择时间',
-	          trigger: 'change'
-	        }]
-	      },
 	      tableData: [],
-	      gddata: [],
-	      value: [],
+	      // gddata: [],
+	      // value: [],
 	      // dialogTableVisible: false,
 	      dialogFormVisible: false,
-	      form: {
-	        name: '',
-	        date1: '',
-	        date2: '',
-	        options: [],
-	        address: '',
-	        motion: ''
-	      },
+	      // form: {
+	      //   name: '',
+	      //   date1: '',
+	      //   date2: '',
+	      //   options: [],
+	      //   address: '',
+	      //   motion: ''
+	      // },
 
-	      motionArray: [{}],
-	      formLabelWidth: '120px',
-	      date: null,
+	      // motionArray: [{}],
+	      // formLabelWidth: '120px',
+	      // date: null,
 	      meetingName: '',
 	      yearList: [],
 	      meetingNameList: [],
@@ -235,6 +165,9 @@ export default {
 	      ]
 	    }
   },
+  components: {
+    AnnualMeeting, AddMeeting
+  },
 
 	  computed: {
 	    role () {
@@ -262,21 +195,7 @@ export default {
 	      })
 	  },
 	  watch: {
-	    // 侦听年度会议功能卡中的年份发生变化时立马向后台发起数据请求
-	    'ruleForm.year': function (newVal) {
-	      if (newVal) {
-	        // alert(this.year)
-	        // console.log()
-	        axios.get(this.host + 'get_meeting/' + newVal)
-	          .then(response => (
-	            // console.log(response.data[2020]),
-	            this.meetingNameList = response.data[newVal]
-	          )).catch(error => {
-	            alert('error')
-	            // console.log(error.response.data);
-	          })
-	      }
-	    }
+
 	  },
 	  // created() {
 	  //     this.handleListener();
@@ -290,81 +209,84 @@ export default {
 	  //     bus.$off('collapse', this.handleBus);
 	  // },
 	  methods: {
-	    addMotion () {
-	      this.motionArray.push({})
-	    },
-	    getData (year, name) {
-	      axios.get(this.host + 'get_detail/' + this.ruleForm.year + '/' + this.meetingName)
-	        .then(response => (
-	          this.res_data = response.data,
-	          this.tableData = this.res_data.list,
-	          // 事件总线，向BaseForm组件通信，共享数据
-	          EventBus.$emit('addition', {
-	            year: this.ruleForm.year,
-	            date: this.date,
-	            meetingName: this.meetingName,
-	            tableData: this.tableData,
-	            motion: this.res_data.motion,
-	            sharehold: this.res_data.sharehold
-	          })
-	        )).catch(error => {
-	          // console.log(error.response);
-	        })
-	    },
-	    submitForm (formName) {
-	      this.$refs[formName].validate((valid) => {
-	        if (valid) {
-	          this.getData()
-	        } else {
-	          console.log('error submit!!')
-	          return false
-	        }
-	      })
-	    },
-	    submitAdd (formName) {
-	      console.log(formName)
-	      this.$refs[formName].validate((valid) => {
-	        if (valid) {
-	          axios.post(this.host + 'add_meeting', {
-	            meeting: this.form,
-	            motion: this.motionArray,
-	            gdid: this.value
-	          }).then(response => (
-	            this.$message.success('提交成功！'),
-	            this.dialogFormVisible = false,
-	            location.reload()
-	            // EventBus.$emit('addition',{
-	            // 	year:this.form.year,
-	            // 	meetingName: this.form.name
-	            // })
-	            // this.$router.push({name:'form'})
-	          )).catch(error => (this.$message(error.response.data.msg)))
-	        } else {
-	          this.$message.error('数据校验失败，请按格式填写！')
-	        }
-	      })
-	    },
-	    changeDate () {
-	      const now = new Date().getTime()
-	      this.data.forEach((item, index) => {
-	        const date = new Date(now - (6 - index) * 86400000)
-	        item.name = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
-	      })
-    },
-	    addMeeting () {
-	      this.dialogFormVisible = true
-	      axios.get(this.host + 'get_shareholder')
-	        .then(response => (
-	          // console.log(response.data)
-	          this.gddata = response.data['list']
-	          // for(var i = 0; i <= response.data['list'].length; i++) {
-	          // 		this.gddata.push({key: response.data['list'][i].id,	label: response.data['list'][i].name})
-	          // }
-	        )).catch(error => {
-	          alert('error')
-	          // console.log(error.response.data);
-	        })
-	    }
+	    childByValue(childValue) {
+	      this.dialogFormVisible = childValue
+      }
+      // addMotion () {
+	    //   this.motionArray.push({})
+	    // },
+	    // getData (year, name) {
+	    //   axios.get(this.host + 'get_detail/' + this.ruleForm.year + '/' + this.meetingName)
+	    //     .then(response => (
+	    //       this.res_data = response.data,
+	    //       this.tableData = this.res_data.list,
+	    //       // 事件总线，向BaseForm组件通信，共享数据
+	    //       EventBus.$emit('addition', {
+	    //         year: this.ruleForm.year,
+	    //         date: this.date,
+	    //         meetingName: this.meetingName,
+	    //         tableData: this.tableData,
+	    //         motion: this.res_data.motion,
+	    //         sharehold: this.res_data.sharehold
+	    //       })
+	    //     )).catch(error => {
+	    //       // console.log(error.response);
+	    //     })
+	    // },
+	    // submitForm (formName) {
+	    //   this.$refs[formName].validate((valid) => {
+	    //     if (valid) {
+	    //       this.getData()
+	    //     } else {
+	    //       console.log('error submit!!')
+	    //       return false
+	    //     }
+	    //   })
+	    // },
+	  //   submitAdd (formName) {
+	  //     console.log(formName)
+	  //     this.$refs[formName].validate((valid) => {
+	  //       if (valid) {
+	  //         axios.post(this.host + 'add_meeting', {
+	  //           meeting: this.form,
+	  //           motion: this.motionArray,
+	  //           gdid: this.value
+	  //         }).then(response => (
+	  //           this.$message.success('提交成功！'),
+	  //           this.dialogFormVisible = false,
+	  //           location.reload()
+	  //           // EventBus.$emit('addition',{
+	  //           // 	year:this.form.year,
+	  //           // 	meetingName: this.form.name
+	  //           // })
+	  //           // this.$router.push({name:'form'})
+	  //         )).catch(error => (this.$message(error.response.data.msg)))
+	  //       } else {
+	  //         this.$message.error('数据校验失败，请按格式填写！')
+	  //       }
+	  //     })
+	  //   },
+	  //   changeDate () {
+	  //     const now = new Date().getTime()
+	  //     this.data.forEach((item, index) => {
+	  //       const date = new Date(now - (6 - index) * 86400000)
+	  //       item.name = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
+	  //     })
+    // },
+	  //   addMeeting () {
+	  //     this.dialogFormVisible = true
+	  //     axios.get(this.host + 'get_shareholder')
+	  //       .then(response => (
+	  //         // console.log(response.data)
+	  //         this.gddata = response.data['list']
+	  //         // for(var i = 0; i <= response.data['list'].length; i++) {
+	  //         // 		this.gddata.push({key: response.data['list'][i].id,	label: response.data['list'][i].name})
+	  //         // }
+	  //       )).catch(error => {
+	  //         alert('error')
+	  //         // console.log(error.response.data);
+	  //       })
+	  //   }
 	    // handleListener() {
 	    //     bus.$on('collapse', this.handleBus);
 	    //     // 调用renderChart方法对图表进行重新渲染
@@ -385,12 +307,7 @@ export default {
 
 
 <style scoped>
-	.edit_dev>>>.el-transfer-panel {
 
-		/* width: 300px; */
-		margin: 0 auto;
-		width: 35%
-	}
 
 
 	.search-box {

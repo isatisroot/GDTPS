@@ -66,7 +66,7 @@
 		<!-- </div> -->
 		<div class="container">
 			<!-- <div id="onSite" v-show="showOnSite"> -->
-			<el-tabs v-model="message" type="border-card" @tab-click="handleTabClick" >
+			<el-tabs v-model="message" type="border-card" >
 				<el-tab-pane name="first" >
 					<div id="onSite" class="on-site">
 						<p class="title1">佛山电器照明股份有限公司</p>

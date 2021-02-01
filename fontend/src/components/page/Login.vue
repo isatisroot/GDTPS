@@ -2,12 +2,6 @@
 
     <div class="login-wrap">
       <link href="https://cdn.jsdelivr.net/npm/animate.css@3.5.1" rel="stylesheet" type="text/css">
-
-<!--      <transition-->
-<!--          name="custom-classes-transition"-->
-<!--          enter-active-class="animated tada"-->
-<!--          leave-active-class="animated bounceOutDown"-->
-<!--      >-->
         <div class="ms-login" v-if="show">
             <div class="ms-title">佛山照明股东投票系统</div>
             <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
@@ -33,37 +27,31 @@
             </el-form>
         </div>
 
-<!--      </transition>-->
-<!--      <transition enter-active-class="animated tada">-->
-        <div class="ms-login animated fadeInUp"  v-if="!show">
+        <div class="ms-login animated fadeInUp"  v-if="!show & !dialogFormVisible" style="text-align: center">
           <div class="ms-title">选择年度会议</div>
-          <el-form>
-            <el-form-item>
-              <el-input></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-input></el-input>
-            </el-form-item>
-            <el-form-item>
-              <div class="login-btn">
-              <el-button type="primary" @click="submitForm('ruleForm')">
-                <router-link :to="'/form'"><span style="color: white;">查询</span></router-link>
-              </el-button>
-              <el-button type="primary" @click="addMeeting">新增</el-button>
-            </div>
-            </el-form-item>
-          </el-form>
+
+          <AnnualMeeting class="ms-content" v-on:childByValue="childByValue"></AnnualMeeting>
         </div>
-<!--      </transition>-->
+      <div v-if="dialogFormVisible" class="new-meeting animated fadeInUp">
+        <div class="ms-title">新增会议</div>
+      <AddMeeting ></AddMeeting>
+      </div>
+
 
     </div>
 </template>
 
 <script>
 	import axios from 'axios'
+import AnnualMeeting from '@/components/page/AnnualMeeting'
+import AddMeeting from '@/components/page/AddMeeting'
 export default {
+  components: {
+    AnnualMeeting, AddMeeting
+  },
   data: function () {
     return {
+      dialogFormVisible: false,
       show: true,
       param: {
         username: 'admin',
@@ -75,11 +63,14 @@ export default {
       }
     }
   },
+
   methods: {
+    childByValue (childValue) {
+      this.dialogFormVisible = childValue
+    },
     submitForm () {
       this.$refs.login.validate(valid => {
         if (valid) {
-
           // this.$router.push('/')
           axios.post(this.host + 'login', {
 	            username: this.param.username,
@@ -126,7 +117,7 @@ export default {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 350px;
+    width:350px;
     margin: -190px 0 0 -175px;
     border-radius: 5px;
     background: rgba(255, 255, 255, 0.3);
@@ -151,5 +142,17 @@ export default {
     font-size: 12px;
     line-height: 30px;
     color: #fff;
+}
+.new-meeting{
+  position: absolute;
+  left: 25%;
+  top: 18%;
+  overflow: hidden;
+  /*margin: -190px 0 0 -175px;*/
+  /*margin: auto;*/
+  border-radius: 5px;
+  width: 700px;
+  background: rgba(255, 255, 255, 0.3);
+
 }
 </style>

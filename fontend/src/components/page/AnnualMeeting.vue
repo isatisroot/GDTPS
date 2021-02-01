@@ -1,12 +1,12 @@
 <template>
   <div>
-    <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" class="demo-ruleForm">
+    <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" >
       <el-form-item prop="year">
         <!-- .number限制输入的只能是数值 -->
-        <el-input v-model.number="ruleForm.year" placeholder="请输入年份" style="width: 50%;"></el-input>
+        <el-input v-model.number="ruleForm.year" placeholder="请输入年份" style="width: 70%;"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-select v-model="meetingName" label="会议类型" required placeholder="请选择会议类型" style="width: 50%;">
+        <el-select v-model="ruleForm.meetingName" label="会议类型" required placeholder="请选择会议类型" style="width: 70%;">
           <el-option v-for="(val, id) in meetingNameList" :key="id" :value="val"></el-option>
         </el-select>
       </el-form-item>
@@ -21,6 +21,9 @@
 </template>
 
 <script>
+import axios from 'axios'
+import {EventBus} from "@/api/event_bus";
+
 export default {
   name: 'AnnualMeeting',
   data () {
@@ -42,8 +45,11 @@ export default {
       }, 1000)
     }
     return {
+      dialogFormVisible: false,
+      meetingNameList: [],
       ruleForm: {
-        year: null
+        year: null,
+        meeting: ''
       },
       rules: {
         year: [{
@@ -51,6 +57,67 @@ export default {
           trigger: 'blur'
         }]
       }
+    }
+  },
+  created () {
+    this.init()
+  },
+  watch: {
+    // 侦听年度会议功能卡中的年份发生变化时立马向后台发起数据请求
+    'ruleForm.year': function (newVal) {
+      if (newVal) {
+        // alert(this.year)
+        // console.log()
+        axios.get(this.host + 'get_meeting/' + newVal)
+          .then(response => (
+            // console.log(response.data[2020]),
+            this.meetingNameList = response.data[newVal]
+          )).catch(error => {
+            // alert('error')
+          // console.log(error.response.data);
+          })
+      }
+    }
+  },
+  methods: {
+    init () {
+      axios.get(this.host + 'current').then(response => {
+        this.ruleForm.year = response.data['current']['year']
+        this.ruleForm.meetingName = response.data['current']['name']
+        this.meetingNameList = response.data['meeting_list']
+      }).catch(error => { cosole.log(error) })
+    },
+    getData (year, name) {
+      axios.get(this.host + 'get_detail/' + this.ruleForm.year + '/' + this.meetingName)
+          .then(response => (
+              this.res_data = response.data,
+                  this.tableData = this.res_data.list,
+                  // 事件总线，向BaseForm组件通信，共享数据
+                  EventBus.$emit('addition', {
+                    year: this.ruleForm.year,
+                    date: this.date,
+                    meetingName: this.meetingName,
+                    tableData: this.tableData,
+                    motion: this.res_data.motion,
+                    sharehold: this.res_data.sharehold
+                  })
+          )).catch(error => {
+        // console.log(error.response);
+      })
+    },
+    submitForm (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.getData()
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
+    addMeeting () {
+      this.dialogFormVisible = true
+      this.$emit('childByValue', this.dialogFormVisible)
     }
   }
 }
