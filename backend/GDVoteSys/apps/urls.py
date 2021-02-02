@@ -14,5 +14,6 @@ urlpatterns = [
     url(r'delete', views.Delete.as_view()),
     url(r'login', views.Login.as_view()),
     # url(r'add/', views.Add.as_view()),
-    url(r'current', views.Current.as_view())
+    url(r'current', views.Current.as_view()),
+    url(r'result/(?P<year>\d{4})/(?P<meeting_name>\w+)', views.Result.as_view())
 ]

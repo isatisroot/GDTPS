@@ -66,11 +66,13 @@ class Current(View):
     def get(self, request):
         """
         向数据库中查询标记为最近一次会议的会议信息
-        :return: 当前会议信息：年份，名称，时间, 参会股东信息; 当前年份下所有会议信息的列表; 股本数;
+        :return: 当前会议信息：年份，名称，时间, 参会股东信息; 当前年份下所有会议信息的列表; 股本数; 备选股东信息
         """
         motion = []
         detail_list = []
         meeting_list = []
+        s_list = []
+        extr_sh_list = []
         m = Meeting.objects.get(current_year=1)
         str_date = m.date.strftime('%Y-%m-%d %H:%M:%S')
         # 会议议案
@@ -85,6 +87,7 @@ class Current(View):
         for q in qs1:
             # 根据登记表查找到股东信息表q
             s = q.shareholder
+
             data = {
                 'id':q.shareholder_id,
                 'cx': q.cx,
@@ -98,8 +101,24 @@ class Current(View):
                 'gzB': q.gzB,
                 'meno': q.meno  # 备注信息
             }
+            s_list.append(s.id)
             detail_list.append(data)
 
+        # 找出在登记表中没有关联的股东信息
+        extr_shareholds = ShareholderInfo.objects.exclude(id__in = s_list)
+        for s in extr_shareholds:
+            data = {
+                'id':s.id,
+                'value': s.gdxm,
+                'gdtype': s.gdtype,
+                'gddmk': s.gddmk,
+                'sfz': s.sfz,
+                'rs': s.rs,
+                'gzA': s.gzA,
+                'gzB': s.gzB,
+            }
+            extr_sh_list.append(data)
+        
         # 查询当前年份下有多少个会议
         qs2 = Meeting.objects.filter(year=m.year)
         for q in qs2:
@@ -109,7 +128,7 @@ class Current(View):
         sharehold = {"totalShare": m.gb.gb, "AShareTotal": m.gb.ltag, "BShareTotal": m.gb.ltbg}
 
         return JsonResponse({"current": current, "detail_list": detail_list,
-                             "meeting_list": meeting_list, 'sharehold': sharehold})
+                             "meeting_list": meeting_list, 'sharehold': sharehold, "extr_shareholds": extr_sh_list})
 
 
 class AddMeeting(View):
@@ -189,14 +208,17 @@ class QueryMeeting(View):
 #
 class QueryDetail(View):
     def get(self, request, year, meeting_name):
-#         # year = request.GET.get('year')
-#         # meeting_name = request.GET.get('meeting_name')
-#         print(year, meeting_name)
-        global str_date, sharehold
+
+        global str_date, sharehold, extr_sh_list, meeting_list, current
+        motion = []
         str_date = ""
         sharehold = {}
+        current = {}
+        s_list = []
         detail_list = []
-        motion = []
+        meeting_list = []
+        extr_sh_list = []
+
         try:
             # m是annual_meeting年度会议表的模型类对象
             m = Meeting.objects.get(year=year,name=meeting_name)
@@ -205,37 +227,58 @@ class QueryDetail(View):
                 sharehold = {"totalShare": m.gb.gb, "AShareTotal": m.gb.ltag, "BShareTotal": m.gb.ltbg}
             # 通过m查找现场会议登记的中间表queset
             queryset = m.onsitemeeting_set.all()
-            # _d = m.date + timedelta(minutes=-10)
+
             str_date = m.date.strftime('%Y-%m-%d %H:%M:%S')
             if m.motion:
                 motion = m.motion.split(";")
                 motion.pop()
             # print(motion)
-            for i in queryset:
+            current = {"year": m.year, "name": m.name, "date": str_date, "motion": motion}
+
+
+            for q in queryset:
                 # 根据中间表查找到股东信息表q
-                q = i.shareholder
+                s = q.shareholder
                 # print(i.cx)
                 data = {
-                    'id':i.shareholder_id,
-                    'cx': i.cx,
-                    'xc': i.xcorwl,
-                    'gdxm': q.gdxm,
-                    'gdtype': q.gdtype,
-                    'gddmk': q.gddmk,
-                    'sfz': q.sfz,
-                    'rs': q.rs,
-                    # 'frA': q.frA,
-                    'gzA': i.gzA,
-                    'gzB': i.gzB,
-                    # 'dlr': q.dlr,
-                    'meno': i.meno
+                    'id':q.shareholder_id,
+                    'cx': q.cx,
+                    'xc': q.xcorwl,
+                    'gdxm': s.gdxm,
+                    'gdtype': s.gdtype,
+                    'gddmk': s.gddmk,
+                    'sfz': s.sfz,
+                    'rs': s.rs,
+                    'gzA': q.gzA,
+                    'gzB': q.gzB,
+                    'meno': q.meno
                 }
+                s_list.append(s.id)
                 detail_list.append(data)
+
+            # 找出在登记表中没有关联的股东信息
+            extr_shareholds = ShareholderInfo.objects.exclude(id__in = s_list)
+            for s in extr_shareholds:
+                data = {
+                    'id':s.id,
+                    'value': s.gdxm,
+                    'gdtype': s.gdtype,
+                    'gddmk': s.gddmk,
+                    'sfz': s.sfz,
+                    'rs': s.rs,
+                    'gzA': s.gzA,
+                    'gzB': s.gzB,
+                }
+                extr_sh_list.append(data)
+
+            qs2 = Meeting.objects.filter(year=m.year)
+            for q in qs2:
+                meeting_list.append(q.name)
         except Exception as e:
             print(e)
 
-        return JsonResponse({'date': str_date, 'motion':motion, 'list':detail_list, 'sharehold': sharehold})
-
+        # return JsonResponse({'date': str_date, 'motion':motion, 'list':detail_list, 'sharehold': sharehold})
+        return JsonResponse({"current": current, "detail_list": detail_list, "meeting_list": meeting_list, 'sharehold': sharehold, "extr_shareholds": extr_sh_list})
 class UpdateMeeting(View):
     def post(self, request):
         json_str = request.body.decode()
@@ -350,3 +393,54 @@ class Delete(View):
 
         return JsonResponse({'code':200, 'msg':'删除成功'})
 
+class Result(View):
+    def get(self, request, year, meeting_name):
+        s_list = []
+        detail_list = []
+        m = Meeting.objects.get(year=year,name=meeting_name)
+        if m.gb:
+            # 通过年度会议查找股本信息
+            sharehold = {"totalShare": m.gb.gb, "AShareTotal": m.gb.ltag, "BShareTotal": m.gb.ltbg}
+        # 查询出席会议股东及其股份
+        cxgd = m.onsitemeeting_set.filter(cx=1)
+        sum_gd = len(cxgd)
+        sum_ag = 0
+        sum_bg = 0
+        sum_xc = 0
+        sum_xc_ag = 0
+        sum_xc_bg = 0
+        for i in cxgd:
+            sum_ag += i.gzA
+            sum_bg += i.gzB
+            if i.xcorwl:
+                sum_xc += 1
+                sum_xc_ag += i.gzA
+                sum_xc_bg += i.gzB
+
+
+        # 通过m查找现场会议登记的中间表queset,统计中小股东出席人数
+        sum_zxgu = 0
+        queryset = m.onsitemeeting_set.all()
+        for q in queryset:
+            # 根据中间表查找到股东信息表q
+            s = q.shareholder
+            if(s.gdtype == "中小股"):
+                sum_zxgu += 1
+
+            # print(i.cx)
+            # data = {
+            #     'id':q.shareholder_id,
+            #     'cx': q.cx,
+            #     'xc': q.xcorwl,
+            #     'gdxm': s.gdxm,
+            #     'gdtype': s.gdtype,
+            #     'gddmk': s.gddmk,
+            #     'sfz': s.sfz,
+            #     'rs': s.rs,
+            #     'gzA': q.gzA,
+            #     'gzB': q.gzB,
+            #     'meno': q.meno
+            # }
+            # s_list.append(s.id)
+            # detail_list.append(data)
+        return  JsonResponse({})
