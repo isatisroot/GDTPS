@@ -6,11 +6,12 @@
             <v-tags></v-tags>
             <div class="content">
                 <transition name="move" mode="out-in">
-                    <keep-alive :include="tagsList">
+<!--                  禁用缓存，使子组件中状态更新时，共享的数据在其他组件及时响应-->
+<!--                    <keep-alive :include="tagsList">-->
 						<!-- 路由出口 -->
 						  <!-- 路由匹配到的组件将渲染在这里 -->
                         <router-view></router-view>
-                    </keep-alive>
+<!--                    </keep-alive>-->
                 </transition>
                 <el-backtop target=".content"></el-backtop>
             </div>
@@ -19,35 +20,42 @@
 </template>
 
 <script>
-import vHead from './Header.vue';
-import vSidebar from './Sidebar.vue';
-import vTags from './Tags.vue';
-import bus from './bus';
+import vHead from './Header.vue'
+import vSidebar from './Sidebar.vue'
+import vTags from './Tags.vue'
+import bus from './bus'
+import {EventBus} from '@/api/event_bus'
 export default {
-    data() {
-        return {
-            tagsList: [],
-            collapse: false
-        };
-    },
-    components: {
-        vHead,
-        vSidebar,
-        vTags
-    },
-    created() {
-        bus.$on('collapse-content', msg => {
-            this.collapse = msg;
-        });
-
-        // 只有在标签页列表里的页面才使用keep-alive，即关闭标签之后就不保存到内存中了。
-        bus.$on('tags', msg => {
-            let arr = [];
-            for (let i = 0, len = msg.length; i < len; i++) {
-                msg[i].name && arr.push(msg[i].name);
-            }
-            this.tagsList = arr;
-        });
+  data () {
+    return {
+      tagsList: [],
+      collapse: false,
+      year: null,
+      name: null
     }
-};
+  },
+  components: {
+    vHead,
+    vSidebar,
+    vTags
+  },
+  created () {
+    EventBus.$on('addition', param => {
+      this.year = param.year
+      this.name = param.meetingName
+    })
+    bus.$on('collapse-content', msg => {
+      this.collapse = msg
+    })
+
+    // 只有在标签页列表里的页面才使用keep-alive，即关闭标签之后就不保存到内存中了。
+    bus.$on('tags', msg => {
+      let arr = []
+      for (let i = 0, len = msg.length; i < len; i++) {
+        msg[i].name && arr.push(msg[i].name)
+      }
+      this.tagsList = arr
+    })
+  }
+}
 </script>

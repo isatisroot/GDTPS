@@ -8,7 +8,7 @@
         </div>
       <div class="container">
         <p class="title1" >佛山电器照明股份有限公司</p>
-        <p  class="title2" align="center">议案表决投反对票、弃权票统计表</p>
+        <p  class="title2" align="center">{{query.year+query.name}}议案表决投反对票、弃权票统计表</p>
         <p class="text">出现会议股东代表股数：x股， 其中B股y股。</p>
         <table class="table4" >
           <tr>
@@ -77,6 +77,10 @@ export default {
   name: 'editor',
   data: function () {
     return {
+      query: {
+        year: null,
+        name: null
+      },
       directorMotion: ['选举董事会成员1', '选举董事会成员2'],
       array1: [],
       array2: [],
@@ -88,6 +92,14 @@ export default {
       countQiB: [{count: null}, {count: null}, {count: null}]
 
     }
+  },
+  created() {
+    this.query.year = localStorage.getItem('year')
+    this.query.name = JSON.parse(localStorage.getItem('meetingName'))
+  },
+  updated () {
+    this.query.year = localStorage.getItem('year')
+    this.query.name = JSON.parse(localStorage.getItem('meetingName'))
   },
 
   methods: {

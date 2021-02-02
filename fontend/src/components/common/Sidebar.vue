@@ -31,10 +31,13 @@
 
 <script>
 	import bus from '../common/bus'
+  import {EventBus} from '@/api/event_bus'
 export default {
 	  data () {
 	    return {
 	      collapse: false,
+        year: null,
+        name: null,
 	      items: [
 	        {
 	          icon: 'el-icon-lx-copy',
@@ -109,6 +112,11 @@ export default {
 	  },
 	  created () {
 	    // 通过 Event Bus 进行组件间通信，来折叠侧边栏
+      EventBus.$on('addition', param => {
+        this.year = param.year
+        // alert(this.year)
+      })
+
 	    bus.$on('collapse', msg => {
 	      this.collapse = msg
 	      bus.$emit('collapse-content', msg)

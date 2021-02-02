@@ -111,11 +111,16 @@ export default {
     }
   },
   created () {
-    EventBus.$on('baseform', param => {
-      this.query.year = param.year
-      this.query.name = param.meetingName
-      this.motion = param.motion
-    })
+    this.query.year = localStorage.getItem('year')
+    this.query.name = JSON.parse(localStorage.getItem('meetingName'))
+  },
+  mounted () {
+
+  },
+  updated () {
+    // 当有更新时重新读取
+    this.query.year = localStorage.getItem('year')
+    this.query.name = JSON.parse(localStorage.getItem('meetingName'))
   },
 
   methods: {

@@ -78,7 +78,7 @@ export default {
 	          }).then(response => {
             this.$message.success('登录成功！')
             this.show = false
-            localStorage.setItem('ms_username', this.param.username)
+            // localStorage.setItem('ms_username', this.param.username)
             localStorage.setItem('ms_username', response.data['username'])
             localStorage.setItem('token', response.data['token'])
 	            // this.$router.push('/')

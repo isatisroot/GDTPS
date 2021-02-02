@@ -240,8 +240,8 @@ export default {
       message: 'first',
       query: {
         address: '',
-        year: '',
-        name: '',
+        year: null,
+        name: null,
         date: null,
         pageIndex: 1,
         pageSize: 15
@@ -254,27 +254,37 @@ export default {
       rowList: [],
       motion: [],
       row: [], // 选中的行
-      index: null
+      index: null,
+      test: null,
     }
   },
 
   created () {
-    EventBus.$on('addition', param => {
-      this.query.year = param.year
-      this.query.name = param.meetingName
-      this.init('current')
-    })
+    // EventBus.$on('addition', param => {
+    //   this.query.year = param.year
+    //   this.query.name = param.meetingName
+    // })
+    this.query.year = localStorage.getItem('year')
+    this.query.name = JSON.parse(localStorage.getItem('meetingName'))
+    this.init('current')
   },
-  mounted () {
+  watch: {
+    // 侦听年度会议功能卡中的年份发生变化时立马向后台发起数据请求
+    'query.year': function (newVal) {
+      if (newVal) {
+        axios.get(this.host + 'get_meeting/' + newVal)
+          .then(response => (
+            // console.log(response.data[2020]),
+            this.meetingName = response.data[newVal]
+          )).catch(error => {
+            console.log(error)
+          })
+      }
+    }
+  },
+  beforeDestroy () {
+    // EventBus.$off('addition')
 
-  },
-  beforeDestroy() {
-    EventBus.$off('addition')
-    EventBus.$emit('baseform', {
-      year: this.query.year,
-      meetingName: this.query.name,
-      motion: this.motion
-    })
   },
   computed: {
     countCheckedData: function () {
@@ -347,6 +357,8 @@ export default {
     async handleSearch () {
       // 等待异步请求axios处理完成后再执行initSelectRow操作，因为后者需要等到tableData拿到数据后进行操作
       await this.getData()
+      localStorage.setItem('year', JSON.stringify(this.query.year))
+      localStorage.setItem('meetingName', JSON.stringify(this.query.name))
       // 初始化rowChecked中的数据
       this.transferFormat()
       this.initSelectRow()

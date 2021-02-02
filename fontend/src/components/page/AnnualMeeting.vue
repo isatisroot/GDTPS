@@ -6,13 +6,15 @@
         <el-input v-model.number="ruleForm.year" placeholder="请输入年份" style="width: 70%;"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-select v-model="ruleForm.meetingName" label="会议类型" required placeholder="请选择会议类型" style="width: 70%;">
+        <el-select v-model="dashboard?dashboard.meetingName:ruleForm.meetingName" label="会议类型" required placeholder="请选择会议类型" style="width: 70%;">
           <el-option v-for="(val, id) in meetingNameList" :key="id" :value="val"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submitForm('ruleForm')">
-          <router-link :to="'/form'"><span style="color: white;">查询</span></router-link>
+<!--          <router-link :to="'/form'">-->
+            <span style="color: white;">查询</span>
+<!--          </router-link>-->
         </el-button>
         <el-button type="primary" @click="addMeeting">新增</el-button>
       </el-form-item>
@@ -26,6 +28,7 @@ import {EventBus} from '@/api/event_bus'
 
 export default {
   name: 'AnnualMeeting',
+  props: ['dashboard'],
   data () {
     // 检验方法：判断查询年度会议功能模块中输入的年份是否满足以下格式
     var checkYear = (rule, value, callback) => {
@@ -80,11 +83,11 @@ export default {
     }
   },
   beforeDestroy () {
-    EventBus.$emit('addition', {
-      year: this.ruleForm.year,
-      meetingName: this.ruleForm.meetingName
-
-    })
+    // EventBus.$emit('addition', {
+    //   year: this.ruleForm.year,
+    //   meetingName: this.ruleForm.meetingName
+    //
+    // })
   },
   methods: {
     init () {
@@ -96,27 +99,24 @@ export default {
     },
     getData (year, name) {
       axios.get(this.host + 'get_detail/' + this.ruleForm.year + '/' + this.meetingName)
-        .then(response => (
+        .then(response => {
           this.res_data = response.data,
-          this.tableData = this.res_data.list,
+          this.tableData = this.res_data.list
           // 事件总线，向BaseForm组件通信，共享数据
           EventBus.$emit('addition', {
             year: this.ruleForm.year,
-            // date: this.date,
             meetingName: this.meetingName
-            // tableData: this.tableData,
-            // motion: this.res_data.motion,
-            // sharehold: this.res_data.sharehold
           })
-        )).catch(error => {
+    }).catch(error => {
         // console.log(error.response);
         })
     },
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          // this.getData()
-          // alert(this.ruleForm.meetingName)
+          localStorage.setItem('year', JSON.stringify(this.ruleForm.year))
+          localStorage.setItem('meetingName', JSON.stringify(this.ruleForm.meetingName))
+          this.$router.push('/form')
         } else {
           console.log('error submit!!')
           return false
