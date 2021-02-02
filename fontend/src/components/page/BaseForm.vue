@@ -10,15 +10,6 @@
 		</div> -->
 		<!-- <div class="topDiv"> -->
 		<ul class="button-group">
-      <div class="button-group-left">
-        <el-button class="button" icon="el-icon-circle-plus" @click="addRow">增加</el-button>
-        <el-button class="button" icon="el-icon-delete" @click="handleDelete(row.index,row)" >删除</el-button>
-        <el-button class="button" icon="el-icon-printer" @click="printOnSite">登记表</el-button>
-        <el-button class="button" icon="el-icon-printer" @click="printCeritficate" v-print="'#printCertificate'">登记凭证</el-button>
-        <el-button class="button" icon="el-icon-printer" @click="printVote" v-print="'#printVote'">表决表</el-button>
-        <el-button class="button" icon="el-icon-printer" @click="printStock" v-print="'#printStock'">统计表</el-button>
-        <el-button class="button" icon="el-icon-success" @click="updateTable">保存</el-button>
-      </div>
       <div class="search-box">
         <el-select v-model="query.year" placeholder="年份" class="handle-select mr10" filterable allow-create
                    default-first-option clearable>
@@ -29,9 +20,19 @@
           <el-option v-for="(val, id) in meetingName" :key="id" :value="val"></el-option>
         </el-select>
 
-        <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+        <el-button type="warning" icon="el-icon-search" @click="handleSearch">搜索</el-button>
         <!-- <el-button type="primary" icon="el-icon-circle-plus">新增</el-button> -->
       </div>
+      <div class="button-group-left">
+        <el-button class="button" icon="el-icon-circle-plus" @click="addRow">增加</el-button>
+        <el-button class="button" icon="el-icon-delete" @click="handleDelete(row.index,row)" >删除</el-button>
+        <el-button class="button" icon="el-icon-printer" @click="printOnSite">登记表</el-button>
+        <el-button class="button" icon="el-icon-printer" @click="printCeritficate" v-print="'#printCertificate'">登记凭证</el-button>
+        <el-button class="button" icon="el-icon-printer" @click="printVote" v-print="'#printVote'">表决表</el-button>
+        <el-button class="button" icon="el-icon-printer" @click="printStock" v-print="'#printStock'">统计表</el-button>
+        <el-button class="button" icon="el-icon-success" @click="updateTable">保存</el-button>
+      </div>
+
 
 			<div class="sharemsg">
 				<span>总股本：</span>
@@ -214,7 +215,7 @@ export default {
       // height: '2px'
       },
       headerCellStyle: {
-        background: '#00dea3 !important',
+        background: '#FFCCBC!important',
         color: '#7100aa',
         'border': 'solid 1px #000000 !important',
         padding: '0px'
@@ -699,11 +700,12 @@ export default {
 
 	.button {
 		/* border-top: 1px solid #97f7df; */
-		/*background: #1ABC9C;*/
-    background: linear-gradient(0.25turn, #3f87a6, #ebf8e1, #449abf);
+		background: #FFCCBC;
+    /*background: linear-gradient(0.25turn, #03A9F4, #ebf8e1, #B2DFDB);*/
 		padding: 9px 15px;
 		border-radius: 3px;
-		color: #e45f23;
+		/*color: #e45f23;*/
+    color: red;
 		font-size: 12px;
     font-weight: bolder;
     font-family: "YouYuan";
@@ -739,16 +741,33 @@ export default {
     /*line-height: 3px;*/
 	}
 
-
+  .button-group {
+    /* font-size: 0; */
+    /* Inline block elements gap - fix */
+    /* margin-bottom: 10px; */
+    padding: 0;
+    /*background: #E64A19;*/
+    background: linear-gradient(to bottom, #FF5722, #FFCCBC);
+    /* border-bottom: 1px solid rgba(0, 0, 0, .1); */
+    padding: 7px;
+    -moz-border-radius: 7px;
+    -webkit-border-radius: 7px;
+    border-radius: 7px;
+    /* float: right; */
+  }
 
 </style>
 <style scoped>
-
+/deep/ .el-checkbox__input.is-checked .el-checkbox__inner, .el-checkbox__input.is-indeterminate .el-checkbox__inner{
+  background-color: #f56c6c;
+  border-color: palegoldenrod;
+}
 	/* 鼠标移入行时改变背景色 */
 	/*/deep/ .el-table tbody tr:hover>td { background-color: lightpink }*/
   /*鼠标点击行时改变颜色*/
   /deep/ .el-table__body tr.current-row>td{
-    background-color: #69A8EA !important;
+    /*background-color: #69A8EA !important;*/
+    background: #FFCCBC;
     /*color: #fff;*/
   }
 
@@ -779,8 +798,8 @@ export default {
 	} */
 
   .button-group-left{
-    display: inline-block;
-    text-align: right;
+    /*display: inline-block;*/
+    /*text-align: right;*/
   }
 
 	.sharemsg {
@@ -803,10 +822,13 @@ export default {
 	}
 
 	.search-box {
-		margin-bottom: 20px;
-    display: inline;
+		margin-bottom: 10px;
+    /*display: inline;*/
+    /*display: inline-block;*/
+    /*position: absolute;*/
+    /*right: 36px;*/
 		/*text-align: right;*/
-    right: 10px;
+    /*right: 10px;*/
 
 	}
 
@@ -814,20 +836,7 @@ export default {
 		margin-right: 10px;
 	}
 
-	.button-group {
-		/* font-size: 0; */
-		/* Inline block elements gap - fix */
-		/* margin-bottom: 10px; */
-		padding: 0;
-		/* background: rgba(255, 170, 127, 0.1); */
-		background: linear-gradient(to bottom, rgba(85, 85, 127, 1.0), rgba(255, 255, 255, 0));
-		/* border-bottom: 1px solid rgba(0, 0, 0, .1); */
-		padding: 7px;
-		-moz-border-radius: 7px;
-		-webkit-border-radius: 7px;
-		border-radius: 7px;
-		/* float: right; */
-	}
+
 
 
 	.topDiv {
@@ -858,7 +867,7 @@ export default {
 	}
 
 	.red {
-		color: #ff0000;
+		color: #324157;
 	}
 
 	.mr10 {

@@ -6,6 +6,15 @@
 <!--                <el-breadcrumb-item>编辑器</el-breadcrumb-item>-->
 <!--            </el-breadcrumb>-->
         </div>
+      <ul class="button-group">
+        <div class="button-group-left">
+          <!--        <el-button class="button" icon="el-icon-circle-plus" @click="addRow">增加</el-button>-->
+          <!--        <el-button class="button" icon="el-icon-delete" @click="handleDelete(row.index,row)" >删除</el-button>-->
+          <el-button class="button" icon="el-icon-printer" @click="">统计表</el-button>
+          <el-button class="button" icon="el-icon-printer" @click="" v-print="">表决结果</el-button>
+          <el-button class="button" icon="el-icon-success" @click="">保存</el-button>
+        </div>
+      </ul>
       <div class="container">
         <p class="title1" >佛山电器照明股份有限公司</p>
         <p  class="title2" align="center">{{query.year+query.name}}议案表决投反对票、弃权票统计表</p>

@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div id="res1">
     <p class="title1" >佛山电器照明股份有限公司</p>
-    <p  class="title2" align="center">议案投票表决统计结果</p>
+    <p  class="title2" align="center">{{query.year+query.name}}议案投票表决统计结果</p>
     <p>一、会议的出席情况</p>
     <p>1.出席的总体情况：</p>
     <p>股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{}%。</p>
@@ -32,7 +32,27 @@
 
 <script>
 export default {
-  name: 'BiaoJueRes'
+  name: 'BiaoJueRes',
+  data () {
+    return{
+      query: {
+        year: '',
+        name: ''
+      }
+    }
+  },
+  created () {
+    this.query.year = localStorage.getItem('year')
+    this.query.name = JSON.parse(localStorage.getItem('meetingName'))
+  },
+  mounted () {
+
+  },
+  updated () {
+    // 当有更新时重新读取
+    this.query.year = localStorage.getItem('year')
+    this.query.name = JSON.parse(localStorage.getItem('meetingName'))
+  }
 }
 </script>
 
