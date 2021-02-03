@@ -34,7 +34,7 @@
         </div>
       <div v-if="dialogFormVisible" class="new-meeting animated fadeInUp">
         <div class="ms-title">新增会议</div>
-      <AddMeeting ></AddMeeting>
+      <AddMeeting v-on:addValue="addMeetingValue" ></AddMeeting>
       </div>
 
 
@@ -65,6 +65,9 @@ export default {
   },
 
   methods: {
+    addMeetingValue(childValue){
+      this.dialogFormVisible = childValue
+    },
     childByValue (childValue) {
       this.dialogFormVisible = childValue
     },

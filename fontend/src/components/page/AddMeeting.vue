@@ -50,7 +50,7 @@
     </div>
 
     <div slot="footer" class="dialog-footer">
-      <el-button @click="dialogFormVisible = false">取 消</el-button>
+      <el-button @click="FormVisible">取 消</el-button>
       <el-button type="primary" @click="submitAdd('form')">确 定</el-button>
       <!-- <el-button type="primary">
         <router-link :to="'/table'"><span style="color: white;">确定</span></router-link>
@@ -67,6 +67,7 @@ export default {
   name: 'AddMeeting',
   data () {
     return {
+      dialogFormVisible: true,
       rules: {
 
         name: [{
@@ -128,6 +129,10 @@ export default {
       })
   },
   methods: {
+    FormVisible(){
+      this.dialogFormVisible = false
+      this.$emit('addValue', this.dialogFormVisible)
+    },
     addMotion () {
       this.motionArray.push({})
     },

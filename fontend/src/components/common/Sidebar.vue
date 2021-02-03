@@ -32,33 +32,38 @@
 
 <script>
 	import bus from '../common/bus'
-  import {EventBus} from '@/api/event_bus'
+import {EventBus} from '@/api/event_bus'
 export default {
 	  data () {
 	    return {
 	      collapse: false,
-        year: null,
-        name: null,
+      year: null,
+      name: null,
 	      items: [
+        {
+          icon: 'el-icon-lx-home',
+          index: 'dashboard',
+          title: '会议信息'
+        },
 	        {
 	          icon: 'el-icon-lx-copy',
 	          index: 'form',
 	          title: '股东登记'
 	        },
-        {
-          icon: 'el-icon-lx-copy',
-          index: 'tabs',
-          title: '议案表决统计'
-        },
+        // {
+        //   icon: 'el-icon-lx-copy',
+        //   index: 'markdown',
+        //   title: '唱票统计'
+        // },
         {
           icon: 'el-icon-lx-home',
           index: 'editor',
-          title: '董事表决统计'
+          title: '唱票统计'
         },
         {
-          icon: 'el-icon-lx-home',
-          index: 'dashboard',
-          title: '选择表决年度'
+          icon: 'el-icon-lx-copy',
+          index: 'tabs',
+          title: '表决统计结果'
         }
 	
 	        // {
@@ -113,10 +118,10 @@ export default {
 	  },
 	  created () {
 	    // 通过 Event Bus 进行组件间通信，来折叠侧边栏
-      EventBus.$on('addition', param => {
-        this.year = param.year
-        // alert(this.year)
-      })
+    EventBus.$on('addition', param => {
+      this.year = param.year
+      // alert(this.year)
+    })
 
 	    bus.$on('collapse', msg => {
 	      this.collapse = msg

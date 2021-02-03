@@ -20,23 +20,23 @@ export default new Router({
           path: '/form',
           name: 'form',
           component: () => import(/* webpackChunkName: "form" */ '../components/page/BaseForm.vue'),
-          meta: { title: '股权登记' }
+          meta: { title: '股东登记' }
         },
         {
           path: '/tabs',
           component: () => import(/* webpackChunkName: "tabs" */ '../components/page/Tabs.vue'),
-          meta: { title: '议案表决统计' }
+          meta: { title: '表决统计结果' }
         },
         {
           // 富文本编辑器组件
           path: '/editor',
           component: () => import(/* webpackChunkName: "editor" */ '../components/page/VueEditor.vue'),
-          meta: { title: '董事表决统计' }
+          meta: { title: '唱票统计' }
         },
         {
           path: '/dashboard',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/page/Dashboard.vue'),
-          meta: { title: '选择表决年度' }
+          meta: { title: '会议信息' }
         }
 
         // {

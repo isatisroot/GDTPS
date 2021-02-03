@@ -21,6 +21,7 @@
         </el-select>
 
         <el-button type="warning" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+        <el-button @click="()=>{this.meetingName.push('new')}">添加</el-button>
         <!-- <el-button type="primary" icon="el-icon-circle-plus">新增</el-button> -->
       </div>
       <div class="button-group-left">
@@ -268,6 +269,7 @@ export default {
     this.query.year = localStorage.getItem('year')
     this.query.name = JSON.parse(localStorage.getItem('meetingName'))
     this.init('current')
+    this.loadAll()
   },
   watch: {
     // 侦听年度会议功能卡中的年份发生变化时立马向后台发起数据请求
@@ -481,7 +483,11 @@ export default {
         gzB: '',
         meno: ''
       }
+      let _index = this.tableData.length
+      console.log(_index)
       this.tableData.push(newValue)
+      this.idx = _index
+      this.editVisible = true
     },
 
     // 向服务端缓存将与输入相关的内容
@@ -704,8 +710,8 @@ export default {
     /*background: linear-gradient(0.25turn, #03A9F4, #ebf8e1, #B2DFDB);*/
 		padding: 9px 15px;
 		border-radius: 3px;
-		/*color: #e45f23;*/
-    color: red;
+    color: #455A64;
+    /*color: red;*/
 		font-size: 12px;
     font-weight: bolder;
     font-family: "YouYuan";
@@ -716,7 +722,7 @@ export default {
 	.button:hover {
 		/*border-top-color: #287378;*/
 		background: #ebf8e1;
-		color: #1d1c1c;
+    color: orangered;
 	}
 
 	.button:active {
@@ -763,11 +769,11 @@ export default {
   border-color: palegoldenrod;
 }
 	/* 鼠标移入行时改变背景色 */
-	/*/deep/ .el-table tbody tr:hover>td { background-color: lightpink }*/
+	/deep/ .el-table tbody tr:hover>td { background-color: rgba(238,232,170,0.5) }
   /*鼠标点击行时改变颜色*/
   /deep/ .el-table__body tr.current-row>td{
-    /*background-color: #69A8EA !important;*/
-    background: #FFCCBC;
+    background-color: rgba(255, 87, 34, 0.5);
+    /*background: #FFCCBC;*/
     /*color: #fff;*/
   }
 

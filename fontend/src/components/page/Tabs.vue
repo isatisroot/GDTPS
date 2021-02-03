@@ -91,6 +91,9 @@
         <el-tab-pane disabled name="second">
               <BiaoJueRes></BiaoJueRes>
         </el-tab-pane>
+        <el-tab-pane disabled name="third">
+<!--          <Director></Director>-->
+        </el-tab-pane>
       </el-tabs>
 		</div>
 
@@ -103,9 +106,11 @@ import {
   EventBus
 } from '../../api/event_bus.js'
 import BiaoJueRes from './BiaoJueRes'
+import Director from "@/components/page/Director";
+import axios from "axios";
 export default {
   name: 'tabs',
-  components: {BiaoJueRes},
+  components: {BiaoJueRes, Director},
   data () {
     return {
       message: 'first',
@@ -127,16 +132,19 @@ export default {
     }
   },
   created () {
+    console.log('created')
     this.query.year = localStorage.getItem('year')
     this.query.name = JSON.parse(localStorage.getItem('meetingName'))
+    axios.get(this.host + 'get_detail/' + this.query.year + '/' + this.query.name).then(response => {
+      console.log(response.data)
+    }).catch(error => {
+      console.log(error)
+    })
   },
   mounted () {
 
   },
   updated () {
-    // 当有更新时重新读取
-    this.query.year = localStorage.getItem('year')
-    this.query.name = JSON.parse(localStorage.getItem('meetingName'))
   },
 
   methods: {
