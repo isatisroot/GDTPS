@@ -16,12 +16,14 @@
         </div>
       </ul>
       <div class="container">
-
+        <p class="title1" >佛山电器照明股份有限公司</p>
+        <p class="title2">{{query.year+query.name}}表决票统计</p>
         <div class="search-gddmk">
+<!--          element中使用原生@keyup.enter事件时需要加.native-->
           <el-autocomplete class="inline-input" v-model="searchValue0" :fetch-suggestions="querySearch0" placeholder="请输入股东姓名"
                            :trigger-on-focus="false" value-key="gdxm" @select="handleSelect" @keyup.enter.native="handleSelect"></el-autocomplete>
           <span style="margin: 10px">或</span>
-          <el-autocomplete class="inline-input" v-model="searchValue" :fetch-suggestions="querySearch" placeholder="请输入代码卡号"
+          <el-autocomplete class="inline-input" v-model="searchValue" :fetch-suggestions="querySearch" placeholder="输入代码卡号"
                            :trigger-on-focus="false" value-key="gddmk" @select="handleSelect" @keyup.enter.native="handleSelect"></el-autocomplete>
 <!--          <span>股东姓名或代码卡：</span><input v-model="searchValue" @keyup.enter="search()"></input><button @click="search">确认</button>-->
 <!--           <el-button type="primary" @click="fn1">确认</el-button>-->
@@ -49,19 +51,23 @@
             </tr>
           </table>
           <el-divider></el-divider>
-          <table class="table3">
+          <table class="table2">
             <tr >
               <th width="60">议案编号</th>
               <th>议案主题</th>
               <th>反对</th>
               <th>弃权</th>
+              <th>是否回避</th>
+              <th>回避表述</th>
 
             </tr>
             <tr v-for="(m,index) in motion" :key="index" >
               <td>{{index+1}}</td>
               <td>{{m}}</td>
-              <td><el-checkbox></el-checkbox></td>
-              <td><el-checkbox></el-checkbox></td>
+              <td><el-checkbox v-model="fandui[index]"></el-checkbox></td>
+              <td><el-checkbox v-model="qiquan[index]"></el-checkbox></td>
+              <td><el-checkbox v-model="isHuibi[index]"></el-checkbox></td>
+              <td><textarea v-model="huibi[index]"></textarea></td>
 
             </tr>
           </table>
@@ -90,7 +96,8 @@
 <!--              </template>-->
 <!--            </el-table-column>-->
 <!--          </el-table>-->
-          <table class="table3">
+          <h4>采用累计投票：</h4>
+          <table class="table2">
             <tr >
               <th width="60">议案编号</th>
               <th>议案主题</th>
@@ -101,10 +108,10 @@
               <td>{{index+1}}</td>
               <td>{{m}}</td>
               <td>
-                                <el-select v-model="agree" required placeholder="请输入投赞成票数"  filterable allow-create
-                                           default-first-option clearable>
-                                  <el-option v-for="(val, id) in agreeList" :key="id" :value="val"></el-option>
-                                </el-select>
+                <el-select v-model="agree[index]" required placeholder="请输入投赞成票数"  filterable allow-create
+                           default-first-option clearable>
+                  <el-option v-for="(val, id) in agreeList" :key="id" :value="val"></el-option>
+                </el-select>
               </td>
 
             </tr>
@@ -112,8 +119,12 @@
 
 
         </div>
+        <div style="text-align: center">
+        <el-button type="primary" style="margin-top: 30px;" @click="next">下一张</el-button>
+
+        </div>
         <el-divider></el-divider>
-        <el-steps :active="active" finish-status="success">
+        <el-steps :active="active" finish-status="success" width="50%">
           <el-step v-for="(val, idx) in gdxmArray"><span slot="title"></span> </el-step>
         </el-steps>
 
@@ -131,17 +142,26 @@ export default {
   name: 'editor',
   data () {
     return {
+      countfandui: [{name: 'yian', sum: []}],
+      countqiquan: [],
+      counthuibi: [],
+      fandui: [],
+      qiquan: [],
+      isHuibi: [],
+      huibi: [],
+      countVoted: [],
       active: 0,
-      agree: null,
-      agreeList: [100, 3000],
+      agree: [],
+      agreeList: [],
+      countleijimotion: [],
       query: {
         year: '',
         name: ''
       },
       searchValue0: '',
       searchValue: '',
-      motion: [{name: '议案1'}, {name: '议案2'}],
-      leijimotion: [{name: '议案1'}, {name: '议案2'}],
+      motion: [],
+      leijimotion: [],
       gdxmArray: [],
       gddmkArray: [],
       row: {}
@@ -150,25 +170,54 @@ export default {
   created () {
     this.query.year = localStorage.getItem('year')
     this.query.name = JSON.parse(localStorage.getItem('meetingName'))
-    axios.get(this.host + 'motion/' + this.query.year + this.query.name)
+    axios.get(this.host + 'motion/' + this.query.year + '/' + this.query.name)
       .then(response => {
+        this.gdxmArray = response.data['gdmsg']
         this.motion = response.data['motion']
         this.leijimotion = response.data['leijimotion']
+        this.init()
       })
       .catch(error => {})
-    this.loadAll()
+    // this.loadAll()
   },
   mounted () {
-    this.agreeList.push(4499)
+
+  },
+  computed: {
+    countlejimotion: function () {
+      return {}
+    }
   },
   methods: {
+    init () {
+      // this.countleijimotion = Array(this.leijimotion.length).fill({sum: 0})
+      let n = this.leijimotion.length
+
+      for (let i = 0; i < n; i++) {
+        this.countleijimotion.push({name: this.leijimotion[i], sum: 0})
+      }
+    },
+    next () {
+      if (this.active++ > this.gdxmArray.lengthAdjust) this.active = 0
+      this.countVoted.push(this.row.id)
+      // motion = [{name:'议案1', num: 1},{name: '议案2', num: 2}]
+      // for (let i = 0; i < this.fandui.length; i++) {
+      //   if(this.fandui[i]){}
+      // }
+      console.log(this.fandui)
+      // console.log(this.qiquan)
+      //统计累计投票赞成数
+      for (let i = 0; i < this.agree.length; i++) {
+      //   console.log(this.leijimotion[i])
+        this.countleijimotion[i].sum += this.agree[i]
+      }
+      // console.log(this.countleijimotion)
+    },
+    // 匹配输入框内容到表格中
     search () {
       for (let i = 0, len = this.gdxmArray.length; i < len; i++) {
-        console.log(this.gdxmArray[i])
-        if (this.searchValue == this.gdxmArray[i].value || this.searchValue == this.gdxmArray[i].gddmk) {
+        if (this.searchValue == this.gdxmArray[i].gdxm || this.searchValue == this.gdxmArray[i].gddmk) {
           this.row = this.gdxmArray[i]
-          this.row.gdxm = this.gdxmArray[i].value
-          alert('done')
         }
       }
     },
@@ -207,18 +256,25 @@ export default {
         return (gdxmArray.gddmk.toLowerCase().indexOf(queryString.toLowerCase()) === 0)
       }
     },
-    fn1 () { this.agreeList.push(222211) },
     handleSelect (item) {
       let num = this.leijimotion.length
       let obj = {}
       for (let i = 0, len = this.gdxmArray.length; i < len; i++) {
         obj = this.gdxmArray[i]
-        if (item.gdxm == obj.value || item.gddmk == obj.gddmk || this.searchValue0 == obj.gdxm || this.searchValue == obj.gddmk) {
+        if (item.gdxm == obj.gdxm || item.gddmk == obj.gddmk || this.searchValue0 == obj.gdxm || this.searchValue == obj.gddmk) {
           this.row = this.gdxmArray[i]
-          this.agreeList.push(obj.gzA)
+          this.agreeList = []
+          // 根据该股东持股数和议案数量计算有多少张选票
+          for (let j = 0; j <= num; j++) {
+            if (obj.gzA != 0) {
+              this.agreeList.push(obj.gzA * j)
+            }
+            if (obj.gzB != 0) {
+              this.agreeList.push(obj.gzB * j)
+            }
+          }
         }
       }
-
     }
   }
 }

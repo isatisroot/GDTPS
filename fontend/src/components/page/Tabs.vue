@@ -11,7 +11,7 @@
 <!--        <el-button class="button" icon="el-icon-delete" @click="handleDelete(row.index,row)" >删除</el-button>-->
         <el-button class="button" icon="el-icon-printer" @click="">统计表</el-button>
         <el-button class="button" icon="el-icon-printer" @click="" v-print="'#res1'">表决结果</el-button>
-        <el-button class="button" icon="el-icon-success" @click="">保存</el-button>
+        <el-button class="button" icon="el-icon-download" @click="">下载</el-button>
       </div>
     </ul>
 		<div class="container">

@@ -125,7 +125,7 @@
           <certificate :query="query" :row="row"></certificate>
 				</el-tab-pane>
 				<el-tab-pane :disabled="!disabled" name="third">
-					<vote :query="query" :row="row" :motion="motion"></vote>
+					<vote :query="query" :row="row" :motion="motion" :leijimotion="leijimotion" :descr="descr"></vote>
 				</el-tab-pane>
 				<el-tab-pane :disabled="!disabled"name="fouth">
 					<stock :share="share" :query="query" :summary="countCheckedData">
@@ -254,7 +254,9 @@ export default {
       rowChecked: [], // 存储“出席”列中勾选的复选框所在行的行号（下标从0开始）
       checkedData: [],
       rowList: [],
+      descr: '',
       motion: [],
+      leijimotion: [],
       row: [], // 选中的行
       index: null,
       test: null,
@@ -347,11 +349,14 @@ export default {
         this.query.year = response.data['current']['year']
         this.query.date = response.data['current']['date']
         this.query.name = response.data['current']['name']
+        this.descr = response.data['current']['descr']
         this.motion = response.data['current']['motion']
+        this.leijimotion = response.data['current']['leijimotion']
         this.meetingName = response.data['meeting_list']
         this.share = response.data['sharehold']
         this.gdxmArray = response.data['extr_shareholds']
         this.transferFormat()
+        console.log(this.leijimotion)
         // this.sendData()
       })
     },
@@ -376,7 +381,9 @@ export default {
           this.query.year = response.data['current']['year']
           this.query.date = response.data['current']['date']
           this.query.name = response.data['current']['name']
+          this.descr = response.data['current']['descr']
           this.motion = response.data['current']['motion']
+          this.leijimotion = response.data['current']['leijimotion']
           this.meetingName = response.data['meeting_list']
           this.share = response.data['sharehold']
           this.gdxmArray = response.data['extr_shareholds']

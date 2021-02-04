@@ -22,7 +22,7 @@
         <!-- <el-cascader :options="options" v-model="form.address"></el-cascader> -->
         <el-input v-model="form.address"></el-input>
       </el-form-item>
-      <el-form-item label="会议议案" :label-width="formLabelWidth">
+      <el-form-item label="会议议案主题" :label-width="formLabelWidth">
         <!-- <template slot-scope="scope"> -->
         <div style="float: left; width: 90%">
           <!-- <li v-for="(val, id) in motion.list" :key="id" style="list-style-type:none;">
@@ -35,14 +35,46 @@
                 <el-input v-model="motionArray[scope.$index].motion"></el-input>
               </template>
             </el-table-column>
+<!--            <el-table-column></el-table-column>-->
           </el-table>
           <!-- <el-input type="text" style="margin-bottom: 5px;"></el-input>
           <el-input type="text" style="margin-bottom: 5px;"></el-input> -->
         </div>
         <div style="float:right">
-          <el-button icon="el-icon-circle-plus" type="success" @click="addMotion"></el-button>
+          <el-button style="height: 32px;margin-top: 8px" icon="el-icon-circle-plus" type="success" @click="addMotion"></el-button>
         </div>
         <!-- </template> -->
+      </el-form-item>
+      <el-form-item label="累计投票议案" :label-width="formLabelWidth">
+        <!-- <template slot-scope="scope"> -->
+        <div style="float: left; width: 90%">
+          <!-- <li v-for="(val, id) in motion.list" :key="id" style="list-style-type:none;">
+            <el-input type="text" style="margin-bottom: 5px;" v-model="val.text"></el-input>
+          </li> -->
+          <!-- 使用作用域插槽，el-table是子组件，现在往子组件传<template>的内容，并获取里面的内容 -->
+          <el-table :data="leijimotionArray" :show-header="false">
+            <el-table-column prop=motion>
+              <template slot-scope="scope">
+                <el-input v-model="leijimotionArray[scope.$index].motion"></el-input>
+              </template>
+            </el-table-column>
+            <!--            <el-table-column></el-table-column>-->
+          </el-table>
+          <!-- <el-input type="text" style="margin-bottom: 5px;"></el-input>
+          <el-input type="text" style="margin-bottom: 5px;"></el-input> -->
+        </div>
+        <div style="float:right">
+          <el-button style="height: 32px;margin-top: 8px" icon="el-icon-circle-plus" type="success" @click="addleijiMotion"></el-button>
+        </div>
+        <!-- </template> -->
+      </el-form-item>
+      <el-form-item label="议案投票说明" :label-width="formLabelWidth">
+        <el-input
+            type="textarea"
+            :rows="2"
+            placeholder="可选填"
+            v-model="textarea">
+        </el-input>
       </el-form-item>
     </el-form>
     <div class="edit_dev">
@@ -102,6 +134,8 @@ export default {
       },
       gddata: [],
       motionArray: [{}],
+      leijimotionArray: [{}],
+      descr: '',
       formLabelWidth: '120px',
       date: null,
       form: {
@@ -136,6 +170,9 @@ export default {
     addMotion () {
       this.motionArray.push({})
     },
+    addleijiMotion () {
+      this.leijimotionArray.push({})
+    },
     submitAdd (formName) {
       console.log(formName)
       this.$refs[formName].validate((valid) => {
@@ -143,7 +180,9 @@ export default {
           axios.post(this.host + 'add_meeting', {
             meeting: this.form,
             motion: this.motionArray,
-            gdid: this.value
+            leijimotion: this.leijimotionArray,
+            gdid: this.value,
+            descr: this.descr
           }).then(response => (
             this.$message.success('提交成功！'),
             this.dialogFormVisible = false,
@@ -172,7 +211,9 @@ export default {
 </script>
 
 <style scoped>
-
+/deep/ .el-table .cell, .el-table--border td:first-child .cell, .el-table--border th:first-child .cell{
+  padding-left: 0px;
+}
 .edit_dev>>>.el-transfer-panel {
   /*position: absolute;*/
   /*left: 5%;*/

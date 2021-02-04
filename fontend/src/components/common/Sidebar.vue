@@ -58,12 +58,12 @@ export default {
         {
           icon: 'el-icon-lx-home',
           index: 'editor',
-          title: '唱票统计'
+          title: '表决统计'
         },
         {
           icon: 'el-icon-lx-copy',
           index: 'tabs',
-          title: '表决统计结果'
+          title: '统计结果'
         }
 	
 	        // {

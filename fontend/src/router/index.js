@@ -25,13 +25,13 @@ export default new Router({
         {
           path: '/tabs',
           component: () => import(/* webpackChunkName: "tabs" */ '../components/page/Tabs.vue'),
-          meta: { title: '表决统计结果' }
+          meta: { title: '统计结果' }
         },
         {
           // 富文本编辑器组件
           path: '/editor',
           component: () => import(/* webpackChunkName: "editor" */ '../components/page/VueEditor.vue'),
-          meta: { title: '唱票统计' }
+          meta: { title: '表决统计' }
         },
         {
           path: '/dashboard',

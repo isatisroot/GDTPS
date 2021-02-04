@@ -28,25 +28,42 @@
 						</tr>
 					</table>
 					<br>
-					<p class="text">说明：每项议案均有一张表决票，请使用“✓”符号在赞成、反对或弃权栏中选择其中一项投出表决票，多选无效。</p>
+      <p v-if="descr">{{descr}}</p>
+					<p class="text" v-else>说明：每项议案均有一张表决票，请使用“✓”符号在赞成、反对或弃权栏中选择其中一项投出表决票，多选无效。</p>
 					<table class="table3">
 						<tr >
 							<th width="60">议案编号</th>
 							<th>议案主题</th>
-							<th>赞成</th>
+<!--							<th>赞成</th>-->
 							<th>反对</th>
 							<th>弃权</th>
 						</tr>
 						<tr v-for="(m,index) in motion" :key="index" >
 							<td>{{index+1}}</td>
 							<td>{{m}}</td>
-							<td></td>
+<!--							<td></td>-->
 							<td></td>
 							<td></td>
 						</tr>
 					</table>
-					<p align="right" class="bottom-p">投票人签名：_____________</p>
-					<p align="right" class="bottom-p">{{currentDate}}</p>
+<!--					<p align="right" class="bottom-p">投票人签名：_____________</p>-->
+<!--					<p align="right" class="bottom-p">{{currentDate}}</p>-->
+      <br>
+      <br>
+      <table class="table3">
+        <tr >
+          <th width="60">议案编号</th>
+          <th>议案主题</th>
+          <th>赞成</th>
+        </tr>
+        <tr v-for="(m,index) in leijimotion" :key="index" >
+          <td>{{index+1}}</td>
+          <td>{{m}}</td>
+          <td></td>
+        </tr>
+      </table>
+      <p align="right" class="bottom-p">投票人签名：_____________</p>
+      <p align="right" class="bottom-p">{{currentDate}}</p>
 
 <!--				</li>-->
 <!--			</ul>-->
@@ -60,7 +77,7 @@
 <script>
 	export default {
 	  name: 'vote',
-	  props: ['query', 'row', 'motion'],
+	  props: ['query', 'row', 'motion', 'leijimotion', 'descr'],
 	  data () {
 	    return {
 	      currentDate: this.dateToString(),
