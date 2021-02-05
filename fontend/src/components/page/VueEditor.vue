@@ -142,9 +142,7 @@ export default {
   name: 'editor',
   data () {
     return {
-      countfandui: [{name: 'yian', sum: []}],
-      countqiquan: [],
-      counthuibi: [],
+      countRes: [],
       fandui: [],
       qiquan: [],
       isHuibi: [],
@@ -200,18 +198,12 @@ export default {
     next () {
       if (this.active++ > this.gdxmArray.lengthAdjust) this.active = 0
       this.countVoted.push(this.row.id)
-      // motion = [{name:'议案1', num: 1},{name: '议案2', num: 2}]
-      // for (let i = 0; i < this.fandui.length; i++) {
-      //   if(this.fandui[i]){}
-      // }
-      console.log(this.fandui)
-      // console.log(this.qiquan)
+      this.countRes.push({id: this.row.id, fanduiArray: this.fandui, qiquanArray: this.qiquan, isHuibi: this.isHuibi, descr: this.huibi})
+      console.log(this.countRes)
+
       //统计累计投票赞成数
-      for (let i = 0; i < this.agree.length; i++) {
-      //   console.log(this.leijimotion[i])
-        this.countleijimotion[i].sum += this.agree[i]
-      }
-      // console.log(this.countleijimotion)
+
+
     },
     // 匹配输入框内容到表格中
     search () {

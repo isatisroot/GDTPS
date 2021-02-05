@@ -64,7 +64,7 @@ export default {
           icon: 'el-icon-lx-copy',
           index: 'tabs',
           title: '统计结果'
-        }
+        },
 	
 	        // {
 	        //   icon: 'el-icon-lx-home',
@@ -102,11 +102,11 @@ export default {
 	        //     ]
 	        // },
 
-	        // {
-	        //   icon: 'el-icon-lx-home',
-	        //   index: 'charts',
-	        //   title: '图表统计'
-	        // }
+	        {
+	          icon: 'el-icon-lx-home',
+	          index: 'charts',
+	          title: '图表统计'
+	        }
 
 	      ]
 	    }

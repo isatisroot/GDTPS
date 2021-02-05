@@ -37,7 +37,7 @@ export default new Router({
           path: '/dashboard',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/page/Dashboard.vue'),
           meta: { title: '会议信息' }
-        }
+        },
 
         // {
         //     path: '/table',
@@ -57,12 +57,12 @@ export default new Router({
         //     component: () => import(/* webpackChunkName: "upload" */ '../components/page/Upload.vue'),
         //     meta: { title: '文件上传' }
         // },
-        // {
-        //     // vue-schart组件
-        //     path: '/charts',
-        //     component: () => import(/* webpackChunkName: "chart" */ '../components/page/BaseCharts.vue'),
-        //     meta: { title: '图表统计' }
-        // },
+        {
+            // vue-schart组件
+            path: '/charts',
+            component: () => import(/* webpackChunkName: "chart" */ '../components/page/BaseCharts.vue'),
+            meta: { title: '图表统计' }
+        },
         // {
         // 	path:'/shareholders',
         // 	component:()=> import(/* webpackChunkName: "shareholders" */'../components/page/ShareHolder.vue'),
