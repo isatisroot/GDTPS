@@ -12,7 +12,7 @@
 		<ul class="button-group">
       <div class="search-box">
         <el-select v-model="query.year" placeholder="年份" class="handle-select mr10" filterable allow-create
-                   default-first-option clearable>
+                    clearable>
           <el-option v-for="(val, id) in yearList" :key="id" :value="val"></el-option>
         </el-select>
 

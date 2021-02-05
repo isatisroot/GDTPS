@@ -28,110 +28,66 @@
 <!--          <span>股东姓名或代码卡：</span><input v-model="searchValue" @keyup.enter="search()"></input><button @click="search">确认</button>-->
 <!--           <el-button type="primary" @click="fn1">确认</el-button>-->
         </div>
-        <br>
-        <div>
-          <table class="table2">
-            <tr>
-              <th rowspan="2">股东姓名</th>
-              <th rowspan="2">股东代码</th>
-              <th colspan="2">
-                股票种类即持股数
-              </th>
-            </tr>
-            <tr>
-              <th>A股</th>
-              <th>B股</th>
-            </tr>
+        <el-divider></el-divider>
+        <div class="page">
+        <div class="page-box">
+        <el-form :model="form" >
+<!--          <div>e</div>-->
+<!--          <p></p>-->
+          <br>
+          <el-divider style="margin-top: 10px">基本信息</el-divider>
+          <el-form-item label="股东姓名：">{{row.gdxm}}</el-form-item>
+          <el-form-item label="股东代码卡：">{{row.gddmk}}</el-form-item>
+          <el-form-item label="A股：" v-if="row.gzA > 0" >{{row.gzA}}</el-form-item>
+          <el-form-item label="B股：" v-else-if="row.gzB > 0">{{row.gzB}}</el-form-item>
+          <el-form-item label="持股数：" v-else></el-form-item>
+          <el-divider>议案主题</el-divider>
+          <el-form-item v-for="(m, index) in motion">
+            <template>
+              <li>{{ m }}</li>
+              <el-radio-group v-model="form.checked[index]" :disabled="form.isHuibi[index]">
+                <el-radio label="反对"></el-radio>
+                <el-radio label="弃权"></el-radio>
+              </el-radio-group>
+              <div style="position: relative;float: right; display: inline-block">
+              <span style="margin-left: 25px">是否回避：</span><el-switch v-model="form.isHuibi[index]"></el-switch>
+              <span style="margin-left: 25px;margin-right: 10px">回避表述：</span><el-input v-model="form.desc[index]" :disabled="!form.isHuibi[index]" style="display: inline-block;width: 250px"></el-input>
+              </div>
+            </template>
 
-            <tr>
-              <td>{{row.gdxm}}</td>
-              <td>{{row.gddmk}}</td>
-              <td>{{row.gzA}}</td>
-              <td>{{row.gzB}}</td>
-            </tr>
-          </table>
+          </el-form-item>
+          <br>
+          <el-divider v-if="leijimotion">累计投票议案</el-divider>
+          <el-form-item v-for="(m, index) in leijimotion">
+            <template>
+<!--              <br>-->
+              <li >{{m.name}}</li>
+<!--              <el-select v-model="agree[index]"  required placeholder="请输入投赞成票数"  filterable allow-create default-first-option-->
+<!--                          clearable @blur="selectBlur($event, index)" @keyup.enter.native="enterFn">-->
+<!--                <el-option v-for="(val, id) in agreeList" :key="id" :value="val"></el-option>-->
+<!--              </el-select>-->
+              <el-autocomplete
+                  class="inline-input"
+                  v-model="agree[index]"
+                  :fetch-suggestions="querySearch3"
+                  placeholder="请输入赞成票数"
+                  @select="handleSelect"
+              ></el-autocomplete>
+            </template>
+          </el-form-item>
           <el-divider></el-divider>
-          <table class="table2">
-            <tr >
-              <th width="60">议案编号</th>
-              <th>议案主题</th>
-              <th>反对</th>
-              <th>弃权</th>
-              <th>是否回避</th>
-              <th>回避表述</th>
-
-            </tr>
-            <tr v-for="(m,index) in motion" :key="index" >
-              <td>{{index+1}}</td>
-              <td>{{m}}</td>
-              <td><el-checkbox v-model="fandui[index]"></el-checkbox></td>
-              <td><el-checkbox v-model="qiquan[index]"></el-checkbox></td>
-              <td><el-checkbox v-model="isHuibi[index]"></el-checkbox></td>
-              <td><textarea v-model="huibi[index]"></textarea></td>
-
-            </tr>
-          </table>
-<!--          <el-table :data="motion">-->
-<!--            <el-table-column label="议案编号" type="index"></el-table-column>-->
-<!--            <el-table-column label="议案主题" prop="name"></el-table-column>-->
-<!--            <el-table-column label="反对">-->
-<!--              <el-checkbox></el-checkbox>-->
-<!--            </el-table-column>-->
-<!--            <el-table-column label="弃权">-->
-<!--              <el-checkbox></el-checkbox>-->
-<!--            </el-table-column>-->
-<!--          </el-table>-->
-          <el-divider></el-divider>
-
-<!--          <el-table :data="leijimotion">-->
-<!--            <el-table-column label="议案编号" type="index"></el-table-column>-->
-<!--            <el-table-column label="议案主题" prop="name"></el-table-column>-->
-<!--            <el-table-column label="赞成">-->
-<!--              <template slot-scope="scope">-->
-
-<!--                <el-select v-model="scope.row.agree" required placeholder="请输入投赞成票数"  filterable allow-create-->
-<!--                           default-first-option clearable>-->
-<!--                  <el-option v-for="(val, id) in agreeList" :key="id" :value="val"></el-option>-->
-<!--                </el-select>-->
-<!--              </template>-->
-<!--            </el-table-column>-->
-<!--          </el-table>-->
-          <h4>采用累计投票：</h4>
-          <table class="table2">
-            <tr >
-              <th width="60">议案编号</th>
-              <th>议案主题</th>
-              <th>赞成</th>
-
-            </tr>
-            <tr v-for="(m,index) in leijimotion" :key="index" >
-              <td>{{index+1}}</td>
-              <td>{{m}}</td>
-              <td>
-                <el-select v-model="agree[index]" required placeholder="请输入投赞成票数"  filterable allow-create
-                           default-first-option clearable>
-                  <el-option v-for="(val, id) in agreeList" :key="id" :value="val"></el-option>
-                </el-select>
-              </td>
-
-            </tr>
-          </table>
-
-
+        </el-form>
+        </div>
         </div>
         <div style="text-align: center">
-        <el-button type="primary" style="margin-top: 30px;" @click="next">下一张</el-button>
-
+        <el-button type="primary" style="margin: 20px;" @click="next">下一张</el-button>
         </div>
-        <el-divider></el-divider>
-        <el-steps :active="active" finish-status="success" width="50%">
-          <el-step v-for="(val, idx) in gdxmArray"><span slot="title"></span> </el-step>
+<!--        <div style="text-align: center">-->
+        <el-steps :active="active" finish-status="success" :space="40" simple>
+          <el-step align-center  v-for="(val, idx) in step"  icon="el-icon-s-custom"><span slot="title">{{idx + 1}}</span> </el-step>
         </el-steps>
-
-
+<!--      </div>-->
       </div>
-
-				
     </div>
 	
 </template>
@@ -142,16 +98,15 @@ export default {
   name: 'editor',
   data () {
     return {
-      countRes: [],
-      fandui: [],
-      qiquan: [],
-      isHuibi: [],
-      huibi: [],
+      form: {
+        checked: [],
+        isHuibi: [],
+        desc: []
+      },
       countVoted: [],
       active: 0,
       agree: [],
       agreeList: [],
-      countleijimotion: [],
       query: {
         year: '',
         name: ''
@@ -161,8 +116,9 @@ export default {
       motion: [],
       leijimotion: [],
       gdxmArray: [],
-      gddmkArray: [],
-      row: {}
+      // gddmkArray: [],
+      row: {},
+      step: []
     }
   },
   created () {
@@ -173,6 +129,8 @@ export default {
         this.gdxmArray = response.data['gdmsg']
         this.motion = response.data['motion']
         this.leijimotion = response.data['leijimotion']
+        this.step = new Array(this.gdxmArray.length).fill()
+        console.log(this.step)
         this.init()
       })
       .catch(error => {})
@@ -187,6 +145,16 @@ export default {
     }
   },
   methods: {
+    enterFn (e) {
+      console.log(e)
+      // let dom = document.getElementsByClassName("tbody-input")
+      // let dom = e.target
+      // let nextInput = dom.nextSibling
+      // nextInput.focus()
+      // console.log(nextInput)
+    },
+    selectBlur (e, index) {
+    },
     init () {
       // this.countleijimotion = Array(this.leijimotion.length).fill({sum: 0})
       let n = this.leijimotion.length
@@ -197,13 +165,17 @@ export default {
     },
     next () {
       if (this.active++ > this.gdxmArray.lengthAdjust) this.active = 0
-      this.countVoted.push(this.row.id)
-      this.countRes.push({id: this.row.id, fanduiArray: this.fandui, qiquanArray: this.qiquan, isHuibi: this.isHuibi, descr: this.huibi})
-      console.log(this.countRes)
+      this.countVoted.push({id: this.row.id, motion1: this.form, motion2: this.agree})
 
-      //统计累计投票赞成数
-
-
+      this.searchValue = ''
+      this.searchValue0 = ''
+      this.row = {}
+      this.form = {
+        checked: [],
+        isHuibi: [],
+        desc: []
+      }
+      this.agree = []
     },
     // 匹配输入框内容到表格中
     search () {
@@ -222,6 +194,18 @@ export default {
         this.gdxmArray = response.data
       }).catch(error => {})
     },
+
+    querySearch3 (queryString, cb) {
+      var agreeList = this.agreeList
+      var results = queryString ? agreeList.filter(this.createFilter3(queryString)) : agreeList
+      cb(results)
+    },
+    createFilter3 (queryString) {
+      return (agreeList) => {
+        return (agreeList.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0)
+      }
+    },
+
     querySearch0 (queryString, cb) {
       var gdxmArray = this.gdxmArray
       var results = queryString ? gdxmArray.filter(this.createFilter0(queryString)) : gdxmArray
@@ -230,7 +214,7 @@ export default {
     },
     createFilter0 (queryString) {
       return (gdxmArray) => {
-        console.log(gdxmArray)
+        // console.log(gdxmArray)
         return (gdxmArray.gdxm.toLowerCase().indexOf(queryString.toLowerCase()) === 0)
       }
     },
@@ -259,19 +243,26 @@ export default {
           // 根据该股东持股数和议案数量计算有多少张选票
           for (let j = 0; j <= num; j++) {
             if (obj.gzA != 0) {
-              this.agreeList.push(obj.gzA * j)
+              // console.log( this.leijimotion[j].name)
+              this.agreeList.push({value: obj.gzA * j + ''})
             }
             if (obj.gzB != 0) {
-              this.agreeList.push(obj.gzB * j)
+              this.agreeList.push({value: obj.gzB * j + ''})
             }
           }
+          this.gdxmArray.splice(i, 1)
         }
       }
+      console.log(this.agreeList)
     }
   }
 }
 </script>
 <style scoped>
+ /deep/ .el-step__icon  {
+  height: 15px;
+  width: 15px;
+}
     .editor-btn{
         margin-top: 20px;
     }
@@ -290,4 +281,34 @@ export default {
       border-collapse: collapse;
     }
 
+
+
+
+ .page,.page-box{
+   margin: 0 auto;
+   width: 650px;
+   padding: 50px 0 0 60px;
+   background: #fff;
+   border-radius: 20px;
+   text-align: justify;
+ }
+ .page-box{
+   padding: 0 60px 40px 0;
+ }
+ .page{
+   position: relative;
+   /*margin-left: 0;*/
+
+   filter: drop-shadow(0px 0px 15px #bbb);
+ }
+ .page:before{
+   content: '';
+   display: block;
+   position: absolute;
+   right:-60px;
+   top:0;
+   width: 60px;
+   height: 50px;
+   background: linear-gradient(42deg, #ddd 30%, rgba(0,0,0,0) 40%);
+ }
 </style>
