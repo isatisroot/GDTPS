@@ -2,7 +2,7 @@ import json
 from django.shortcuts import render
 from django.views.generic import View
 from django.http.response import JsonResponse, HttpResponseBadRequest, HttpResponseNotFound
-from .models import Meeting, ShareholderInfo,OnSiteMeeting,GB
+from .models import Meeting, ShareholderInfo, OnSiteMeeting, GB, MotionBook, AccumulateMotion
 from django.contrib.auth import login
 from rest_framework_jwt.settings import api_settings
 from datetime import datetime,date
@@ -145,6 +145,7 @@ class AddMeeting(View):
         req_data = json.loads(json_str)
         meeting = req_data.get('meeting')
         motion = req_data.get("motion")
+        leijimotion = req_data.get("leijimotion")
         gdid_list = req_data.get('gdid')
         name = meeting.get("name")
         address = meeting.get("address")
@@ -155,10 +156,10 @@ class AddMeeting(View):
         if not all((date1, date2, address)):
             return HttpResponseBadRequest(json.dumps({'msg': '请填写时间和日期'}))
 
-        text = ''
-        for i in motion:
-            if bool(i):
-                text += i.get('motion','')+ ";"
+        # text = ''
+        # for i in motion:
+        #     if bool(i):
+        #         text += i.get('motion','')+ ";"
 
         try:
             if Meeting.objects.filter(year=year, name=name):
@@ -172,19 +173,30 @@ class AddMeeting(View):
 
             stru_date = datetime.strptime(date1 +"\xa0" + date2, "%Y-%m-%d %H:%M")
             gb =  GB.objects.last()
+            # 写入年度会议表
             m = Meeting.objects.create(
                 year=year,
                 date=stru_date,
                 name=name,
                 current_year=1,
                 address=address,
-                motion=text,
+                # motion=text,
                 gb=gb
             )
+            #判断有无议案，有则写入议案表
+            for i in motion:
+                if bool(i):
+                    MotionBook.objects.create(name=i['motion'], annual_meeting=m)
+
+            for i in leijimotion:
+                if bool(i):
+                    AccumulateMotion.objects.create(name=i["leijimotion"], annual_meeting=m)
+
+            # 写入中间表——登记表，并关联年度会议和股东id，记录当年股东的股份数
             m.members.set(gdid_list)
             for i in gdid_list:
                 gd = ShareholderInfo.objects.get(id=i)
-                OnSiteMeeting.objects.filter(meeting_id=m.id, shareholder_id=i).update(gzA=gd.gzA, gzB=gd.gzB)
+                OnSiteMeeting.objects.filter(meeting_id=m.id, shareholder_id=i).update(gzA=gd.gzA, gzB=gd.gzB, cx=True, xcorwl=True)
             return JsonResponse({'code':200, 'msg': 'success'})
         except Exception as e:
             print(e)
@@ -229,12 +241,19 @@ class QueryDetail(View):
             queryset = m.onsitemeeting_set.all()
 
             str_date = m.date.strftime('%Y-%m-%d %H:%M:%S')
-            if m.motion:
-                motion = m.motion.split(";")
-                motion.pop()
-            # print(motion)
-            current = {"year": m.year, "name": m.name, "date": str_date, "motion": motion}
+            # if m.motion:
+            #     motion = m.motion.split(";")
+            #     motion.pop()
+            motion_qs =  m.motionbook_set.all()
+            for i in motion_qs:
+                motion.append(i.name)
 
+            leijimotion = []
+            leijimotion_qs = m.accumulatemotion_set.all()
+            for i in leijimotion_qs:
+                leijimotion.append(i.name)
+
+            current = {"year": m.year, "name": m.name, "date": str_date, "motion": motion, "leijimotion": leijimotion}
 
             for q in queryset:
                 # 根据中间表查找到股东信息表q
@@ -361,6 +380,7 @@ class LoadAll(View):
         req_data = json.loads(json_str)
         idList = req_data.get("gdid",[])
         data_list = []
+        gddmk_data_list = []
         qs = ShareholderInfo.objects.all()
         for q in qs:
             if q.id in idList:
@@ -368,8 +388,19 @@ class LoadAll(View):
             data = {
                 'id':q.id,
                 'value': q.gdxm,
+                'gdxm': q.gdxm,
                 'gdtype': q.gdtype,
                 'gddmk': q.gddmk,
+                'sfz': q.sfz,
+                'rs': q.rs,
+                'gzA': q.gzA,
+                'gzB': q.gzB,
+            }
+            data2 = {
+                'id':q.id,
+                'value': q.gddmk,
+                'gdxm': q.gdxm,
+                'gdtype': q.gdtype,
                 'sfz': q.sfz,
                 'rs': q.rs,
                 'gzA': q.gzA,
@@ -444,3 +475,106 @@ class Result(View):
             # s_list.append(s.id)
             # detail_list.append(data)
         return  JsonResponse({})
+
+class Motion(View):
+    def get(self, request, year, meeting_name):
+
+        try:
+            m = Meeting.objects.get(year=year,name=meeting_name)
+            sharehold = {"totalShare": m.gb.gb, "AShareTotal": m.gb.ltag, "BShareTotal": m.gb.ltbg}
+
+            motion = []
+            motion_qs =  m.motionbook_set.all()
+            for i in motion_qs:
+                data = {
+                    "id": i.id,
+                    "name": i.name
+                }
+
+                motion.append(data)
+
+            leijimotion = []
+            leijimotion_qs = m.accumulatemotion_set.all()
+            for i in leijimotion_qs:
+                data = {
+                    "id": i.id,
+                    "name": i.name
+                }
+                leijimotion.append(data)
+            queryset = m.onsitemeeting_set.filter(cx=True)
+            data_list = []
+            for q in queryset:
+                # 根据中间表查找到股东信息表q
+                s = q.shareholder
+                # print(i.cx)
+                data = {
+                    'id':q.shareholder_id,
+                    # 'cx': q.cx,
+                    # 'xc': q.xcorwl,
+                    'gdxm': s.gdxm,
+                    'gdtype': s.gdtype,
+                    'gddmk': s.gddmk,
+                    'sfz': s.sfz,
+                    # 'rs': s.rs,
+                    'gzA': q.gzA,
+                    'gzB': q.gzB,
+                    # 'meno': q.meno
+                }
+                data_list.append(data)
+            return JsonResponse({"motion": motion, "leijimotion": leijimotion, "gdmsg": data_list})
+        except Exception as e:
+            print(e)
+            return HttpResponseBadRequest(content=json.dumps({'msg':'查询失败'}),content_type="'application/json'")
+
+class Record(View):
+    def post(self, request):
+        json_str = request.body.decode()
+        req_data = json.loads(json_str)
+        countVote = req_data.get("countVoted", [])
+        motion = req_data.get("motion")
+        liejimotion = req_data.get("leijimotion")
+
+        desc_text = ""
+        for index, _i in enumerate(motion):
+            sum_zan_A = sum_zan_B = sum_fan_A = sum_fan_B = sum_qi_A = sum_qi_B = huibiA = huibiB = 0
+            is_huibi = False
+            for i in countVote:
+                id = i.get("id")
+                s = ShareholderInfo.objects.get(id=id)
+                motion1 = i.get("motion1")
+                ishuibi = motion1.get("isHuibi")
+                desc = motion1.get("desc")
+                # for index, j in enumerate(motion1.get("checked")):
+                j = motion1.get("checked")[index]
+                if j == 1:
+                    sum_zan_A += s.gzA
+                    sum_zan_B += s.gzB
+                elif j == 2:
+                    sum_fan_A += s.gzA
+                    sum_fan_B += s.gzB
+                elif j == 3:
+                    sum_qi_A += s.gzA
+                    sum_qi_B += s.gzB
+
+                if ishuibi[index]:
+                    is_huibi = True
+                    huibiA += s.gzA
+                    huibiB += s.gzB
+                    desc_text += desc[index] + ";" if desc[index] else ""
+
+            MotionBook.objects.filter(id=_i.get("id")).update(
+                zanchengA = sum_zan_A,
+                zanchengB = sum_zan_B,
+                fanduiA = sum_fan_A,
+                fanduiB = sum_fan_B,
+                qiquanA = sum_qi_A,
+                qiquanB = sum_qi_B,
+                is_huibi = is_huibi,
+                huibiA = huibiA,
+                huibiB = huibiB
+            )
+
+
+
+
+        return JsonResponse({"success": 1, "msg": "提交成功"})

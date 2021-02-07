@@ -89,3 +89,32 @@ class OnSiteMeeting(models.Model):
         verbose_name_plural = verbose_name
 
 
+class MotionBook(models.Model):
+    name = models.CharField(verbose_name="议案主题", max_length=80)
+    zanchengA = models.IntegerField(null=True)
+    zanchengB = models.IntegerField(null=True)
+    fanduiA = models.IntegerField(null=True)
+    fanduiB = models.IntegerField(null=True)
+    qiquanA = models.IntegerField(null=True)
+    qiquanB = models.IntegerField(null=True)
+    is_huibi = models.BooleanField(default=False, null=True)
+    huibiA = models.IntegerField(null=True)
+    huibiB = models.IntegerField(null=True)
+    annual_meeting = models.ForeignKey(Meeting, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        db_table = 'motion_book'
+        verbose_name = '议案信息表'
+        verbose_name_plural = verbose_name
+
+class AccumulateMotion(models.Model):
+    """累积议案表"""
+    name = models.CharField(verbose_name="议案主题", max_length=80)
+    zancheng = models.IntegerField(null=True)
+
+    annual_meeting = models.ForeignKey(Meeting, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        db_table = 'accumulate_book'
+        verbose_name = '议案信息表'
+        verbose_name_plural = verbose_name
