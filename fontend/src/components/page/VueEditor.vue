@@ -12,7 +12,7 @@
           <!--        <el-button class="button" icon="el-icon-delete" @click="handleDelete(row.index,row)" >删除</el-button>-->
 <!--          <el-button class="button" icon="el-icon-printer" @click="">统计表</el-button>-->
 <!--          <el-button class="button" icon="el-icon-printer" @click="" v-print="">表决结果</el-button>-->
-          <el-button class="button" icon="el-icon-success" @click="">保存</el-button>
+<!--          <el-button class="button" icon="el-icon-success" @click="submit">保存</el-button>-->
         </div>
       </ul>
       <div class="container">
@@ -80,7 +80,10 @@
         </div>
         </div>
         <div style="text-align: center">
-        <el-button type="primary" style="margin: 20px;" @click="next">下一张</el-button>
+          <el-button class="button" style="margin: 20px;" icon="el-icon-finished" @click="submit" v-if="showDone">提交</el-button>
+
+<!--          <button class=""  @click="finish" v-if="showDone">完成</button>-->
+        <el-button type="primary" style="margin: 20px;" @click="next" v-else>下一张</el-button>
         </div>
 <!--        <div style="text-align: center">-->
         <el-steps :active="active" finish-status="success" :space="40" simple>
@@ -98,6 +101,7 @@ export default {
   name: 'editor',
   data () {
     return {
+      showDone: false,
       form: {
         checked: [],
         isHuibi: [],
@@ -118,7 +122,8 @@ export default {
       gdxmArray: [],
       // gddmkArray: [],
       row: {},
-      step: []
+      step: [],
+      nextStep: 0
     }
   },
   created () {
@@ -130,7 +135,7 @@ export default {
         this.motion = response.data['motion']
         this.leijimotion = response.data['leijimotion']
         this.step = new Array(this.gdxmArray.length).fill()
-        console.log(this.step)
+        console.log(this.gdxmArray)
         this.init()
       })
       .catch(error => {})
@@ -163,10 +168,32 @@ export default {
         this.countleijimotion.push({name: this.leijimotion[i], sum: 0})
       }
     },
+    submit () {
+      console.log(this.countVoted)
+    },
     next () {
-      if (this.active++ > this.gdxmArray.lengthAdjust) this.active = 0
-      this.countVoted.push({id: this.row.id, motion1: this.form, motion2: this.agree})
+      if (this.active++ == this.step.length - 1) {
+        // this.showDone = true
+        // this.active = 0
+        this.$alert('是否提交数据', '表决统计', {
+          confirmButtonText: '确定',
+          callback: action => {
+            axios.post(this.host + 'record', {
+              countVoted: this.countVoted
+            }).then(response => {
+              console.log(response.data)
+              this.$message({
+                type: 'success',
+                message: `数据提交成功`
+              })
+              this.$router.push('/tabs')
+            }).catch(error => {console.log(error)})
 
+          }
+        })
+      }
+      console.log(this.row)
+      this.countVoted.push({id: this.row.id, motion1: this.form, motion2: this.agree})
       this.searchValue = ''
       this.searchValue0 = ''
       this.row = {}
@@ -182,6 +209,7 @@ export default {
       for (let i = 0, len = this.gdxmArray.length; i < len; i++) {
         if (this.searchValue == this.gdxmArray[i].gdxm || this.searchValue == this.gdxmArray[i].gddmk) {
           this.row = this.gdxmArray[i]
+          // console.log(this.row)
         }
       }
     },
@@ -237,8 +265,10 @@ export default {
       let obj = {}
       for (let i = 0, len = this.gdxmArray.length; i < len; i++) {
         obj = this.gdxmArray[i]
+
         if (item.gdxm == obj.gdxm || item.gddmk == obj.gddmk || this.searchValue0 == obj.gdxm || this.searchValue == obj.gddmk) {
           this.row = this.gdxmArray[i]
+          // console.log(this.row)
           this.agreeList = []
           // 根据该股东持股数和议案数量计算有多少张选票
           for (let j = 0; j <= num; j++) {
@@ -253,7 +283,7 @@ export default {
           this.gdxmArray.splice(i, 1)
         }
       }
-      console.log(this.agreeList)
+      // console.log(this.agreeList)
     }
   }
 }
@@ -289,6 +319,7 @@ export default {
    width: 650px;
    padding: 50px 0 0 60px;
    background: #fff;
+   /*background: url("../../assets/img/box-bg.jpg");*/
    border-radius: 20px;
    text-align: justify;
  }
