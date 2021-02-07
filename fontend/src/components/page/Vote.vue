@@ -140,35 +140,4 @@
 	}
 
 
-	.table2{
-    width:70%;
-    margin: auto;
-    text-align: center;
-    border-collapse: collapse;
-  }
-
-	.table3 {
-		width: 100%;
-		margin: auto;
-		text-align: center;
-		border-collapse: collapse;
-	}
-
-	.table2 tr th,
-	.table3 tr th {
-		font-family: SimSun;
-		font-weight: 900;
-		height: 50px;
-		font-size: 20px;
-		border: 1px solid #000000;
-	}
-
-	.table2 tr td,
-	.table3 tr td {
-		font-family: STSong;
-		font-weight: 200;
-		font-size: 18px;
-		border: 1px solid #000000;
-		height: 50px;
-	}
 </style>

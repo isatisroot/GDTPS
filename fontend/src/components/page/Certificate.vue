@@ -136,27 +136,7 @@
 		line-height: 35px;
 	}
 	
-	.table1{
-		/*width: 100% ;*/
-		margin:auto;
-		text-align: center;
-		border-collapse:collapse;
 
-	}
-	.table1 tr th{
-		font-family: SimSun;
-		font-weight: 900;
-		height: 50px;
-		font-size: 18px;
-		border:1px solid #000000;
-	}
-	.table1 tr td{
-		font-family: times new roman;
-		font-weight: 200;
-		font-size: 14px;
-		border:1px solid #000000;
-		height: 50px;
-	}
   /*@page{*/
   /*  size: A4 portrait;*/
   /*}*/

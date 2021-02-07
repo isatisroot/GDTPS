@@ -59,3 +59,102 @@ export default {
   }
 }
 </script>
+<style>
+.title1 {
+  /* margin-top: 30px; */
+  /* margin-bottom: 10px; */
+  text-align: center;
+  font-size: 30px;
+  font-family: "LiSu";
+  color: orangered;
+
+}
+
+.title2 {
+  /* margin-top: 15px; */
+  /* margin-bottom: 20px; */
+  line-height: 80px;
+  text-align: center;
+  font-size: 28px;
+  color: indianred
+}
+
+.table1{
+  /*width: 100% ;*/
+  margin:auto;
+  text-align: center;
+  border-collapse:collapse;
+
+}
+.table1 tr th{
+  font-family: SimSun;
+  font-weight: 900;
+  height: 50px;
+  font-size: 18px;
+  border:1px solid #000000;
+}
+.table1 tr td{
+  font-family: times new roman;
+  font-weight: 200;
+  font-size: 14px;
+  border:1px solid #000000;
+  height: 50px;
+}
+
+.table2{
+  width:70%;
+  margin: auto;
+  text-align: center;
+  border-collapse: collapse;
+}
+
+.table3 {
+  width: 100%;
+  margin: auto;
+  text-align: center;
+  border-collapse: collapse;
+}
+
+.table2 tr th,
+.table3 tr th {
+  font-family: SimSun;
+  font-weight: 900;
+  height: 50px;
+  font-size: 20px;
+  border: 1px solid #000000;
+}
+
+.table2 tr td,
+.table3 tr td {
+  font-family: STSong;
+  font-weight: 200;
+  font-size: 18px;
+  border: 1px solid #000000;
+  height: 50px;
+}
+
+.table4 {
+  width: 100%;
+  margin: auto;
+  text-align: center;
+  border-collapse: collapse;
+}
+
+
+.table4 tr th {
+  font-family: SimSun;
+  font-weight: 900;
+  height: 50px;
+  font-size: 18px;
+  border: 1px solid #000000;
+}
+
+
+.table4 tr td {
+  font-family: times new roman;
+  font-weight: 200;
+  font-size: 14px;
+  border: 1px solid #000000;
+  height: 50px;
+}
+</style>

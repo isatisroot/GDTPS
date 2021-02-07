@@ -664,24 +664,7 @@ export default {
 }
 </script>
 <style>
-	.title1 {
-		/* margin-top: 30px; */
-		/* margin-bottom: 10px; */
-		text-align: center;
-		font-size: 30px;
-		font-family: "LiSu";
-		color: orangered;
 
-	}
-
-	.title2 {
-		/* margin-top: 15px; */
-		/* margin-bottom: 20px; */
-		line-height: 80px;
-		text-align: center;
-		font-size: 28px;
-		color: indianred
-	}
 
   .el-tabs__nav-scroll {
       background: #FFF;
