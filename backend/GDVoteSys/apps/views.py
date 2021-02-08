@@ -430,52 +430,25 @@ class Result(View):
         s_list = []
         detail_list = []
         m = Meeting.objects.get(year=year,name=meeting_name)
+        motion_qs =  m.motionbook_set.all()
+        motion = []
+        for i in motion_qs:
+            data = {
+                "id": i.id,
+                "name": i.name,
+                "zanchengA": i.zanchengA,
+                "zanchengB": i.zanchengB,
+                "fanduiA": i.fanduiA,
+                "fanduiB": i.fanduiB,
+                "qiquanA": i.qiquanA,
+                "qiquanB": i.qiquanB
+            }
+            motion.append(data)
         if m.gb:
             # 通过年度会议查找股本信息
             sharehold = {"totalShare": m.gb.gb, "AShareTotal": m.gb.ltag, "BShareTotal": m.gb.ltbg}
-        # 查询出席会议股东及其股份
-        cxgd = m.onsitemeeting_set.filter(cx=1)
-        sum_gd = len(cxgd)
-        sum_ag = 0
-        sum_bg = 0
-        sum_xc = 0
-        sum_xc_ag = 0
-        sum_xc_bg = 0
-        for i in cxgd:
-            sum_ag += i.gzA
-            sum_bg += i.gzB
-            if i.xcorwl:
-                sum_xc += 1
-                sum_xc_ag += i.gzA
-                sum_xc_bg += i.gzB
 
-
-        # 通过m查找现场会议登记的中间表queset,统计中小股东出席人数
-        sum_zxgu = 0
-        queryset = m.onsitemeeting_set.all()
-        for q in queryset:
-            # 根据中间表查找到股东信息表q
-            s = q.shareholder
-            if(s.gdtype == "中小股"):
-                sum_zxgu += 1
-
-            # print(i.cx)
-            # data = {
-            #     'id':q.shareholder_id,
-            #     'cx': q.cx,
-            #     'xc': q.xcorwl,
-            #     'gdxm': s.gdxm,
-            #     'gdtype': s.gdtype,
-            #     'gddmk': s.gddmk,
-            #     'sfz': s.sfz,
-            #     'rs': s.rs,
-            #     'gzA': q.gzA,
-            #     'gzB': q.gzB,
-            #     'meno': q.meno
-            # }
-            # s_list.append(s.id)
-            # detail_list.append(data)
-        return  JsonResponse({})
+        return  JsonResponse({"motion": motion})
 
 class Motion(View):
     def get(self, request, year, meeting_name):
@@ -578,6 +551,31 @@ class Record(View):
 
         print(data)
         print(data2)
+        for k,v in data.items():
+            m = MotionBook.objects.filter(id=k)
+            sum_zan_A = sum_zan_B = sum_fan_A = sum_fan_B = sum_qi_A = sum_qi_B = huibiA = huibiB = 0
+            for i in v:
+                gd_id = i.get("gdid")
+                j = i.get("checked")
+                s = ShareholderInfo.objects.get(id=gd_id)
+                if j == 1:
+                    sum_zan_A += s.gzA
+                    sum_zan_B += s.gzB
+                elif j == 2:
+                    sum_fan_A += s.gzA
+                    sum_fan_B += s.gzB
+                elif j == 3:
+                    sum_qi_A += s.gzA
+                    sum_qi_B += s.gzB
+
+            m.update(
+                zanchengA = sum_zan_A,
+                zanchengB = sum_zan_B,
+                fanduiA = sum_fan_A,
+                fanduiB = sum_fan_B,
+                qiquanA = sum_qi_A,
+                qiquanB = sum_qi_B
+            )
 
         return JsonResponse({"success": 1, "msg": "唱票成功"})
 

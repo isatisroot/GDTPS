@@ -108,7 +108,7 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': '172.30.1.236',  # 数据库主机
+        'HOST': '192.168.31.25',  # 数据库主机
         'PORT': 3306,  # 数据库端口
         'USER': 'root',  # 数据库用户名
         'PASSWORD': 'mysql',  # 数据库用户密码
