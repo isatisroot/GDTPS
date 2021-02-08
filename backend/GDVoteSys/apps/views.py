@@ -8,6 +8,7 @@ from rest_framework_jwt.settings import api_settings
 from datetime import datetime,date
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django_redis import get_redis_connection
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 # from django.utils import timezone as datetime
@@ -488,7 +489,8 @@ class Motion(View):
             for i in motion_qs:
                 data = {
                     "id": i.id,
-                    "name": i.name
+                    "name": i.name,
+                    "checked": 1
                 }
 
                 motion.append(data)
@@ -498,7 +500,8 @@ class Motion(View):
             for i in leijimotion_qs:
                 data = {
                     "id": i.id,
-                    "name": i.name
+                    "name": i.name,
+                    "agree": None
                 }
                 leijimotion.append(data)
             queryset = m.onsitemeeting_set.filter(cx=True)
@@ -518,6 +521,8 @@ class Motion(View):
                     # 'rs': s.rs,
                     'gzA': q.gzA,
                     'gzB': q.gzB,
+                    'motion': motion,
+                    'leijimotion': leijimotion
                     # 'meno': q.meno
                 }
                 data_list.append(data)
@@ -527,54 +532,109 @@ class Motion(View):
             return HttpResponseBadRequest(content=json.dumps({'msg':'查询失败'}),content_type="'application/json'")
 
 class Record(View):
+    def get(self, request):
+        year = request.GET.get("year")
+        name = request.GET.get("name")
+        print(year, name)
+        items = request.session.get(1)
+        # keys = request.session.keys()
+        # print(keys)
+        print(items)
+        # redis = get_redis_connection('verify')
+        # text = redis.get(1)
+        # print(text)
+        return JsonResponse({"msg": "统计成功"})
     def post(self, request):
         json_str = request.body.decode()
         req_data = json.loads(json_str)
-        countVote = req_data.get("countVoted", [])
-        motion = req_data.get("motion")
-        liejimotion = req_data.get("leijimotion")
+        vote = req_data.get("vote")
+        year = req_data.get("year")
+        name = req_data.get("name")
+        # m = Meeting.objects.get(year=year,name=name)
+        # motion_qs =  m.motionbook_set.all()
 
-        desc_text = ""
-        for index, _i in enumerate(motion):
-            sum_zan_A = sum_zan_B = sum_fan_A = sum_fan_B = sum_qi_A = sum_qi_B = huibiA = huibiB = 0
-            is_huibi = False
-            for i in countVote:
-                id = i.get("id")
-                s = ShareholderInfo.objects.get(id=id)
-                motion1 = i.get("motion1")
-                ishuibi = motion1.get("isHuibi")
-                desc = motion1.get("desc")
-                # for index, j in enumerate(motion1.get("checked")):
-                j = motion1.get("checked")[index]
-                if j == 1:
-                    sum_zan_A += s.gzA
-                    sum_zan_B += s.gzB
-                elif j == 2:
-                    sum_fan_A += s.gzA
-                    sum_fan_B += s.gzB
-                elif j == 3:
-                    sum_qi_A += s.gzA
-                    sum_qi_B += s.gzB
+        data = {}
+        data2 = {}
+        for i in vote:
+            gd_id = i.get("id")
+            gzA = i.get("gzA")
+            gzB = i.get("gzB")
+            motion = i.get("motion")  # [{'id': 1, 'name': '关于与广东省广晟财务有限公司签署《金融服务协议》的议案', 'checked': 1}, {'id': 2, 'name': '关于修订《公司章程》的议案', 'checked': 1}]
+            leijimotion = i.get("leijimotion") #[{'id': 1, 'name': '累计投票议案１', 'agree': '122694246'}, {'id': 2, 'name': '累计投票议案２', 'agree': '122694246'}]
+            for j in motion:
+                motion_id = j.get("id")
+                _array = data.get(motion_id, [])
+                checked = j.get("checked")
+                _array.append({"gdid": gd_id, "checked": checked})
+                data[motion_id]= _array
 
-                if ishuibi[index]:
-                    is_huibi = True
-                    huibiA += s.gzA
-                    huibiB += s.gzB
-                    desc_text += desc[index] + ";" if desc[index] else ""
+            for q in leijimotion:
+                leijimotion_id = q.get("id")
+                _array = data2.get(leijimotion_id, [])
+                agree = q.get("agree",0)
 
-            MotionBook.objects.filter(id=_i.get("id")).update(
-                zanchengA = sum_zan_A,
-                zanchengB = sum_zan_B,
-                fanduiA = sum_fan_A,
-                fanduiB = sum_fan_B,
-                qiquanA = sum_qi_A,
-                qiquanB = sum_qi_B,
-                is_huibi = is_huibi,
-                huibiA = huibiA,
-                huibiB = huibiB
-            )
+                _array.append({"gdid": gd_id, "agree": agree})
+                data2[leijimotion_id]= _array
+
+        print(data)
+        print(data2)
+
+        return JsonResponse({"success": 1, "msg": "唱票成功"})
+
+        # gdid = req_data.get("gdid", 0)
+        # print(gdid)
+        # motion = req_data.get("motion")
+        # leijimotion = req_data.get("leijimotion")
+        # s = ShareholderInfo.objects.get(id=gdid)
+        # data = {"motion": motion, "leijimotion": leijimotion}
+        # 连接redis数据库，写入验证码,UUID
+        # redis = get_redis_connection('verify')
+        # redis.setex(gdid, 300, data)
+        # request.session[gdid] = data
+        # items = request.session.items()
+        # keys = request.session.keys()
+        # print(keys)
+        # print(items)
+        # print(request.session.get(gdid))
+        # sum_zan_A = request.session.get("sum_zan_A")
+        # sum_zan_B = request.session.get("sum_zan_B", 0)
+        # sum_fan_A = request.session.get("sum_fan_A", 0)
+        # sum_fan_B = request.session.get("sum_fan_B", 0)
+        # sum_qi_A = request.session.get("sum_qi_A", 0)
+        # sum_qi_B = request.session.get("sum_qi_B", 0)
+        # huibiA = request.session.get("huibiA", 0)
+        # huibiB = request.session.get("huibiB", 0)
 
 
 
+        # desc_text = ""
+        # for index, _i in enumerate(motion):
+        #
+        #     is_huibi = False
+        #     for i in countVote:
+        #         id = i.get("id")
+        #         s = ShareholderInfo.objects.get(id=id)
+        #         motion1 = i.get("motion1")
+        #         ishuibi = motion1.get("isHuibi")
+        #         desc = motion1.get("desc")
+        #         # for index, j in enumerate(motion1.get("checked")):
+        #         j = motion1.get("checked")[index]
+        #         if j == 1:
+        #             sum_zan_A += s.gzA
+        #             sum_zan_B += s.gzB
+        #         elif j == 2:
+        #             sum_fan_A += s.gzA
+        #             sum_fan_B += s.gzB
+        #         elif j == 3:
+        #             sum_qi_A += s.gzA
+        #             sum_qi_B += s.gzB
+        #
+        #         if ishuibi[index]:
+        #             is_huibi = True
+        #             huibiA += s.gzA
+        #             huibiB += s.gzB
+        #             desc_text += desc[index] + ";" if desc[index] else ""
+        #
 
-        return JsonResponse({"success": 1, "msg": "提交成功"})
+
+
