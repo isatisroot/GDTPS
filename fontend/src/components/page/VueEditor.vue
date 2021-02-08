@@ -49,48 +49,99 @@
           <el-form-item label="B股：" v-else-if="row.gzB > 0">{{row.gzB}}</el-form-item>
           <el-form-item label="持股数：" v-else></el-form-item>
           <el-divider>议案主题</el-divider>
+          <template v-if="row.id">
+            <el-form-item v-for="(m, index) in row.motion">
+              <template >
+                <li>{{ m.name }}!</li>
+                <el-radio-group v-model="m.checked" :disabled="!row.id" >
+                  <el-radio :label="1" style="display: none">赞成</el-radio>
+                  <el-radio :label="2" >反对</el-radio>
+                  <el-radio :label="3" >弃权</el-radio>
+                </el-radio-group>
+                <div style="position: relative;float: right; display: inline-block">
+                  <span style="margin-left: 15px">是否回避：</span><el-switch v-model="m.ishuibi"></el-switch>
+                  <span style="margin-left: 15px;margin-right: 10px">回避表述：</span><el-input v-model="m.desc" :disabled="!m.ishuibi" style="display: inline-block;width: 200px"></el-input>
+                </div>
+              </template>
 
-          <el-form-item v-for="(m, index) in motion">
-            <template>
-              <li>{{ m.name }}</li>
-              <el-radio-group v-model="m.checked" :disabled="form.isHuibi[index]">
-                <el-radio :label="1" >赞成</el-radio>
-                <el-radio :label="2">反对</el-radio>
-                <el-radio :label="3">弃权</el-radio>
-              </el-radio-group>
-              <div style="position: relative;float: right; display: inline-block">
-              <span style="margin-left: 15px">是否回避：</span><el-switch v-model="form.isHuibi[index]"></el-switch>
-              <span style="margin-left: 15px;margin-right: 10px">回避表述：</span><el-input v-model="form.desc[index]" :disabled="!form.isHuibi[index]" style="display: inline-block;width: 200px"></el-input>
-              </div>
-            </template>
+            </el-form-item>
+          </template>
+          <template v-else>
+            <el-form-item v-for="(m, index) in motion">
+              <template >
+                <li>{{ m.name }}</li>
+                <el-radio-group v-model="m.checked" :disabled="!row.id" >
+                  <el-radio :label="1" >赞成</el-radio>
+                  <el-radio :label="2" >反对</el-radio>
+                  <el-radio :label="3" >弃权</el-radio>
+                </el-radio-group>
+                <div style="position: relative;float: right; display: inline-block">
+                  <span style="margin-left: 15px">是否回避：</span><el-switch v-model="m.ishuibi"></el-switch>
+                  <span style="margin-left: 15px;margin-right: 10px">回避表述：</span><el-input v-model="m.desc" :disabled="!m.ishuibi" style="display: inline-block;width: 200px"></el-input>
+                </div>
+              </template>
 
-          </el-form-item>
+            </el-form-item>
+          </template>
+
+
           <br>
           <el-divider v-if="leijimotion">累计投票议案</el-divider>
-          <el-form-item v-for="(m, index) in leijimotion">
-            <template>
-<!--              <br>-->
-              <li >{{m.name}}</li>
-<!--              <el-select v-model="agree[index]"  required placeholder="请输入投赞成票数"  filterable allow-create default-first-option-->
-<!--                          clearable @blur="selectBlur($event, index)" @keyup.enter.native="enterFn">-->
-<!--                <el-option v-for="(val, id) in agreeList" :key="id" :value="val"></el-option>-->
-<!--              </el-select>-->
-              <el-autocomplete
-                  class="inline-input"
-                  v-model="agree[index]"
-                  :fetch-suggestions="querySearch3"
-                  placeholder="请输入赞成票数"
-                  @select="handleSelect"
-                  @blur="validate(index)"
-              ></el-autocomplete>
-              <el-alert
-                  :title="tip"
-                  type="error"
-                  show-icon
-                  v-if="errorTip[index]">
-              </el-alert>
-            </template>
-          </el-form-item>
+          <template v-if="row.id">
+            <el-form-item v-for="(m, index) in row.leijimotion" >
+              <template>
+                <!--              <br>-->
+                <li >{{m.name}}!</li>
+                <!--              <el-select v-model="agree[index]"  required placeholder="请输入投赞成票数"  filterable allow-create default-first-option-->
+                <!--                          clearable @blur="selectBlur($event, index)" @keyup.enter.native="enterFn">-->
+                <!--                <el-option v-for="(val, id) in agreeList" :key="id" :value="val"></el-option>-->
+                <!--              </el-select>-->
+                <el-autocomplete
+                    class="inline-input"
+                    v-model="m.agree"
+                    :fetch-suggestions="querySearch3"
+                    placeholder="请输入赞成票数"
+                    :disabled="!row.id"
+                    @change="validate(m)"
+                ></el-autocomplete>
+                <el-alert
+                    :title="tip"
+                    type="error"
+                    show-icon
+                    v-if="errorTip[index]">
+                </el-alert>
+              </template>
+            </el-form-item>
+          </template>
+
+          <template v-else>
+            <el-form-item v-for="(m, index) in leijimotion" >
+              <template>
+                <!--              <br>-->
+                <li >{{m.name}}</li>
+                <!--              <el-select v-model="agree[index]"  required placeholder="请输入投赞成票数"  filterable allow-create default-first-option-->
+                <!--                          clearable @blur="selectBlur($event, index)" @keyup.enter.native="enterFn">-->
+                <!--                <el-option v-for="(val, id) in agreeList" :key="id" :value="val"></el-option>-->
+                <!--              </el-select>-->
+                <el-autocomplete
+                    class="inline-input"
+                    v-model="m.agree"
+                    :fetch-suggestions="querySearch3"
+                    placeholder="请输入赞成票数"
+                    :disabled="!row.id"
+
+                    @change="validate(m)"
+                ></el-autocomplete>
+                <el-alert
+                    :title="tip"
+                    type="error"
+                    show-icon
+                    v-if="errorTip[index]">
+                </el-alert>
+              </template>
+            </el-form-item>
+          </template>
+
           <el-divider></el-divider>
         </el-form>
         </div>
@@ -140,7 +191,7 @@ export default {
       motion: [],
       leijimotion: [],
       gdxmArray: [],
-      // gddmkArray: [],
+      voteArray: [],
       row: {},
       step: [],
       nextStep: 0
@@ -152,16 +203,29 @@ export default {
     axios.get(this.host + 'motion/' + this.query.year + '/' + this.query.name)
       .then(response => {
         this.gdxmArray = response.data['gdmsg']
-        // this.motion = response.data['motion']
-        this.leijimotion = response.data['leijimotion']
-        let res = response.data['motion']
-        res.forEach(item => {
-          item.checked = []
-        })
-        this.motion = res
         this.step = new Array(this.gdxmArray.length).fill()
+        // this.motion = response.data['motion']
+        // this.leijimotion = response.data['leijimotion']
+        let res1 = response.data['motion']
+        let res2 = response.data['leijimotion']
+        res1.forEach(item => {
+          item.checked = 0
+          item.ishuibi = false
+          item.desc = ''
+          item.sumZan = []
+          item.sumFan = []
+          item.sumQi = []
+        })
+        res2.forEach(item => {
+          item.agree = null
+          item.sumAgree = 0
+          item.sumGd = []
+        })
+        this.motion = res1
+        this.leijimotion = res2
+
         // this.form.checked = new Array(this.motion.length).fill(1)
-        this.form.isHuibi = new Array(this.motion.length).fill(false)
+        // this.form.isHuibi = new Array(this.motion.length).fill(false)
         // this.form.desc = new Array(this.motion.length).fill(null)
         // console.log(this.gdxmArray)
         this.init()
@@ -172,41 +236,62 @@ export default {
   mounted () {
 
   },
+  // beforeUpdate () {
+  //   console.log('beforeUpdate', this.motion)
+  // },
+  // updated () {
+  //   console.log('updated', this.motion)
+  // },
   computed: {
-    count: function () {
-      this.countVoted.push({id: this.row.id, motion1: this.form, motion2: this.agree})
-      return this.countVoted
+    count1 () {
+      return function (checked, m) {
+
+
+        return m.sumZanA
+      }
     }
   },
   methods: {
-    validate (index) {
-      console.log(this.agree[index])
-      // if (typeof (this.agree[index]) === 'undefined') {
-      //   this.errorTip[index] = true
-      //   this.tip = '不能为空'
-      //   this.$forceUpdate() // 强制更新
-      // } else {
-      //   this.errorTip[index] = false
-      //   this.$forceUpdate()
+    validate (m) {
+      // if (m.sumGd.includes(this.row.id)) {
+      //
       // }
-      if (this.agree[index] > this.row.gzA && this.agree[index] > this.row.gzB) {
-        this.errorTip[index] = true
-        this.tip = '输入的值大于当前股东可投票数'
-        this.$forceUpdate()
-        console.log(this.errorTip)
-        // this.$message({
-        //   type: 'warning',
-        //   message: `输入的值大于当前股东可投票数`
-        // })
-      }
+
+      let num = m.agree
+      m.agreement = num
     },
-    enterFn (e) {
-      console.log(e)
-      // let dom = document.getElementsByClassName("tbody-input")
-      // let dom = e.target
-      // let nextInput = dom.nextSibling
-      // nextInput.focus()
-      // console.log(nextInput)
+    countZan (m) {
+      if (m.sumFan.includes(this.row.id)) {
+        let idx = m.sumFan.indexOf(this.row.id)
+        m.sumFan.splice(idx, 1)
+      } else if (m.sumQi.includes(this.row.id)) {
+        let idx = m.sumQi.indexOf(this.row.id)
+        m.sumQi.splice(idx, 1)
+      }
+     m.sumZan.push(this.row.id)
+    },
+    countFan (m) {
+      if (m.sumZan.includes(this.row.id)) {
+        let idx = m.sumZan.indexOf(this.row.id)
+        m.sumZan.splice(idx, 1)
+      } else if (m.sumQi.includes(this.row.id)) {
+        let idx = m.sumQi.indexOf(this.row.id)
+        m.sumQi.splice(idx, 1)
+      }
+      m.sumFan.push(this.row.id)
+    },
+    countQi (m) {
+      if (m.sumFan.includes(this.row.id)) {
+        let idx = m.sumFan.indexOf(this.row.id)
+        m.sumFan.splice(idx, 1)
+      } else if (m.sumZan.includes(this.row.id)) {
+        let idx = m.sumZan.indexOf(this.row.id)
+        m.sumZan.splice(idx, 1)
+      }
+      m.sumQi.push(this.row.id)
+    },
+    countfn (m) {
+      // m.choose.push({choose: m.checked, gdid: this.row.id})
     },
     selectBlur (e, index) {
     },
@@ -222,59 +307,58 @@ export default {
       console.log(this.countVoted)
     },
     next () {
-      this.motion.forEach(item => {
-        console.log(item.checked)
-      })
-      if (this.agree.length < this.leijimotion.length) {
-        this.$message({
-          type: 'error',
-          message: `赞成票不能为空`
+      // this.countVoted.push({id: this.row.id, motion1: this.motion, motion2: this.leijimotion})
+      this.voteArray.push(this.row)
+      console.log(this.leijimotion)
+
+
+      if (this.active++ == this.step.length - 1) {
+        // this.showDone = true
+        // this.active = 0
+        this.$alert('是否提交数据', '表决统计', {
+          confirmButtonText: '确定',
+          callback: action => {
+            // axios.get(this.host + 'record')
+            axios.post(this.host + 'record', {
+              // countVoted: this.countVoted
+              // gdid: this.row.id,
+              // motion: this.motion,
+              // leijimotion: this.row.leijimotion
+              vote: this.voteArray
+            }).then(response => {
+              this.$message({
+                type: 'success',
+                message: `数据提交成功`
+              })
+              // this.isRecord = true
+              // this.$router.push('/tabs')
+
+            }).catch(error => { console.log(error) })
+          }
         })
-      }else if (this.form.checked.length < this.motion.length) {
-        this.$message({
-          type: 'error',
-          message: `议案表决票不能为空`
-        })
-      }else{
-        if (this.active++ == this.step.length - 1) {
-          // this.showDone = true
-          // this.active = 0
-          this.$alert('是否提交数据', '表决统计', {
-            confirmButtonText: '确定',
-            callback: action => {
-              axios.post(this.host + 'record', {
-                countVoted: this.countVoted,
-                motion: this.motion,
-                leijimotion: this.leijimotion
-              }).then(response => {
-                this.$message({
-                  type: 'success',
-                  message: `数据提交成功`
-                })
-                // this.isRecord = true
-                this.$router.push('/tabs')
-              }).catch(error => { console.log(error) })
-            }
-          })
-        }
-        console.log(this.form)
-        let motion1 = this.form
-        this.countVoted.push({id: this.row.id, motion1: motion1, motion2: this.agree})
-        // this.count()
-        console.log(this.countVoted)
-        this.searchValue = ''
-        this.searchValue0 = ''
-        this.row = {}
-        // this.form.checked = new Array(this.motion.length).fill(1)
-        // this.form.isHuibi = new Array(this.motion.length).fill(false)
-        // this.form.desc = new Array(this.motion.length).fill(null)
-        this.form = {
-          checked: [],
-          isHuibi: [],
-          desc: ''
-        }
-        this.agree = []
       }
+
+      // console.log(this.countVoted)
+      this.searchValue = ''
+      this.searchValue0 = ''
+      this.row = {}
+      this.motion.forEach(item => {
+        item.checked = 0
+        item.ishuibi = false
+        item.desc = ''
+      })
+
+      // this.leijimotion.forEach(item => {
+      //   item.agree = null
+      // })
+      // this.form.checked = new Array(this.motion.length).fill(1)
+      // this.form.isHuibi = new Array(this.motion.length).fill(false)
+      // this.form.desc = new Array(this.motion.length).fill(null)
+      // this.form = {
+      //   checked: [],
+      //   isHuibi: [],
+      //   desc: ''
+      // }
 
     },
     // 匹配输入框内容到表格中
@@ -334,6 +418,7 @@ export default {
       }
     },
     handleSelect (item) {
+
       let num = this.leijimotion.length
       let obj = {}
       for (let i = 0, len = this.gdxmArray.length; i < len; i++) {
