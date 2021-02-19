@@ -664,7 +664,9 @@ export default {
 }
 </script>
 <style>
-
+  .search-box .el-select {
+    margin-right: 10px;
+  }
 
   .el-tabs__nav-scroll {
       background: #FFF;
@@ -737,20 +739,7 @@ export default {
     /*line-height: 3px;*/
 	}
 
-  .button-group {
-    /* font-size: 0; */
-    /* Inline block elements gap - fix */
-    /* margin-bottom: 10px; */
-    padding: 0;
-    /*background: #E64A19;*/
-    background: linear-gradient(to bottom, #FF5722, #FFCCBC);
-    /* border-bottom: 1px solid rgba(0, 0, 0, .1); */
-    padding: 7px;
-    -moz-border-radius: 7px;
-    -webkit-border-radius: 7px;
-    border-radius: 7px;
-    /* float: right; */
-  }
+
 
 </style>
 <style scoped>
@@ -828,9 +817,7 @@ export default {
 
 	}
 
-	.search-box .el-select {
-		margin-right: 10px;
-	}
+
 
 
 

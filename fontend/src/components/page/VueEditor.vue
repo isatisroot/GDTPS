@@ -12,7 +12,7 @@
           <!--        <el-button class="button" icon="el-icon-delete" @click="handleDelete(row.index,row)" >删除</el-button>-->
 <!--          <el-button class="button" icon="el-icon-printer" @click="">统计表</el-button>-->
 <!--          <el-button class="button" icon="el-icon-printer" @click="" v-print="">表决结果</el-button>-->
-<!--          <el-button class="button" icon="el-icon-success" @click="submit">保存</el-button>-->
+          <el-button class="button" icon="el-icon-refresh" @click="refresh" v-if="isRecord">重新计票</el-button>
         </div>
       </ul>
       <div class="container" v-if="isRecord">
@@ -202,6 +202,8 @@ export default {
     this.query.name = JSON.parse(localStorage.getItem('meetingName'))
     axios.get(this.host + 'motion/' + this.query.year + '/' + this.query.name)
       .then(response => {
+        this.isRecord = response.data['isRecord']
+
         this.gdxmArray = response.data['gdmsg']
         this.step = new Array(this.gdxmArray.length).fill()
         // this.motion = response.data['motion']
@@ -230,7 +232,9 @@ export default {
         // console.log(this.gdxmArray)
         this.init()
       })
-      .catch(error => {})
+      .catch(error => {
+        console.log(error)
+      })
     // this.loadAll()
   },
   mounted () {
@@ -245,13 +249,15 @@ export default {
   computed: {
     count1 () {
       return function (checked, m) {
-
-
         return m.sumZanA
       }
     }
   },
   methods: {
+    refresh () {
+      this.isRecord = false
+      axios.get(this.host + 'refresh/', {params: {year: this.query.year, name: this.query.name}})
+    },
     validate (m) {
       // if (m.sumGd.includes(this.row.id)) {
       //
@@ -268,7 +274,7 @@ export default {
         let idx = m.sumQi.indexOf(this.row.id)
         m.sumQi.splice(idx, 1)
       }
-     m.sumZan.push(this.row.id)
+      m.sumZan.push(this.row.id)
     },
     countFan (m) {
       if (m.sumZan.includes(this.row.id)) {
@@ -311,7 +317,6 @@ export default {
       this.voteArray.push(this.row)
       console.log(this.leijimotion)
 
-
       if (this.active++ == this.step.length - 1) {
         // this.showDone = true
         // this.active = 0
@@ -332,7 +337,6 @@ export default {
               })
               // this.isRecord = true
               // this.$router.push('/tabs')
-
             }).catch(error => { console.log(error) })
           }
         })
@@ -359,7 +363,6 @@ export default {
       //   isHuibi: [],
       //   desc: ''
       // }
-
     },
     // 匹配输入框内容到表格中
     search () {
@@ -418,7 +421,6 @@ export default {
       }
     },
     handleSelect (item) {
-
       let num = this.leijimotion.length
       let obj = {}
       for (let i = 0, len = this.gdxmArray.length; i < len; i++) {
@@ -472,32 +474,5 @@ export default {
 
 
 
- .page,.page-box{
-   margin: 0 auto;
-   width: 650px;
-   padding: 50px 0 0 60px;
-   background: #fff;
-   /*background: url("../../assets/img/box-bg.jpg");*/
-   border-radius: 20px;
-   text-align: justify;
- }
- .page-box{
-   padding: 0 60px 40px 0;
- }
- .page{
-   position: relative;
-   /*margin-left: 0;*/
 
-   filter: drop-shadow(0px 0px 15px #bbb);
- }
- .page:before{
-   content: '';
-   display: block;
-   position: absolute;
-   right:-60px;
-   top:0;
-   width: 60px;
-   height: 50px;
-   background: linear-gradient(42deg, #ddd 30%, rgba(0,0,0,0) 40%);
- }
 </style>

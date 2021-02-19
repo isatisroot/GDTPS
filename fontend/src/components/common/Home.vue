@@ -60,6 +60,48 @@ export default {
 }
 </script>
 <style>
+.page,.page-box{
+  margin: 0 auto;
+  width: 650px;
+  padding: 50px 0 0 60px;
+  background: #fff;
+  /*background: url("../../assets/img/box-bg.jpg");*/
+  border-radius: 20px;
+  text-align: justify;
+}
+.page-box{
+  padding: 0 60px 40px 0;
+}
+.page{
+  position: relative;
+  /*margin-left: 0;*/
+
+  filter: drop-shadow(0px 0px 15px #bbb);
+}
+.page:before{
+  content: '';
+  display: block;
+  position: absolute;
+  right:-60px;
+  top:0;
+  width: 60px;
+  height: 50px;
+  background: linear-gradient(42deg, #ddd 30%, rgba(0,0,0,0) 40%);
+}
+.button-group {
+  /* font-size: 0; */
+  /* Inline block elements gap - fix */
+  /* margin-bottom: 10px; */
+  padding: 0;
+  /*background: #E64A19;*/
+  background: linear-gradient(to bottom, #FF5722, #FFCCBC);
+  /* border-bottom: 1px solid rgba(0, 0, 0, .1); */
+  padding: 7px;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  /* float: right; */
+}
 .title1 {
   /* margin-top: 30px; */
   /* margin-bottom: 10px; */

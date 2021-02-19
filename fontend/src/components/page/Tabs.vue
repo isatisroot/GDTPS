@@ -45,17 +45,17 @@
           <tbody v-for="(m,index) in motion" :key="index" class="tbody-input">
   <!--        <tbody>-->
           <tr >
-            <td  >1</td>
-            <td  >1</td>
-            <td >{{m}}</td>
-            <td>A股</td>
+            <td  >{{index + 1}}</td>
+            <td  >{{m.id}}</td>
+            <td >{{m.name}}</td>
+            <td>{{m.fanduiA}}</td>
 <!--            <td><input class="border-input" v-model.number="array1[index]" @keyup.enter="fun1(array1[index], index)"></input></td>-->
-            <td >{{countFanA[index].count}}</td>
-            <td >{{countFanA[index].count + countFanB[index].count}}</td>
-            <td>A股</td>
+            <td >{{m.fanduiB}}</td>
+            <td >{{m.fanduiA + m.fanduiB}}</td>
+            <td>{{m.qiquanA}}</td>
 <!--            <td><input v-model.number="array2[index]" @keyup.enter="fun2(array2[index], index)"></input></td>-->
-            <td >{{countQiA[index].count}}</td>
-            <td  >{{countQiB[index].count + countQiB[index].count}}</td>
+            <td >{{m.qiquanB}}</td>
+            <td  >{{m.qiquanA + m.qiquanB}}</td>
             <td ></td>
 <!--            <td ></td>-->
             <td  ></td>
@@ -88,7 +88,7 @@
         </table>
         <br>
           <p  class="title2" align="center">{{query.year+query.name}}议案表决董事表决赞成票统计表</p>
-          <p>出席会议股东代表股数：股，其中B股：股。</p>
+          <p>出席会议股东代表股数：{{sharehold_cx_B + sharehold_cx_A}}股，其中B股：{{sharehold_cx_B}}股。</p>
           <table class="table4">
             <tr>
               <th rowspan="2" width="40">议案编号</th>
@@ -101,15 +101,27 @@
               <th>B股</th>
               <th>合计</th>
             </tr>
-            <tr>
+            <tr v-for="(m, index) in leijimotion" :key="index">
+              <td>{{index+1}}</td>
               <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
+              <td>{{m.name}}</td>
+              <td>{{m.zanchengA}}</td>
+              <td>{{m.zanchengB}}</td>
+              <td>{{m.zanchengA + m.zanchengB}}</td>
             </tr>
           </table>
+          <div class="schart-box">
+            <!--                <div class="content-title">柱状图</div>-->
+            <schart class="schart" canvasId="bar" :options="options1"></schart>
+          </div>
+          <div class="schart-box">
+            <!--                <div class="content-title">环形图</div>-->
+            <schart class="schart" canvasId="ring" :options="options4"></schart>
+          </div>
+          <div class="schart-box">
+            <!--                <div class="content-title">饼状图</div>-->
+            <schart class="schart" canvasId="pie" :options="options3"></schart>
+          </div>
         </el-tab-pane>
         <el-tab-pane disabled name="second">
               <BiaoJueRes></BiaoJueRes>
@@ -131,11 +143,73 @@ import {
 import BiaoJueRes from './BiaoJueRes'
 import Director from "@/components/page/Director";
 import axios from "axios";
+import Schart from 'vue-schart'
 export default {
   name: 'tabs',
-  components: {BiaoJueRes, Director},
+  components: {BiaoJueRes, Director, Schart},
   data () {
     return {
+      options1: {
+        type: 'bar',
+        title: {
+          text: '各项议案表决情况统计'
+        },
+        legend: {
+          position: 'bottom',
+          bottom: 20
+        },
+        bgColor: '#fbfbfb',
+        labels: [],
+        datasets: [
+          {
+            label: '赞成票',
+            fillColor: 'rgba(241,49,74,0.5)',
+            data: []
+          },
+          {
+            label: '反对票',
+            data: []
+          },
+          {
+            label: '弃权票',
+            data: []
+          }
+        ]
+      },
+      options3: {
+        type: 'pie',
+        title: {
+          text: '股东出席情况'
+        },
+        legend: {
+          position: 'left'
+        },
+        bgColor: '#fbfbfb',
+        labels: [],
+        datasets: [
+          {
+            data: []
+          }
+        ]
+      },
+      options4: {
+        type: 'ring',
+        title: {
+          text: '累积投票议案表决情况'
+        },
+        showValue: true,
+        legend: {
+          position: 'bottom',
+          bottom: 40
+        },
+        bgColor: '#fbfbfb',
+        labels: [],
+        datasets: [
+          {
+            data: []
+          }
+        ]
+      },
       message: 'first',
       array1: [],
       array2: [],
@@ -151,15 +225,41 @@ export default {
         year: '',
         name: ''
       },
-      motion: ['yianyi', 'yianaa']
+      motion: ['yianyi', 'yianaa'],
+      leijimotion: [],
+      sharehold_cx_B: 0,
+      sharehold_cx_A: 0
     }
   },
   created () {
     console.log('created')
     this.query.year = localStorage.getItem('year')
     this.query.name = JSON.parse(localStorage.getItem('meetingName'))
-    axios.get(this.host + 'get_detail/' + this.query.year + '/' + this.query.name).then(response => {
+    axios.get(this.host + 'result/' + this.query.year + '/' + this.query.name).then(response => {
       console.log(response.data)
+      this.motion = response.data['motion']
+      this.leijimotion = response.data['leijimotion']
+      this.sharehold_cx_A = response.data['sharehold_cx_A']
+      this.sharehold_cx_B = response.data['sharehold_cx_B']
+
+      this.options3.labels = response.data['cx_gd']
+      this.options3.labels.push('未出席股东')
+      this.options3.datasets[0].data = response.data['cx_gb']
+      let ncx = response.data['ncx_gb']
+      this.options3.datasets[0].data.push(ncx)
+      let res1 = response.data['motion']
+      let res2 = response.data['leijimotion']
+      res1.forEach(item => {
+        this.options1.labels.push(item.name)
+        this.options1.datasets[0].data.push(item.zanchengA + item.zanchengB)
+        this.options1.datasets[1].data.push(item.fanduiA + item.fanduiB)
+        this.options1.datasets[2].data.push(item.qiquanA + item.qiquanB)
+      })
+      res2.forEach(item => {
+        this.options4.labels.push(item.name)
+        this.options4.datasets[0].data.push(item.zanchengA + item.zanchengB)
+      })
+
     }).catch(error => {
       console.log(error)
     })
@@ -204,5 +304,13 @@ export default {
 <style scoped>
  #yianTable input{
    width: 80px;
+ }
+ .schart-box {
+   display: inline-block;
+   margin: 20px;
+ }
+ .schart {
+   width: 600px;
+   height: 400px;
  }
 </style>
