@@ -1,7 +1,8 @@
 import json
 from django.shortcuts import render
 from django.views.generic import View
-from django.http.response import JsonResponse, HttpResponseBadRequest, HttpResponseNotFound
+from django.http.response import JsonResponse, HttpResponseBadRequest, HttpResponseNotFound, HttpResponseRedirect, \
+    HttpResponse
 from .models import Meeting, ShareholderInfo, OnSiteMeeting, GB, MotionBook, AccumulateMotion
 from django.contrib.auth import login
 from rest_framework_jwt.settings import api_settings
@@ -254,7 +255,8 @@ class QueryDetail(View):
             for i in leijimotion_qs:
                 leijimotion.append(i.name)
 
-            current = {"year": m.year, "name": m.name, "date": str_date, "motion": motion, "leijimotion": leijimotion}
+            address = m.address
+            current = {"year": m.year, "name": m.name, "date": str_date, "motion": motion, "leijimotion": leijimotion, "address": address}
 
             for q in queryset:
                 # 根据中间表查找到股东信息表q
@@ -301,6 +303,7 @@ class QueryDetail(View):
         return JsonResponse({"current": current, "detail_list": detail_list, "meeting_list": meeting_list, 'sharehold': sharehold, "extr_shareholds": extr_sh_list})
 class UpdateMeeting(View):
     def post(self, request):
+
         json_str = request.body.decode()
         req_data = json.loads(json_str)
         year = req_data.get("year")
@@ -372,7 +375,13 @@ class UpdateMeeting(View):
 
 class Upload(View):
     def post(self, request):
-        print(request.body)
+        # print(request.body)
+        file = request.FILES.get("file")
+        data = request.POST.get("data")
+        print(data)
+        for chunk in file.chunks():
+            print(chunk)
+
         return JsonResponse({'code': 200, 'msg': '上传成功'})
 
 class LoadAll(View):
@@ -444,11 +453,37 @@ class Result(View):
                 "qiquanB": i.qiquanB
             }
             motion.append(data)
-        if m.gb:
-            # 通过年度会议查找股本信息
-            sharehold = {"totalShare": m.gb.gb, "AShareTotal": m.gb.ltag, "BShareTotal": m.gb.ltbg}
+        leijimotion_qs = m.accumulatemotion_set.all()
+        leijimotion = []
+        for i in leijimotion_qs:
+            data = {
+                "id": i.id,
+                "name": i.name,
+                "zanchengA": i.zanchengA,
+                "zanchengB": i.zanchengB
+            }
+            leijimotion.append(data)
 
-        return  JsonResponse({"motion": motion})
+        queryset = m.onsitemeeting_set.filter(cx=True)
+        sharehold_cx_A = 0
+        sharehold_cx_B = 0
+        cx_gd = []
+        cx_gb = []
+        for i in queryset:
+
+            sharehold_cx_A += i.gzA
+            sharehold_cx_B += i.gzB
+            cx_gd.append(i.shareholder.gdxm)
+            cx_gb.append(i.gzB + i.gzA)
+
+        ncx_gb = m.gb.gb - sharehold_cx_A -sharehold_cx_B
+        return  JsonResponse({"motion": motion,
+                              "leijimotion": leijimotion,
+                              "sharehold_cx_A": sharehold_cx_A,
+                              "sharehold_cx_B": sharehold_cx_B,
+                              "cx_gd": cx_gd,
+                              "cx_gb": cx_gb,
+                              "ncx_gb": ncx_gb})
 
 class Motion(View):
     def get(self, request, year, meeting_name):
@@ -456,7 +491,6 @@ class Motion(View):
         try:
             m = Meeting.objects.get(year=year,name=meeting_name)
             sharehold = {"totalShare": m.gb.gb, "AShareTotal": m.gb.ltag, "BShareTotal": m.gb.ltbg}
-
             motion = []
             motion_qs =  m.motionbook_set.all()
             for i in motion_qs:
@@ -499,7 +533,7 @@ class Motion(View):
                     # 'meno': q.meno
                 }
                 data_list.append(data)
-            return JsonResponse({"motion": motion, "leijimotion": leijimotion, "gdmsg": data_list})
+            return JsonResponse({"motion": motion, "leijimotion": leijimotion, "gdmsg": data_list, "isRecord": m.is_tongji})
         except Exception as e:
             print(e)
             return HttpResponseBadRequest(content=json.dumps({'msg':'查询失败'}),content_type="'application/json'")
@@ -577,62 +611,87 @@ class Record(View):
                 qiquanB = sum_qi_B
             )
 
+        for k,v in data2.items():
+            m = AccumulateMotion.objects.filter(id=k)
+            zanchengA = 0
+            zanchengB = 0
+            for i in v:
+                agree = i.get("agree", "0")
+                gdid = i.get("gdid")
+                gd = ShareholderInfo.objects.get(id=gdid)
+                if gd.gzA > 0:
+                    zanchengA += int(agree)
+                else:
+                    zanchengB += int(agree)
+
+            m.update(zanchengA = zanchengA, zanchengB=zanchengB)
+
         return JsonResponse({"success": 1, "msg": "唱票成功"})
 
-        # gdid = req_data.get("gdid", 0)
-        # print(gdid)
-        # motion = req_data.get("motion")
-        # leijimotion = req_data.get("leijimotion")
-        # s = ShareholderInfo.objects.get(id=gdid)
-        # data = {"motion": motion, "leijimotion": leijimotion}
-        # 连接redis数据库，写入验证码,UUID
-        # redis = get_redis_connection('verify')
-        # redis.setex(gdid, 300, data)
-        # request.session[gdid] = data
-        # items = request.session.items()
-        # keys = request.session.keys()
-        # print(keys)
-        # print(items)
-        # print(request.session.get(gdid))
-        # sum_zan_A = request.session.get("sum_zan_A")
-        # sum_zan_B = request.session.get("sum_zan_B", 0)
-        # sum_fan_A = request.session.get("sum_fan_A", 0)
-        # sum_fan_B = request.session.get("sum_fan_B", 0)
-        # sum_qi_A = request.session.get("sum_qi_A", 0)
-        # sum_qi_B = request.session.get("sum_qi_B", 0)
-        # huibiA = request.session.get("huibiA", 0)
-        # huibiB = request.session.get("huibiB", 0)
+class Refresh(View):
+    def get(self, request):
+        year = request.GET.get('year')
+        name = request.GET.get('name')
+        print(year, name)
+        Meeting.objects.filter(year=year, name=name).update(is_tongji = False)
+        return JsonResponse({"success": 1, "msg": "更新成功"})
+
+class Download(View):
+    def post(self, request):
+        data = json.loads(request.body)
+        response = {}
+        file_name = data.get("file_name")
+        if not file_name:
+            response["meta"] = {"code": 400}
+            response["error"] = {"error_msg": "parameter error, no file_path"}
+            HttpResponse(json.dumps(response))
+
+        file_path = r"C:\Users\49223\Desktop\ShareholderVoteSys\backend\GDVoteSys\files\第三次临时股东大会.docx"
+        file = open(file_path, "rb")
+        response = HttpResponse(file)
+        response["Content-Type"] = "application/octet-stream"
+        response["Content-Disposition"] = "attachment:filename={}".format(file_name+".docx")
+        return response
+
+
+class UpdateAnnualMeeting(View):
+    def post(self, request):
+        json_str = request.body.decode()
+        req_data = json.loads(json_str)
+        year = req_data.get("year")
+        name = req_data.get("name")
+        form = req_data.get("form", {})
+        motion = req_data.get("motion")
+        leijimotion = req_data.get("leijimotion")
+        addmotion = req_data.get("addmotion", [])
+        addleijimotion = req_data.get("addleijimotion", [])
+        for i in addleijimotion:
+            addmotion.remove(i)
+        address = form.get("address")
+        date1 = form.get("date1")
+        date2 = form.get('date2')
+        if " " in date1:
+
+            stru_date = datetime.strptime(date1, "%Y-%m-%d %H:%M:%S")
+
+        else:
+            stru_date = datetime.strptime(date1 +"\xa0" + date2, "%Y-%m-%d %H:%M")
+
+        m = Meeting.objects.filter(year=year, name=name)
+        m.update(date=stru_date, address=address)
+        MotionBook.objects.exclude(name__in=motion).filter(annual_meeting=m[0]).delete()
+        AccumulateMotion.objects.exclude(name__in=leijimotion).filter(annual_meeting=m[0]).delete()
+
+        for i in addmotion:
+            if i.get("motion"):
+                MotionBook.objects.create(name=i.get("motion"), annual_meeting=m[0])
+
+        for i in addleijimotion:
+            if i.get("motion"):
+                AccumulateMotion.objects.create(name=i.get("motion"), annual_meeting=m[0])
 
 
 
-        # desc_text = ""
-        # for index, _i in enumerate(motion):
-        #
-        #     is_huibi = False
-        #     for i in countVote:
-        #         id = i.get("id")
-        #         s = ShareholderInfo.objects.get(id=id)
-        #         motion1 = i.get("motion1")
-        #         ishuibi = motion1.get("isHuibi")
-        #         desc = motion1.get("desc")
-        #         # for index, j in enumerate(motion1.get("checked")):
-        #         j = motion1.get("checked")[index]
-        #         if j == 1:
-        #             sum_zan_A += s.gzA
-        #             sum_zan_B += s.gzB
-        #         elif j == 2:
-        #             sum_fan_A += s.gzA
-        #             sum_fan_B += s.gzB
-        #         elif j == 3:
-        #             sum_qi_A += s.gzA
-        #             sum_qi_B += s.gzB
-        #
-        #         if ishuibi[index]:
-        #             is_huibi = True
-        #             huibiA += s.gzA
-        #             huibiB += s.gzB
-        #             desc_text += desc[index] + ";" if desc[index] else ""
-        #
 
 
-
+        return JsonResponse({"success": 1, "msg": "更新成功"})

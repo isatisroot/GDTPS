@@ -56,6 +56,7 @@ class Meeting(models.Model):
     name = models.CharField(verbose_name="会议类型", max_length=20)
     motion = models.CharField(max_length=100, verbose_name="议案主题",default="")
     address = models.CharField(max_length=25, default="")
+    is_tongji = models.BooleanField(default=False, null=True)
     members = models.ManyToManyField(ShareholderInfo, through="OnSiteMeeting")
     # gb_id = models.SmallIntegerField(default=1)
     gb = models.ForeignKey(GB,  on_delete=models.SET_NULL, null=True) # 一对多，gb表是一，annual_meeting是多，当gb表记录删除时，该外键值she为null
@@ -100,6 +101,7 @@ class MotionBook(models.Model):
     is_huibi = models.BooleanField(default=False, null=True)
     huibiA = models.IntegerField(null=True)
     huibiB = models.IntegerField(null=True)
+    # is_tongji = models.BooleanField(default=False, null=True)
     annual_meeting = models.ForeignKey(Meeting, on_delete=models.SET_NULL, null=True)
 
     class Meta:
@@ -110,8 +112,9 @@ class MotionBook(models.Model):
 class AccumulateMotion(models.Model):
     """累积议案表"""
     name = models.CharField(verbose_name="议案主题", max_length=80)
-    zancheng = models.IntegerField(null=True)
-
+    zanchengA = models.IntegerField(null=True)
+    zanchengB = models.IntegerField(null=True)
+    # is_tongji = models.IntegerField(default=False, null=True)
     annual_meeting = models.ForeignKey(Meeting, on_delete=models.SET_NULL, null=True)
 
     class Meta:
