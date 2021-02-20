@@ -21,7 +21,7 @@
         </el-select>
 
         <el-button type="warning" icon="el-icon-search" @click="handleSearch">搜索</el-button>
-        <el-button @click="()=>{this.meetingName.push('new')}">添加</el-button>
+<!--        <el-button @click="()=>{this.meetingName.push('new')}">添加</el-button>-->
         <!-- <el-button type="primary" icon="el-icon-circle-plus">新增</el-button> -->
       </div>
       <div class="button-group-left">
@@ -664,9 +664,7 @@ export default {
 }
 </script>
 <style>
-  .search-box .el-select {
-    margin-right: 10px;
-  }
+
 
   .el-tabs__nav-scroll {
       background: #FFF;
@@ -696,32 +694,6 @@ export default {
 	/*	font-weight: 600;*/
 	}
 
-	.button {
-		/* border-top: 1px solid #97f7df; */
-		background: #FFCCBC;
-    /*background: linear-gradient(0.25turn, #03A9F4, #ebf8e1, #B2DFDB);*/
-		padding: 9px 15px;
-		border-radius: 3px;
-    color: #455A64;
-    /*color: red;*/
-		font-size: 12px;
-    font-weight: bolder;
-    font-family: "YouYuan";
-    opacity: 0.9;
-
-	}
-
-	.button:hover {
-		/*border-top-color: #287378;*/
-		background: #ebf8e1;
-    color: orangered;
-	}
-
-	.button:active {
-		/*border-top-color: #3162a7;*/
-		/*background: #1b365c;*/
-    background-color: #ffffff
-	}
 
   /*固定表格总宽度，使其居中*/
   .el-table{

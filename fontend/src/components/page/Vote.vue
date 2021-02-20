@@ -14,6 +14,7 @@
 							<th colspan="2">
 								股票种类即持股数
 							</th>
+
 						</tr>
 						<tr>
 							<th>A股</th>
@@ -22,14 +23,15 @@
 
 						<tr>
 							<td>{{row.gdxm}}</td>
-							<td>{{row.gddmk}}</td>
+							<td><barcode v-bind:value="row.gddmk"></barcode></td>
 							<td>{{row.gzA}}</td>
 							<td>{{row.gzB}}</td>
+
 						</tr>
 					</table>
 					<br>
       <p v-if="descr">{{descr}}</p>
-					<p class="text" v-else>说明：每项议案均有一张表决票，请使用“✓”符号在赞成、反对或弃权栏中选择其中一项投出表决票，多选无效。</p>
+					<p class="text" v-else>说明：每项议案均有一张表决票，请使用“✓”符号在反对或弃权栏中选择其中一项投出表决票，多选无效。</p>
 					<table class="table3">
 						<tr >
 							<th width="60">议案编号</th>
@@ -75,35 +77,40 @@
 </template>
 
 <script>
-	export default {
-	  name: 'vote',
-	  props: ['query', 'row', 'motion', 'leijimotion', 'descr'],
-	  data () {
-	    return {
-	      currentDate: this.dateToString(),
-	      datas: ['a', 'b']
-	    }
-	  },
-	  created () {
+import VueBarcode from 'vue-barcode'
+export default {
+  name: 'vote',
+  props: ['query', 'row', 'motion', 'leijimotion', 'descr'],
+  components: {
+    'barcode': VueBarcode
+  },
+  data () {
+    return {
+      BarcodeValue: '',
+      currentDate: this.dateToString(),
+      datas: ['a', 'b']
+    }
+  },
+  created () {
 
-	  },
-	  methods: {
-	    dateToString () {
-	      var _date = new Date()
-	      var year = _date.getFullYear()
-	      var month = _date.getMonth() + 1
-	      var day = _date.getDate()
-	      var currentDate = year.toString() + '-' + month.toString() + '-' + day.toString()
-	      return currentDate
-	    },
-	    current_change: function (currentPage) {
-	      // this.currentPage = currentPage;
-	      var oUl = document.getElementById('uvote')
-	      console.log(currentPage)
-	      oUl.style.top = -800 * (currentPage - 1) + 'px'
-	    }
-	  }
-	}
+  },
+  methods: {
+    dateToString () {
+      var _date = new Date()
+      var year = _date.getFullYear()
+      var month = _date.getMonth() + 1
+      var day = _date.getDate()
+      var currentDate = year.toString() + '-' + month.toString() + '-' + day.toString()
+      return currentDate
+    },
+    current_change: function (currentPage) {
+      // this.currentPage = currentPage;
+      var oUl = document.getElementById('uvote')
+      console.log(currentPage)
+      oUl.style.top = -800 * (currentPage - 1) + 'px'
+    }
+  }
+}
 </script>
 
 <style>

@@ -8,6 +8,24 @@
             </el-breadcrumb>
         </div>
         <div class="container">
+          <el-input id="barCode" v-model="barCode" style="width:50%" placeholder="此处为识别的条码号"></el-input>
+
+          <!--          <el-col :lg="10" :md="16" :xs="24">-->
+<!--            <div class="grid-content">-->
+<!--              <div class="titletext">扫描</div>-->
+<!--              <el-card class="box-card">-->
+<!--                <video id="camera" autoplay width="300" height="485"></video>-->
+<!--                <canvas id="canvas" width="800" height="800" hidden="hidden"></canvas>-->
+<!--                <img id="Tagimg" style="display:none" src="" alt=""/>-->
+<!--              </el-card>-->
+<!--              <div style="height:20px"></div>-->
+<!--              <div style="text-align:left">-->
+<!--                <el-tooltip class="item" effect="light" content="读取成功" placement="right-start">-->
+<!--                  <el-button type="success" icon="el-icon-check" circle @click="forgetLove"></el-button>-->
+<!--                </el-tooltip>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </el-col>-->
            <!-- <div class="plugins-tips">
                 vue-schart：vue.js封装sChart.js的图表组件。
                 访问地址：
@@ -45,6 +63,8 @@ export default {
   },
   data () {
     return {
+      barCode: '', // 条码
+      videoobj: null, // 视频对象(全局)
       options1: {
         type: 'bar',
         title: {
@@ -130,6 +150,15 @@ export default {
         ]
       }
     }
+  },
+  created() {
+
+  },
+  methods: {
+
+    // 识别二维码
+
+
   }
 }
 </script>

@@ -11,7 +11,7 @@
 <!--        <el-button class="button" icon="el-icon-delete" @click="handleDelete(row.index,row)" >删除</el-button>-->
         <el-button class="button" icon="el-icon-printer" @click="">统计表</el-button>
         <el-button class="button" icon="el-icon-printer" @click="" v-print="'#res1'">表决结果</el-button>
-        <el-button class="button" icon="el-icon-download" @click="">下载</el-button>
+        <el-button class="button" icon="el-icon-download" @click="download">下载</el-button>
       </div>
     </ul>
 		<div class="container">
@@ -122,6 +122,7 @@
             <!--                <div class="content-title">饼状图</div>-->
             <schart class="schart" canvasId="pie" :options="options3"></schart>
           </div>
+
         </el-tab-pane>
         <el-tab-pane disabled name="second">
               <BiaoJueRes></BiaoJueRes>
@@ -141,8 +142,8 @@ import {
   EventBus
 } from '../../api/event_bus.js'
 import BiaoJueRes from './BiaoJueRes'
-import Director from "@/components/page/Director";
-import axios from "axios";
+import Director from '@/components/page/Director'
+import axios from 'axios'
 import Schart from 'vue-schart'
 export default {
   name: 'tabs',
@@ -259,7 +260,6 @@ export default {
         this.options4.labels.push(item.name)
         this.options4.datasets[0].data.push(item.zanchengA + item.zanchengB)
       })
-
     }).catch(error => {
       console.log(error)
     })
@@ -271,6 +271,35 @@ export default {
   },
 
   methods: {
+    download () {
+      let url = this.host + 'download_file'
+      let data = JSON.stringify({
+        file_name: '第三次临时股东大会'
+      })
+      console.log('data:', data)
+      axios(
+        {
+          method: 'post',
+          url: url,
+          data: data,
+          responseType: 'blob' // 指定获取数据的类型为blob
+        }
+      ).then(
+        function (response) {
+          data = response.data // 创建a标签并点击， 即触发下载
+          let url = window.URL.createObjectURL(new Blob([data], {type: 'application/msword'})) // application/msword指定下载word类型文件
+          let link = document.createElement('a')
+          link.style.display = 'none'
+          link.href = url
+          link.setAttribute('download', '第三次临时股东大会')
+
+          document.body.appendChild(link)
+          link.click()
+        }
+      ).catch(function (err) {
+        console.log(err)
+      })
+    },
     fun1 (v, index) {
       console.log(index)
       this.countFanA[index].count += v

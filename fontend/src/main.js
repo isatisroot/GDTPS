@@ -12,6 +12,11 @@ import 'babel-polyfill'
 import Print from 'vue-print-nb'
 import $ from 'jquery'
 import animated from 'animate.css' // 引入
+import Quagga from 'quagga'
+// 挂载到vue全局
+//官网的方法在我的项目里不起作用，我只能这么加载了
+Vue.prototype.$Quagga = Quagga
+
 Vue.use(animated) // 全局注册
 Vue.use(Print) // 注册
 

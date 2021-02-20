@@ -64,6 +64,11 @@ export default {
           icon: 'el-icon-lx-copy',
           index: 'tabs',
           title: '统计结果'
+          // subs: [
+          //   {
+          //     index: 'charts',
+          //     title: '图表统计'
+          //   }]
         }
 	
 	        // {

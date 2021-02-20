@@ -1,7 +1,7 @@
 <template>
 	<div>
     <ul class="button-group">
-      <div class="search-box" style="text-align: center">
+      <div class="search-box" >
       <el-select v-model="query.year" placeholder="年份" class="handle-select mr10" filterable allow-create
                  clearable>
         <el-option v-for="(val, id) in yearList" :key="id" :value="val"></el-option>
@@ -12,58 +12,17 @@
       </el-select>
 
       <el-button type="warning" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+      <el-button type="warning" icon="el-icon-circle-plus" @click="dialogFormVisible=true" plain>新增会议</el-button>
       </div>
-      <div class="button-group-left" style="text-align: center;margin-top: 10px">
+      <div class="button-group-left" style="margin-top: 10px">
         <el-button class="button" icon="el-icon-circle-plus" @click="addMotion">新增议案</el-button>
-        <el-button class="button" icon="el-icon-circle-plus" @click="">新增累计投票议案</el-button>
-
-        <el-button class="button" icon="el-icon-success" @click="">保存</el-button>
+        <el-button class="button" icon="el-icon-success" @click="submit">保存</el-button>
       </div>
     </ul>
+    <el-dialog :visible.sync="dialogFormVisible"><span slot="title" style="margin-left: 300px;font-size: 30px;">新增会议</span>
+      <AddMeeting></AddMeeting>
+    </el-dialog>
     <div class="container">
-    <!--		<el-row :gutter="20">-->
-<!--			<el-col :span="8">-->
-
-<!--				&lt;!&ndash; 查询与新增年度会议功能卡 &ndash;&gt;-->
-<!--				<el-card shadow="hover" style="height:252px;text-align: center;">-->
-<!--					<div slot="header" class="clearfix">-->
-<!--						<span class="search-box">选择股东大会年度</span>-->
-<!--					</div>-->
-<!--          <AnnualMeeting v-on:childByValue="childByValue" :dashboard="ruleForm"></AnnualMeeting>-->
-<!--				</el-card>-->
-<!--				&lt;!&ndash; 点击新增button之后弹出具有填写表单功能的弹窗 &ndash;&gt;-->
-<!--				<el-dialog :visible.sync="dialogFormVisible"><span slot="title" style="margin-left: 300px;font-size: 30px;">新增会议</span>-->
-<!--          <AddMeeting></AddMeeting>-->
-<!--				</el-dialog>-->
-<!--			</el-col>-->
-<!--			<el-col :span="16">-->
-<!--				&lt;!&ndash; 会议文件展示功能卡 &ndash;&gt;-->
-<!--				<el-card shadow="hover" style="height:403px;">-->
-<!--					<div slot="header" class="clearfix">-->
-<!--						<span>会议议案</span>-->
-<!--						<el-button style="float: right; padding: 3px 0" type="text">添加</el-button>-->
-<!--					</div>-->
-<!--					<el-table :show-header="false" :data="todoList" style="width:100%;">-->
-<!--						<el-table-column width="40">-->
-<!--							<template slot-scope="scope">-->
-<!--								<el-checkbox v-model="scope.row.status"></el-checkbox>-->
-<!--							</template>-->
-<!--						</el-table-column>-->
-<!--						<el-table-column>-->
-<!--							<template slot-scope="scope">-->
-<!--								<div class="todo-item" :class="{'todo-item-del': scope.row.status}">{{scope.row.title}}</div>-->
-<!--							</template>-->
-<!--						</el-table-column>-->
-<!--						<el-table-column width="60">-->
-<!--							<template>-->
-<!--								<i class="el-icon-edit"></i>-->
-<!--								<i class="el-icon-delete"></i>-->
-<!--							</template>-->
-<!--						</el-table-column>-->
-<!--					</el-table>-->
-<!--				</el-card>-->
-<!--			</el-col>-->
-<!--		</el-row>-->
     <div class="page">
       <div class="page-box">
         <el-form :model="form">
@@ -86,12 +45,16 @@
           <el-divider style="margin-top: 10px">议案主题</el-divider>
           <div style="text-align: center;margin-top: -10px;margin-bottom: 15px">
 
-            <span style="font-size: 10px">(✔表示采用累积投票)</span>
+            <span style="font-size: 10px;color:orangered">(✔表示采用累积投票)</span>
           </div>
           <el-form-item v-for="m in motion">
 <!--              <button style="margin-left: 10px" @click="clickHiddenFile">上传附件</button>-->
 <!--              https://www.cnblogs.com/kongxianghai/p/5624785.html-->
-            <li >{{ m }}</li>
+            <li >{{ m }}
+              <el-popconfirm title="确定删除这条议案吗？">
+              <i class="el-icon-delete" style="position: absolute;right: 10px" slot="reference"></i>
+              </el-popconfirm>
+            </li>
 <!--            <span class="btn btn-success fileinput-button">-->
 <!--              <button >上传附件</button>-->
 <!--            <input type="file" value="" id="hiddenFile" @change="uploadConfig($event, m)" >-->
@@ -100,15 +63,21 @@
 
 <!--          <el-divider style="margin-top: 10px">累计投票议案</el-divider>-->
           <el-form-item v-for="m in leijimotion">
-            <el-checkbox v-model="m.checked"></el-checkbox><li style="list-style-type: none;display: inline-block;margin-left: 5px">{{m.name}}</li>
+            <el-checkbox v-model="value" :disabled="value"></el-checkbox>
+            <li style="list-style-type: none;display: inline-block;margin-left: 5px">{{m}}
+              <el-popconfirm title="确定删除这条议案吗？">
+                <i class="el-icon-delete" style="position: absolute;right: 10px" slot="reference"></i>
+              </el-popconfirm>
+            </li>
           </el-form-item>
-          <el-form-item>
-            <div style="float: left; width: 90%" v-show="addmotion.length > 0">
+          <el-form-item v-show="addmotion.length > 0">
+            <div style="float: left; width: 90%" >
               <!-- <li v-for="(val, id) in motion.list" :key="id" style="list-style-type:none;">
                 <el-input type="text" style="margin-bottom: 5px;" v-model="val.text"></el-input>
               </li> -->
               <!-- 使用作用域插槽，el-table是子组件，现在往子组件传<template>的内容，并获取里面的内容 -->
-              <el-table :data="addmotion" :show-header="false">
+              <el-table :data="addmotion" :show-header="false" ref="multipleTable" @selection-change="handleSelectionChange">
+                <el-table-column type="selection" width="28px"></el-table-column>
                 <el-table-column prop=motion>
                   <template slot-scope="scope">
                     <el-input v-model="addmotion[scope.$index].motion"></el-input>
@@ -121,6 +90,11 @@
               <el-input type="text" style="margin-bottom: 5px;"></el-input> -->
             </div>
           </el-form-item>
+<!--          <div class="demo-block-control">-->
+<!--            <i class="el-icon-caret-bottom"></i>-->
+<!--            <span class="active-add">新增议案</span>-->
+<!--          </div>-->
+<!--          <br>-->
           <el-divider style="margin-top: 10px">表决票说明</el-divider>
           <el-form-item prop="textarea"><el-input
               type="textarea"
@@ -145,6 +119,7 @@ export default {
 	  name: 'dashboard',
 	  data () {
     return {
+      multipleSelection: [],
       value: true,
       formLabelWidth: '74px',
       form: {
@@ -181,28 +156,7 @@ export default {
       // yearList: [],
       // meetingNameList: [],
       name: localStorage.getItem('ms_username'),
-      todoList: [{
-        title: '关于与广东省广晟财务有限公司签署《金融服务协议》的议案',
-        status: false
-      },
-      {
-        title: '关于修订《公司章程》的议案',
-        status: false
-      },
-      {
-        title: '关于续聘2020年度审计机构的议案',
-        status: false
-      },
-      {
-        title: '关于XXXXXX的议案',
-        status: false
-      },
-      {
-        title: '关于XXXXXX的议案',
-        status: false
-      }
 
-      ]
     }
   },
   components: {
@@ -224,6 +178,26 @@ export default {
   },
 
   methods: {
+    handleSelectionChange (val) {
+      // console.log(val)
+      this.multipleSelection = val
+    },
+    submit () {
+      let url = this.host + 'update_meeting'
+      axios.post(url, {
+        year: this.query.year,
+        name: this.query.name,
+        form: this.form,
+        motion: this.motion,
+        leijimotion: this.leijimotion,
+        addmotion: this.addmotion,
+        addleijimotion: this.multipleSelection
+      }).then(response => {
+        // console.log(response.data)
+        this.$message.success('数据更新成功！')
+        location.reload()
+      })
+    },
     // download(){
     //   let self = this;
     //   let url = this.host + "download_file";
@@ -296,16 +270,8 @@ export default {
           // this.query.name = response.data['current']['name']
           // this.descr = response.data['current']['descr']
           this.motion = response.data['current']['motion']
-          let res = response.data['current']['leijimotion']
+          this.leijimotion = response.data['current']['leijimotion']
           this.form.address = response.data['current']['address']
-          console.log(res)
-          res.forEach(item => {
-            console.log(item)
-            let m = new Object()
-            m.checked = true
-            m.name = item
-            this.leijimotion.push(m)
-          })
           // console.log(res)
           // this.leijimotion = res
           // this.meetingName = response.data['meeting_list']
@@ -327,6 +293,10 @@ export default {
 /*  display: inline-block;*/
 /*  overflow: hidden;*/
 /*}*/
+/deep/ .el-table-column--selection .cell{
+  padding-left: 0px;
+}
+
 .fileinput-button input{
   position:absolute;
   right: 0px;
@@ -456,4 +426,51 @@ export default {
 		width: 100%;
 		height: 300px;
 	}
+
+ i:hover {
+  /*border-top-color: #287378;*/
+  background: #ebf8e1;
+  color: #ff0026;
+}
+ .el-icon-caret-bottom:hover {
+   color: #20a0ff;
+   /*display: none;*/
+ }
+.demo-block-control {
+  padding-top: 3px;
+  border: 1px solid #eaeefb;
+  height: 24px;
+  box-sizing: border-box;
+  /*background-color: #fff;*/
+  opacity: 0.5;
+  text-align: center;
+  margin-top: -1px;
+  background-color: #d3dce6;
+  cursor: pointer;
+  position: relative;
+
+}
+.demo-block-control span {
+  display: none;
+  position: absolute;
+  transform: translateX(-30px);
+  font-size: 14px;
+  line-height: 44px;
+  transition: .3s;
+
+}
+/*.demo-block-control:hover {*/
+/*  padding-top: 10px;*/
+/*  height: 34px;*/
+/*}*/
+.demo-block-control:hover .active-add{
+  /*display: inline-block;*/
+  /*font-size: 15px;*/
+  color: #20a0ff;
+
+  display: inline-block;
+}
+
+
+
 </style>

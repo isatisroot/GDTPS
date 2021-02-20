@@ -25,13 +25,15 @@
       <div class="container" v-else>
         <p class="title1" >佛山电器照明股份有限公司</p>
         <p class="title2">{{query.year+query.name}}表决票统计</p>
+
         <div class="search-gddmk">
-<!--          element中使用原生@keyup.enter事件时需要加.native-->
-          <el-autocomplete class="inline-input" v-model="searchValue0" :fetch-suggestions="querySearch0" placeholder="请输入股东姓名"
-                           :trigger-on-focus="false" value-key="gdxm" @select="handleSelect" @keyup.enter.native="handleSelect"></el-autocomplete>
+<!--          element中使用原生@keyup.enter事件时需要加.native--><el-autocomplete class="inline-input" v-model="searchValue" :fetch-suggestions="querySearch" placeholder="请扫描股东代码号"
+                                                                       value-key="gddmk" @select="handleSelect" @keyup.enter.native="handleSelect"></el-autocomplete>
           <span style="margin: 10px">或</span>
-          <el-autocomplete class="inline-input" v-model="searchValue" :fetch-suggestions="querySearch" placeholder="输入代码卡号"
-                           value-key="gddmk" @select="handleSelect" @keyup.enter.native="handleSelect"></el-autocomplete>
+          <el-autocomplete class="inline-input" v-model="searchValue0" :fetch-suggestions="querySearch0" placeholder="输入股东姓名"
+                           :trigger-on-focus="false" value-key="gdxm" @select="handleSelect" @keyup.enter.native="handleSelect"></el-autocomplete>
+
+
 <!--          <span>股东姓名或代码卡：</span><input v-model="searchValue" @keyup.enter="search()"></input><button @click="search">确认</button>-->
 <!--           <el-button type="primary" @click="fn1">确认</el-button>-->
         </div>
@@ -71,7 +73,7 @@
               <template >
                 <li>{{ m.name }}</li>
                 <el-radio-group v-model="m.checked" :disabled="!row.id" >
-                  <el-radio :label="1" >赞成</el-radio>
+                  <el-radio :label="1" style="display: none">赞成</el-radio>
                   <el-radio :label="2" >反对</el-radio>
                   <el-radio :label="3" >弃权</el-radio>
                 </el-radio-group>
@@ -86,7 +88,7 @@
 
 
           <br>
-          <el-divider v-if="leijimotion">累计投票议案</el-divider>
+<!--          <el-divider v-if="leijimotion">累计投票议案</el-divider>-->
           <template v-if="row.id">
             <el-form-item v-for="(m, index) in row.leijimotion" >
               <template>

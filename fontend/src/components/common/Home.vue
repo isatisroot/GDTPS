@@ -88,6 +88,7 @@ export default {
   height: 50px;
   background: linear-gradient(42deg, #ddd 30%, rgba(0,0,0,0) 40%);
 }
+
 .button-group {
   /* font-size: 0; */
   /* Inline block elements gap - fix */
@@ -102,6 +103,38 @@ export default {
   border-radius: 7px;
   /* float: right; */
 }
+
+.button {
+  /* border-top: 1px solid #97f7df; */
+  background: #FFCCBC;
+  /*background: linear-gradient(0.25turn, #03A9F4, #ebf8e1, #B2DFDB);*/
+  padding: 9px 15px;
+  border-radius: 3px;
+  color: #455A64;
+  /*color: red;*/
+  font-size: 12px;
+  font-weight: bolder;
+  font-family: "YouYuan";
+  opacity: 0.9;
+
+}
+
+.button:hover {
+  /*border-top-color: #287378;*/
+  background: #ebf8e1;
+  color: orangered;
+}
+
+.button:active {
+  /*border-top-color: #3162a7;*/
+  /*background: #1b365c;*/
+  background-color: #ffffff
+}
+
+.search-box .el-select {
+  margin-right: 10px;
+}
+
 .title1 {
   /* margin-top: 30px; */
   /* margin-bottom: 10px; */
