@@ -232,4 +232,32 @@ export default {
   border: 1px solid #000000;
   height: 50px;
 }
+
+.el-tabs__nav-scroll {
+  background: #FFF;
+}
+.el-tabs__nav {
+  background: #FFF;
+  /* border-radius: 13px; */
+  /*background: #6666ff;*/
+  /*-moz-box-shadow: rgba(152, 152, 152, 1.0) 0 1px 0;*/
+  /*box-shadow: rgba(127, 127, 127, 1.0) 0 1px 0;*/
+  /* text-shadow: rgba(0, 0, 0, .4) 0 1px 0; */
+}
+
+/*.el-tabs--border-card>.el-tabs__header .el-tabs__item {*/
+/*	border: 3px solid #FFFFFF;*/
+/*	border-radius: 5px;*/
+/*	color: white*/
+/*}*/
+
+.el-tabs--border-card>.el-tabs__header .el-tabs__item.is-active {
+  border-right-color:#FFF;
+  border-left-color: #FFF;
+  /*	color: #3f51b5;*/
+  /*	!* background-color: #00BCD4; *!*/
+  /*	background: -webkit-gradient(linear, left top, left bottom, from(#6699ff), to(#ffffff));*/
+  /*	border-radius: 5px;*/
+  /*	font-weight: 600;*/
+}
 </style>

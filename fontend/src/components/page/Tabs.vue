@@ -118,10 +118,10 @@
             <!--                <div class="content-title">环形图</div>-->
             <schart class="schart" canvasId="ring" :options="options4"></schart>
           </div>
-          <div class="schart-box">
-            <!--                <div class="content-title">饼状图</div>-->
-            <schart class="schart" canvasId="pie" :options="options3"></schart>
-          </div>
+<!--          <div class="schart-box">-->
+<!--            &lt;!&ndash;                <div class="content-title">饼状图</div>&ndash;&gt;-->
+<!--            <schart class="schart" canvasId="pie" :options="options3"></schart>-->
+<!--          </div>-->
 
         </el-tab-pane>
         <el-tab-pane disabled name="second">

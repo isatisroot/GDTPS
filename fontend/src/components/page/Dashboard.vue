@@ -13,11 +13,13 @@
 
       <el-button type="warning" icon="el-icon-search" @click="handleSearch">搜索</el-button>
       <el-button type="warning" icon="el-icon-circle-plus" @click="dialogFormVisible=true" plain>新增会议</el-button>
-      </div>
-      <div class="button-group-left" style="margin-top: 10px">
-        <el-button class="button" icon="el-icon-circle-plus" @click="addMotion">新增议案</el-button>
         <el-button class="button" icon="el-icon-success" @click="submit">保存</el-button>
+
       </div>
+<!--      <div class="button-group-left" style="margin-top: 10px">-->
+<!--        <el-button class="button" icon="el-icon-circle-plus" @click="addMotion">新增议案</el-button>-->
+<!--        <el-button class="button" icon="el-icon-success" @click="submit">保存</el-button>-->
+<!--      </div>-->
     </ul>
     <el-dialog :visible.sync="dialogFormVisible"><span slot="title" style="margin-left: 300px;font-size: 30px;">新增会议</span>
       <AddMeeting></AddMeeting>
@@ -90,17 +92,27 @@
               <el-input type="text" style="margin-bottom: 5px;"></el-input> -->
             </div>
           </el-form-item>
-<!--          <div class="demo-block-control">-->
-<!--            <i class="el-icon-caret-bottom"></i>-->
-<!--            <span class="active-add">新增议案</span>-->
-<!--          </div>-->
+          <div class="demo-block-control" @click="addMotion" v-if="motion != '' && leijimotion != ''">
+<!--   <el-tooltip class="item" effect="dark" content="新增议案" placement="bottom">-->
+<!--            <img src="../../assets/img/toggle_bg.png" width="500px" @click="addMotion" ></img>-->
+
+            <div class="add-motion">
+              <i class="el-icon-caret-bottom"></i>
+              <span >新增议案</span>
+            </div>
+
+            <!--            </el-tooltip>-->
+          </div>
+          <div style="text-align: center" @click="addMotion" v-else>
+            <el-button type="success" icon="el-icon-circle-plus"  >新增议案</el-button>
+          </div>
 <!--          <br>-->
           <el-divider style="margin-top: 10px">表决票说明</el-divider>
           <el-form-item prop="textarea"><el-input
               type="textarea"
               :rows="2"
               placeholder="请输入内容"
-              v-model="form.textarea">
+              v-model="form.descr">
           </el-input></el-form-item>
 
         </el-form>
@@ -129,7 +141,7 @@ export default {
         options: [],
         address: '',
         motion: '',
-        textarea: ''
+        desrc: ''
       },
       addmotion: [],
       addlejimotion: [],
@@ -429,47 +441,54 @@ export default {
 
  i:hover {
   /*border-top-color: #287378;*/
-  background: #ebf8e1;
+  /*background: #ebf8e1;*/
   color: #ff0026;
 }
- .el-icon-caret-bottom:hover {
-   color: #20a0ff;
-   /*display: none;*/
- }
+
 .demo-block-control {
   padding-top: 3px;
   border: 1px solid #eaeefb;
   height: 24px;
   box-sizing: border-box;
-  /*background-color: #fff;*/
-  opacity: 0.5;
+  background: linear-gradient(to bottom, #FF5722, #FFCCBC);
+  border-radius: 5px;
+  width: 70%;
+  opacity: 0.7;
   text-align: center;
-  margin-top: -1px;
-  background-color: #d3dce6;
+  margin: 0 auto;
+  /*background-color: #d3dce6;*/
   cursor: pointer;
   position: relative;
-
 }
-.demo-block-control span {
-  display: none;
+.add-motion{
+  /*opacity: .5;*/
+  transition: .5s;
   position: absolute;
-  transform: translateX(-30px);
+  right: 34%;
+}
+.demo-block-control:hover .add-motion{
+ /*opacity: 1;*/
+  right: 42%;
+
+}
+.demo-block-control .add-motion i {
+  color: gray;
+  transition: .5s;
+}
+.demo-block-control:hover .add-motion i{
+  color: black;
+}
+ .add-motion span {
+   opacity: 0;
+   line-height: 4px;
+ }
+.demo-block-control:hover .add-motion span{
+  opacity: 1;
   font-size: 14px;
-  line-height: 44px;
-  transition: .3s;
-
+  /*text-shadow: 0 0 0.1em, 0 0 0.3em;*/
+  /*color: #ffffff;*/
 }
-/*.demo-block-control:hover {*/
-/*  padding-top: 10px;*/
-/*  height: 34px;*/
-/*}*/
-.demo-block-control:hover .active-add{
-  /*display: inline-block;*/
-  /*font-size: 15px;*/
-  color: #20a0ff;
 
-  display: inline-block;
-}
 
 
 

@@ -105,8 +105,11 @@ export default {
     position: relative;
     width: 100%;
     height: 100%;
+  background-attachment:scroll !important;
     background-image: url(../../assets/img/FSLbackground.png);
     background-size: 100%;
+  background-repeat:no-repeat;
+
 }
 .ms-title {
     width: 100%;
@@ -148,14 +151,41 @@ export default {
 }
 .new-meeting{
   position: absolute;
-  left: 25%;
-  top: 18%;
-  overflow: hidden;
+  left: 32%;
+  top: 10%;
+  overflow-y: scroll;
   /*margin: -190px 0 0 -175px;*/
   /*margin: auto;*/
   border-radius: 5px;
   width: 700px;
+  height: 550px;
   background: rgba(255, 255, 255, 0.3);
 
 }
+
+/*控制整个滚动条*/
+::-webkit-scrollbar {
+  /*background-color: lightgray;*/
+  width: 10px;
+  height: 10px;
+  background-clip: padding-box;
+}
+
+/*滚动条两端方向按钮*/
+::-webkit-scrollbar-button {
+  /*background-color: pink;*/
+}
+
+/*滚动条中间滑动部分*/
+::-webkit-scrollbar-thumb {
+  background-color: lightgray;
+  border-radius: 5px;
+  opacity: 0.5;
+}
+
+/*滚动条右下角区域*/
+::-webkit-scrollbar-corner {
+  background-color: red;
+}
+
 </style>

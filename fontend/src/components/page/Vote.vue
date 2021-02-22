@@ -30,7 +30,7 @@
 						</tr>
 					</table>
 					<br>
-      <p v-if="descr">{{descr}}</p>
+      <p v-if="query.descr">{{query.descr}}</p>
 					<p class="text" v-else>说明：每项议案均有一张表决票，请使用“✓”符号在反对或弃权栏中选择其中一项投出表决票，多选无效。</p>
 					<table class="table3">
 						<tr >
@@ -80,7 +80,7 @@
 import VueBarcode from 'vue-barcode'
 export default {
   name: 'vote',
-  props: ['query', 'row', 'motion', 'leijimotion', 'descr'],
+  props: ['query', 'row', 'motion', 'leijimotion'],
   components: {
     'barcode': VueBarcode
   },

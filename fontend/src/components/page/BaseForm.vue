@@ -125,7 +125,7 @@
           <certificate :query="query" :row="row"></certificate>
 				</el-tab-pane>
 				<el-tab-pane :disabled="!disabled" name="third">
-					<vote :query="query" :row="row" :motion="motion" :leijimotion="leijimotion" :descr="descr"></vote>
+					<vote :query="query" :row="row" :motion="motion" :leijimotion="leijimotion" ></vote>
 				</el-tab-pane>
 				<el-tab-pane :disabled="!disabled"name="fouth">
 					<stock :share="share" :query="query" :summary="countCheckedData">
@@ -139,7 +139,7 @@
 				<el-form ref="form" :model="form" label-width="90px">
 					<el-form-item label="股东姓名">
 						<!-- <template slot-scope="scope"> -->
-							<el-autocomplete class="inline-input" v-model="form.gdxm" :fetch-suggestions="querySearch" placeholder="请输入内容"
+							<el-autocomplete class="inline-input" v-model="form.gdxm" :fetch-suggestions="querySearch" placeholder="请输入内容" value-key="gdxm"
 													 :trigger-on-focus="false" @select="handleSelect"  ></el-autocomplete>
 						<!-- </template> -->
 						
@@ -245,6 +245,7 @@ export default {
         year: null,
         name: null,
         date: null,
+        descr: '',
         pageIndex: 1,
         pageSize: 15
       },
@@ -254,7 +255,7 @@ export default {
       rowChecked: [], // 存储“出席”列中勾选的复选框所在行的行号（下标从0开始）
       checkedData: [],
       rowList: [],
-      descr: '',
+
       motion: [],
       leijimotion: [],
       row: [], // 选中的行
@@ -381,7 +382,8 @@ export default {
           this.query.year = response.data['current']['year']
           this.query.date = response.data['current']['date']
           this.query.name = response.data['current']['name']
-          this.descr = response.data['current']['descr']
+          this.query.address = response.data['current']['address']
+          this.query.descr = response.data['current']['descr']
           this.motion = response.data['current']['motion']
           this.leijimotion = response.data['current']['leijimotion']
           this.meetingName = response.data['meeting_list']
@@ -464,7 +466,7 @@ export default {
       }
 
       this.handleCheckedData()
-      axios.post(this.host + 'update', {
+      axios.post(this.host + 'update/', {
         year: this.query.year,
         meeting: this.query.name,
         tableData: this.tableData
@@ -477,24 +479,35 @@ export default {
 
     // 新增行
     addRow () {
-      var newValue = {
-        id: '',
-        cx: '',
-        xc: '',
-        rs: '',
-        gdtype: '',
-        gdxm: '',
-        gddmk: '',
-        sfz: '',
-        gzA: '',
-        gzB: '',
-        meno: ''
-      }
       let _index = this.tableData.length
-      console.log(_index)
-      this.tableData.push(newValue)
+      if (this.tableData != '') {
+        alert(22222)
+        if (this.tableData[this.tableData.length - 1].gdxm != ''){
+          alert(333333)
+          var newValue = {
+            id: '',
+            cx: '',
+            xc: '',
+            rs: '',
+            gdtype: '',
+            gdxm: '',
+            gddmk: '',
+            sfz: '',
+            gzA: '',
+            gzB: '',
+            meno: ''
+          }
+          this.tableData.push(newValue)
+          this.form = {}
+          this.editVisible = true
+        } else {
+          this.form = {}
+          this.editVisible = true
+        }
+      } else {
+        this.editVisible = true
+      }
       this.idx = _index
-      this.editVisible = true
     },
 
     // 向服务端缓存将与输入相关的内容
@@ -524,7 +537,7 @@ export default {
     // 将用户输入字符串转小写后与输入内容进行匹配返回对象
     createFilter (queryString) {
       return (gdxmArray) => {
-        return (gdxmArray.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0)
+        return (gdxmArray.gdxm.toLowerCase().indexOf(queryString.toLowerCase()) === 0)
       }
     },
 
@@ -532,7 +545,7 @@ export default {
     handleSelect (item) {
       console.log(item)
       this.form = item
-      this.form.gdxm = item.value
+
     },
 
     // 根据用户切换选项卡匹配不同打印内容
@@ -652,12 +665,26 @@ export default {
 
     // 保存行编辑
     saveEdit () {
-      this.editVisible = false
       this.$message.success(`修改第 ${this.idx + 1} 行成功`)
       this.$set(this.tableData, this.idx, this.form)
-      if (this.tableData[this.tableData.length - 1].gddmk != '') {
-        this.addRow()
+      if (this.tableData[this.tableData.length - 1].gdxm != '') {
+        alert(1111)
+        var newValue = {
+          id: '',
+          cx: '',
+          xc: '',
+          rs: '',
+          gdtype: '',
+          gdxm: '',
+          gddmk: '',
+          sfz: '',
+          gzA: '',
+          gzB: '',
+          meno: ''
+        }
+        this.tableData.push(newValue)
       }
+      this.editVisible = false
     }
 
   }
@@ -666,33 +693,7 @@ export default {
 <style>
 
 
-  .el-tabs__nav-scroll {
-      background: #FFF;
-  }
-	.el-tabs__nav {
-    background: #FFF;
-		/* border-radius: 13px; */
-		/*background: #6666ff;*/
-		/*-moz-box-shadow: rgba(152, 152, 152, 1.0) 0 1px 0;*/
-		/*box-shadow: rgba(127, 127, 127, 1.0) 0 1px 0;*/
-		/* text-shadow: rgba(0, 0, 0, .4) 0 1px 0; */
-	}
 
-	/*.el-tabs--border-card>.el-tabs__header .el-tabs__item {*/
-	/*	border: 3px solid #FFFFFF;*/
-	/*	border-radius: 5px;*/
-	/*	color: white*/
-	/*}*/
-
-	.el-tabs--border-card>.el-tabs__header .el-tabs__item.is-active {
-    border-right-color:#FFF;
-    border-left-color: #FFF;
-	/*	color: #3f51b5;*/
-	/*	!* background-color: #00BCD4; *!*/
-	/*	background: -webkit-gradient(linear, left top, left bottom, from(#6699ff), to(#ffffff));*/
-	/*	border-radius: 5px;*/
-	/*	font-weight: 600;*/
-	}
 
 
   /*固定表格总宽度，使其居中*/
@@ -720,7 +721,7 @@ export default {
   border-color: palegoldenrod;
 }
 	/* 鼠标移入行时改变背景色 */
-	/deep/ .el-table tbody tr:hover>td { background-color: rgba(238,232,170,0.5) }
+	/*/deep/ .el-table tbody tr:hover>td { background-color: rgba(238,232,170,0.5) }*/
   /*鼠标点击行时改变颜色*/
   /deep/ .el-table__body tr.current-row>td{
     background-color: rgba(255, 87, 34, 0.5);
@@ -788,9 +789,6 @@ export default {
     /*right: 10px;*/
 
 	}
-
-
-
 
 
 

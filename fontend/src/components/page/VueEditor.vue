@@ -25,9 +25,9 @@
       <div class="container" v-else>
         <p class="title1" >佛山电器照明股份有限公司</p>
         <p class="title2">{{query.year+query.name}}表决票统计</p>
-
         <div class="search-gddmk">
-<!--          element中使用原生@keyup.enter事件时需要加.native--><el-autocomplete class="inline-input" v-model="searchValue" :fetch-suggestions="querySearch" placeholder="请扫描股东代码号"
+<!--          element中使用原生@keyup.enter事件时需要加.native-->
+          <el-autocomplete class="inline-input" v-model="searchValue" :fetch-suggestions="querySearch" placeholder="请扫描股东代码号"
                                                                        value-key="gddmk" @select="handleSelect" @keyup.enter.native="handleSelect"></el-autocomplete>
           <span style="margin: 10px">或</span>
           <el-autocomplete class="inline-input" v-model="searchValue0" :fetch-suggestions="querySearch0" placeholder="输入股东姓名"
