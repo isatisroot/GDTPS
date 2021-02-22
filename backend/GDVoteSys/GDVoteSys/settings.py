@@ -53,7 +53,8 @@ MIDDLEWARE = [
 
 ]
 
-
+SESSION_ENGINE='django.contrib.sessions.backends.cached_db'
+SESSION_COOKIE_SAMESITE = None
 
 
 # CORS_ALLOWED_ORIGINS = {
