@@ -147,17 +147,20 @@ class AddMeeting(View):
         req_data = json.loads(json_str)
         meeting = req_data.get('meeting')
         motion = req_data.get("motion")
-        leijimotion = req_data.get("leijimotion")
+        leijimotion = req_data.get("leijimotion",[])
         gdid_list = req_data.get('gdid')
         name = meeting.get("name")
         address = meeting.get("address")
         date1 = meeting.get("date1")
         date2 = meeting.get('date2')
+        descr = meeting.get("descr")
 
         year = date1.split("-")[0]
         if not all((date1, date2, address)):
             return HttpResponseBadRequest(json.dumps({'msg': '请填写时间和日期'}))
 
+        for i in leijimotion:
+            motion.remove(i)
         # text = ''
         # for i in motion:
         #     if bool(i):
@@ -182,23 +185,23 @@ class AddMeeting(View):
                 name=name,
                 current_year=1,
                 address=address,
-                # motion=text,
+                descr=descr,
                 gb=gb
             )
             #判断有无议案，有则写入议案表
             for i in motion:
-                if bool(i):
+                if i.get("motion"):
                     MotionBook.objects.create(name=i['motion'], annual_meeting=m)
 
             for i in leijimotion:
-                if bool(i):
-                    AccumulateMotion.objects.create(name=i["leijimotion"], annual_meeting=m)
+                if i.get("motion"):
+                    AccumulateMotion.objects.create(name=i["motion"], annual_meeting=m)
 
             # 写入中间表——登记表，并关联年度会议和股东id，记录当年股东的股份数
             m.members.set(gdid_list)
             for i in gdid_list:
                 gd = ShareholderInfo.objects.get(id=i)
-                OnSiteMeeting.objects.filter(meeting_id=m.id, shareholder_id=i).update(gzA=gd.gzA, gzB=gd.gzB, cx=True, xcorwl=True)
+                OnSiteMeeting.objects.filter(meeting_id=m.id, shareholder_id=i).update(gzA=gd.gzA, gzB=gd.gzB, cx=True, xcorwl=False)
             return JsonResponse({'code':200, 'msg': 'success'})
         except Exception as e:
             print(e)
@@ -283,7 +286,7 @@ class QueryDetail(View):
             for s in extr_shareholds:
                 data = {
                     'id':s.id,
-                    'value': s.gdxm,
+                    'gdxm': s.gdxm,
                     'gdtype': s.gdtype,
                     'gddmk': s.gddmk,
                     'sfz': s.sfz,
@@ -583,8 +586,8 @@ class Record(View):
                 _array.append({"gdid": gd_id, "agree": agree})
                 data2[leijimotion_id]= _array
 
-        print(data)
-        print(data2)
+        # print(data)
+        # print(data2)
         for k,v in data.items():
             m = MotionBook.objects.filter(id=k)
             sum_zan_A = sum_zan_B = sum_fan_A = sum_fan_B = sum_qi_A = sum_qi_B = huibiA = huibiB = 0
@@ -670,6 +673,7 @@ class UpdateAnnualMeeting(View):
         address = form.get("address")
         date1 = form.get("date1")
         date2 = form.get('date2')
+        descr = form.get("descr")
         if " " in date1:
 
             stru_date = datetime.strptime(date1, "%Y-%m-%d %H:%M:%S")
@@ -678,7 +682,7 @@ class UpdateAnnualMeeting(View):
             stru_date = datetime.strptime(date1 +"\xa0" + date2, "%Y-%m-%d %H:%M")
 
         m = Meeting.objects.filter(year=year, name=name)
-        m.update(date=stru_date, address=address)
+        m.update(date=stru_date, address=address, descr=descr)
         MotionBook.objects.exclude(name__in=motion).filter(annual_meeting=m[0]).delete()
         AccumulateMotion.objects.exclude(name__in=leijimotion).filter(annual_meeting=m[0]).delete()
 
@@ -689,9 +693,5 @@ class UpdateAnnualMeeting(View):
         for i in addleijimotion:
             if i.get("motion"):
                 AccumulateMotion.objects.create(name=i.get("motion"), annual_meeting=m[0])
-
-
-
-
 
         return JsonResponse({"success": 1, "msg": "更新成功"})

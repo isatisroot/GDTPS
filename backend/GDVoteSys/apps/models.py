@@ -56,6 +56,7 @@ class Meeting(models.Model):
     name = models.CharField(verbose_name="会议类型", max_length=20)
     motion = models.CharField(max_length=100, verbose_name="议案主题",default="")
     address = models.CharField(max_length=25, default="")
+    descr = models.CharField(max_length=250, null=True)
     is_tongji = models.BooleanField(default=False, null=True)
     members = models.ManyToManyField(ShareholderInfo, through="OnSiteMeeting")
     # gb_id = models.SmallIntegerField(default=1)
