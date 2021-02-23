@@ -480,33 +480,31 @@ export default {
     // 新增行
     addRow () {
       let _index = this.tableData.length
-      if (this.tableData != '') {
-        alert(22222)
-        if (this.tableData[this.tableData.length - 1].gdxm != ''){
-          alert(333333)
-          var newValue = {
-            id: '',
-            cx: '',
-            xc: '',
-            rs: '',
-            gdtype: '',
-            gdxm: '',
-            gddmk: '',
-            sfz: '',
-            gzA: '',
-            gzB: '',
-            meno: ''
-          }
-          this.tableData.push(newValue)
-          this.form = {}
-          this.editVisible = true
-        } else {
-          this.form = {}
-          this.editVisible = true
-        }
-      } else {
-        this.editVisible = true
+      var newValue = {
+        id: '',
+        cx: '',
+        xc: '',
+        rs: '',
+        gdtype: '',
+        gdxm: '',
+        gddmk: '',
+        sfz: '',
+        gzA: '',
+        gzB: '',
+        meno: ''
       }
+      if (this.tableData == '') {
+        this.tableData.push(newValue)
+      } else {
+        // 判断最后一个元素是否为空值
+        if (this.tableData[_index - 1].gdxm != '') {
+          this.tableData.push(newValue)
+        } else {
+          _index -= 1
+        }
+      }
+
+      this.editVisible = true
       this.idx = _index
     },
 
@@ -543,9 +541,9 @@ export default {
 
     // 处理用户选择的建议项
     handleSelect (item) {
-      console.log(item)
       this.form = item
-
+      // 用户选择该股东后，将其出席属性默认设置为true
+      this.form.cx = true
     },
 
     // 根据用户切换选项卡匹配不同打印内容
@@ -667,24 +665,11 @@ export default {
     saveEdit () {
       this.$message.success(`修改第 ${this.idx + 1} 行成功`)
       this.$set(this.tableData, this.idx, this.form)
-      if (this.tableData[this.tableData.length - 1].gdxm != '') {
-        alert(1111)
-        var newValue = {
-          id: '',
-          cx: '',
-          xc: '',
-          rs: '',
-          gdtype: '',
-          gdxm: '',
-          gddmk: '',
-          sfz: '',
-          gzA: '',
-          gzB: '',
-          meno: ''
-        }
-        this.tableData.push(newValue)
-      }
+      this.addRow()
       this.editVisible = false
+      let index = this.gdxmArray.indexOf(this.form)
+      this.gdxmArray.splice(index, 1)
+      this.form = {}
     }
 
   }

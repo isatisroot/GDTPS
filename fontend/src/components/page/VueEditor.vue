@@ -62,7 +62,7 @@
                 </el-radio-group>
                 <div style="position: relative;float: right; display: inline-block">
                   <span style="margin-left: 15px">是否回避：</span><el-switch v-model="m.ishuibi"></el-switch>
-                  <span style="margin-left: 15px;margin-right: 10px">回避表述：</span><el-input v-model="m.desc" :disabled="!m.ishuibi" style="display: inline-block;width: 200px"></el-input>
+                  <span style="margin-left: 15px;margin-right: 10px">回避表述：</span><el-input v-model="m.descr" :disabled="!m.ishuibi" style="display: inline-block;width: 200px"></el-input>
                 </div>
               </template>
 
@@ -204,8 +204,8 @@ export default {
     this.query.name = JSON.parse(localStorage.getItem('meetingName'))
     axios.get(this.host + 'motion/' + this.query.year + '/' + this.query.name)
       .then(response => {
+        console.log(response.data)
         this.isRecord = response.data['isRecord']
-
         this.gdxmArray = response.data['gdmsg']
         this.step = new Array(this.gdxmArray.length).fill()
         // this.motion = response.data['motion']
@@ -215,7 +215,7 @@ export default {
         res1.forEach(item => {
           item.checked = 0
           item.ishuibi = false
-          item.desc = ''
+          item.descr = ''
           item.sumZan = []
           item.sumFan = []
           item.sumQi = []
@@ -232,7 +232,7 @@ export default {
         // this.form.isHuibi = new Array(this.motion.length).fill(false)
         // this.form.desc = new Array(this.motion.length).fill(null)
         // console.log(this.gdxmArray)
-        this.init()
+        // this.init()
       })
       .catch(error => {
         console.log(error)

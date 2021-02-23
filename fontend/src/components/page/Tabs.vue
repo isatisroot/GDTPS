@@ -9,7 +9,7 @@
       <div class="button-group-left">
 <!--        <el-button class="button" icon="el-icon-circle-plus" @click="addRow">增加</el-button>-->
 <!--        <el-button class="button" icon="el-icon-delete" @click="handleDelete(row.index,row)" >删除</el-button>-->
-        <el-button class="button" icon="el-icon-printer" @click="">统计表</el-button>
+        <el-button class="button" icon="el-icon-printer" @click="printRes1">统计表</el-button>
         <el-button class="button" icon="el-icon-printer" @click="" v-print="'#res1'">表决结果</el-button>
         <el-button class="button" icon="el-icon-download" @click="download">下载</el-button>
       </div>
@@ -17,6 +17,7 @@
 		<div class="container">
       <el-tabs v-model="message" type="border-card" >
         <el-tab-pane name="first" >
+          <div id="printRes1">
         <p class="title1" >佛山电器照明股份有限公司</p>
         <p  class="title2" align="center">{{query.year+query.name}}议案表决投反对票、弃权票统计表</p>
         <table class="table4" id="yianTable">
@@ -56,11 +57,12 @@
 <!--            <td><input v-model.number="array2[index]" @keyup.enter="fun2(array2[index], index)"></input></td>-->
             <td >{{m.qiquanB}}</td>
             <td  >{{m.qiquanA + m.qiquanB}}</td>
-            <td ></td>
+            <td v-if="m.is_huibi">✓</td>
+            <td v-else></td>
 <!--            <td ></td>-->
-            <td  ></td>
-            <td ></td>
-            <td ></td>
+            <td  >{{m.huibiA}}</td>
+            <td >{{m.huibiB}}</td>
+            <td >{{m.huibi_descr}}</td>
           </tr>
 <!--          <tr>-->
 <!--            &lt;!&ndash;          <td colspan="0"></td>&ndash;&gt;-->
@@ -93,7 +95,7 @@
             <tr>
               <th rowspan="2" width="40">议案编号</th>
               <th rowspan="2" width="25">子编号</th>
-              <th rowspan="2" width="600">议案主题</th>
+              <th rowspan="2" width="300">议案主题</th>
               <th colspan="3" width="300">赞成票</th>
             </tr>
             <tr>
@@ -110,6 +112,7 @@
               <td>{{m.zanchengA + m.zanchengB}}</td>
             </tr>
           </table>
+          </div>
           <div class="schart-box">
             <!--                <div class="content-title">柱状图</div>-->
             <schart class="schart" canvasId="bar" :options="options1"></schart>
@@ -125,7 +128,7 @@
 
         </el-tab-pane>
         <el-tab-pane disabled name="second">
-              <BiaoJueRes></BiaoJueRes>
+              <BiaoJueRes :content="content" ></BiaoJueRes>
         </el-tab-pane>
         <el-tab-pane disabled name="third">
 <!--          <Director></Director>-->
@@ -145,11 +148,13 @@ import BiaoJueRes from './BiaoJueRes'
 import Director from '@/components/page/Director'
 import axios from 'axios'
 import Schart from 'vue-schart'
+import {Print} from "@/utils/Print";
 export default {
   name: 'tabs',
   components: {BiaoJueRes, Director, Schart},
   data () {
     return {
+      content: null,
       options1: {
         type: 'bar',
         title: {
@@ -242,6 +247,7 @@ export default {
       this.leijimotion = response.data['leijimotion']
       this.sharehold_cx_A = response.data['sharehold_cx_A']
       this.sharehold_cx_B = response.data['sharehold_cx_B']
+      this.content = response.data['content']
 
       this.options3.labels = response.data['cx_gd']
       this.options3.labels.push('未出席股东')
@@ -271,10 +277,24 @@ export default {
   },
 
   methods: {
+    printRes1 () {
+      Print('#printRes1', {
+        // 以下class属性的div元素不会打印
+        noPrint: '.do-not-print-me',
+        onStart: function () {
+          console.log('onStart', new Date())
+        },
+        onEnd: function () {
+          console.log('onEnd', new Date())
+        }
+      })
+    },
     download () {
       let url = this.host + 'download_file'
       let data = JSON.stringify({
-        file_name: '第三次临时股东大会'
+        file_name: '第三次临时股东大会',
+        year: this.query.year,
+        name: this.query.name
       })
       console.log('data:', data)
       axios(
