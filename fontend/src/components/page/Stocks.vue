@@ -6,7 +6,7 @@
 		<p class="title1" >佛山电器照明股份有限公司</p>
 		<p  class="title2" align="center">{{query.year+query.name}}股东、股份数统计表</p>
 		<p class="text">公司总股本：{{share.totalShare}}股，其中A股：{{share.AShareTotal}}股，B股：{{share.BShareTotal}}股</p>
-		<table class="table1">
+		<table class="table4">
 			<tr>
 				<th></th>
 				<th>股东人数</th>
@@ -47,47 +47,63 @@
 
 <script>
 	export default {
-		name: 'stock',
-		props: ['query', 'summary','share'],
-		data(){
-			return{
-				currentDate: this.dateToString(),
-			}
-		},
-		computed:{
-			meetingTime: function(){
-				var time = {};
-				if(this.query.date){
-					var datetimeArray = this.query.date.split(' ')
-					// var dateArray = datetimeArray[0].split('-')
-					var timeArray = datetimeArray[1].split(':')
-					// var date = dateArray[0] + '-' + dateArray[1] + '-' + dateArray[2] + ' '
-					var min1 = parseInt(timeArray[1]) - 10
-					var min2 = parseInt(timeArray[1]) - 5
-					var time1 = timeArray[0] + ':' + min1 
-					var time2 = timeArray[0] + ':' + min2 
-					time = {t1: time1, t2: time2}
-				}else{
-					time = {t1: "", t2: ""}
-				}
-
-				return time
-			},
-			
-		},
-		methods:{
-			dateToString() {
-				var _date = new Date();
-				var year = _date.getFullYear();
-				var month = _date.getMonth() + 1;
-				var day = _date.getDate();
-				var currentDate = year.toString() + '-' + month.toString() + '-' + day.toString();
-				return currentDate
-			},
-		},
-		
+	  name: 'stock',
+	  props: ['query', 'summary', 'share'],
+	  data () {
+	    return {
+	      currentDate: this.dateToString()
+	    }
+	  },
+	  computed: {
+	    meetingTime: function () {
+	      var time = {}
+	      if (this.query.date) {
+	        var datetimeArray = this.query.date.split(' ')
+	        var timeArray = datetimeArray[1].split(':')
+        var _min = parseInt(timeArray[1])
+        var _time = timeArray[0]
+        var min1 = 0
+        var min2 = 0
+        var time1 = ''
+        var time2 = ''
+        if (5 <= _min & _min < 10) {
+	          min1 = 60 + _min - 10
+          min2 = _min - 5
+          time1 = _time - 1 + ':' + min1
+          time2 = _time + ':' + min2
+        } else if (_min < 5) {
+          min1 = 60 + _min - 10
+          min2 = 60 + _min - 5
+          time1 = _time - 1 + ':' + min1
+          time2 = _time - 1 + ':' + min2
+        } else {
+          min1 = _min - 10
+          min2 = _min - 5
+          time1 = _time + ':' + min1
+          time2 = _time + ':' + min2
+        }
+	        time = {t1: time1, t2: time2}
+	      } else {
+	        time = {t1: '', t2: ''}
+	      }
+	      return time
+	    }
+	
+	  },
+	  methods: {
+	    dateToString () {
+	      var _date = new Date()
+	      var year = _date.getFullYear()
+	      var month = _date.getMonth() + 1
+	      var day = _date.getDate()
+	      var currentDate = year.toString() + '-' + month.toString() + '-' + day.toString()
+	      return currentDate
+	    }
+	  }
+	
 	}
 </script>
 
 <style>
+
 </style>

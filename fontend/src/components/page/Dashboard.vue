@@ -1,549 +1,322 @@
 <template>
 	<div>
-		<el-row :gutter="20">
-			<el-col :span="8">
-				<!-- 管理员信息展示功能卡 -->
-				<el-card shadow="hover" class="mgb20" style="height:252px;">
-					<div class="user-info">
-						<img src="../../assets/img/img.jpg" class="user-avator" alt />
-						<div class="user-info-cont">
-							<div class="user-info-name">{{name}}</div>
-							<div>{{role}}</div>
-						</div>
-					</div>
-					<div class="user-info-list">
-						上次登录时间：
-						<span>2020-11-27</span>
-					</div>
-					<div class="user-info-list">
-						上次登录地点：
-						<span>佛山</span>
-					</div>
-				</el-card>
+    <ul class="button-group">
+      <div class="search-box" >
+      <el-select v-model="query.year" placeholder="年份" class="handle-select mr10" filterable allow-create
+                 clearable>
+        <el-option v-for="(val, id) in yearList" :key="id" :value="val"></el-option>
+      </el-select>
 
-				<!-- 查询与新增年度会议功能卡 -->
-				<el-card shadow="hover" style="height:252px;text-align: center;">
-					<div slot="header" class="clearfix">
-						<span class="search-box">选择股东大会年度</span>
-					</div>
-					<el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" class="demo-ruleForm">
-						<el-form-item prop="year">
-							<!-- .number限制输入的只能是数值 -->
-							<el-input v-model.number="ruleForm.year" placeholder="请输入年份" style="width: 50%;"></el-input>
-						</el-form-item>
-						<el-form-item>
-							<el-select v-model="meetingName" label="会议类型" required placeholder="请选择会议类型" style="width: 50%;">
-								<el-option v-for="(val, id) in meetingNameList" :key="id" :value="val"></el-option>
-							</el-select>
-						</el-form-item>
-						<el-form-item>
-							<el-button type="primary" @click="submitForm('ruleForm')">
-								<router-link :to="'/form'"><span style="color: white;">查询</span></router-link>
-							</el-button>
-							<el-button type="primary" @click="addMeeting">新增</el-button>
-						</el-form-item>
-					</el-form>
+      <el-select v-model="query.name" label="会议类型" required placeholder="请选择会议类型">
+        <el-option v-for="(val, id) in meetingName" :key="id" :value="val"></el-option>
+      </el-select>
 
-					<!-- <el-select v-model="year" placeholder="年份" class="handle-select mr10" filterable allow-create default-first-option
-					 clearable>
-						<el-option v-for="(val, id) in yearList" :key="id" :value="val"></el-option>
-					</el-select> 
-					<div class="searchbox">
-						<el-select v-model="meetingName" label="会议类型" required placeholder="请选择会议类型">
-							<el-option v-for="(val, id) in meetingNameList" :key="id" :value="val"></el-option>
-						</el-select>
-					</div>
-					<el-button type="primary">
-						<router-link :to="'/table'"><span style="color: white;">确定</span></router-link>
-					</el-button>
-					
-					<el-button type="primary" @click="addMeeting">新增</el-button> -->
+      <el-button type="warning" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+      <el-button type="warning" icon="el-icon-circle-plus" @click="dialogFormVisible=true" plain>新增会议</el-button>
+        <el-button class="button" icon="el-icon-success" @click="submit">保存</el-button>
 
-				</el-card>
-				<!-- 点击新增button之后弹出具有填写表单功能的弹窗 -->
-				<el-dialog :visible.sync="dialogFormVisible"><span slot="title" style="margin-left: 400px;font-size: 30px;">新增会议</span>
-					<el-form :model="form" :rules="rules" ref="form">
-						<el-form-item label="会议名称" prop="name" :label-width="formLabelWidth">
-							<el-input v-model="form.name" autocomplete="off"></el-input>
-						</el-form-item>
+      </div>
+<!--      <div class="button-group-left" style="margin-top: 10px">-->
+<!--        <el-button class="button" icon="el-icon-circle-plus" @click="addMotion">新增议案</el-button>-->
+<!--        <el-button class="button" icon="el-icon-success" @click="submit">保存</el-button>-->
+<!--      </div>-->
+    </ul>
+    <el-dialog :visible.sync="dialogFormVisible"><span slot="title" style="margin-left: 300px;font-size: 30px;">新增会议</span>
+      <AddMeeting></AddMeeting>
+    </el-dialog>
+    <div class="container">
+    <div class="page">
+      <div class="page-box">
+        <el-form :model="form">
+          <br>
+          <el-divider style="margin-top: 10px">基本信息</el-divider>
+          <el-form-item label="会议时间:">
+            <el-col :span="10" style="padding-left: 0px">
+              <el-form-item prop="date0">
+                <el-date-picker placeholder="选择日期" v-model="form.date1" format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
+              </el-form-item>
+            </el-col>
+            <!-- <el-col class="line" :span="2">-</el-col> -->
+            <el-col :span="10">
+              <el-form-item prop="date2">
+                <el-time-picker placeholder="选择时间" v-model="form.date2" format="HH:mm" value-format="HH:mm"></el-time-picker>
+              </el-form-item>
+            </el-col>
+          </el-form-item>
+          <el-form-item prop="address" label="会议地点:" :label-width="formLabelWidth"><el-input v-model="form.address"></el-input></el-form-item>
+          <el-divider style="margin-top: 10px">议案主题</el-divider>
+          <div style="text-align: center;margin-top: -10px;margin-bottom: 15px">
 
-						<el-form-item label="会议时间" :label-width="formLabelWidth" required>
-							<el-col :span="10" style="padding-left: 0px">
-								<el-form-item prop="date0">
-									<el-date-picker placeholder="选择日期" v-model="form.date1" format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
-								</el-form-item>
-							</el-col>
-							<!-- <el-col class="line" :span="2">-</el-col> -->
-							<el-col :span="10">
-								<el-form-item prop="date2">
-									<el-time-picker placeholder="选择时间" v-model="form.date2" format="HH:mm" value-format="HH:mm"></el-time-picker>
-								</el-form-item>
-							</el-col>
-						</el-form-item>
-						<el-form-item prop="address" label="会议地点" :label-width="formLabelWidth" default-first-option>
-							<!-- <el-cascader :options="options" v-model="form.address"></el-cascader> -->
-							<el-input v-model="form.address"></el-input>
-						</el-form-item>
-						<el-form-item label="会议议案" :label-width="formLabelWidth">
-							<!-- <template slot-scope="scope"> -->
-							<div style="float: left; width: 90%">
-								<!-- <li v-for="(val, id) in motion.list" :key="id" style="list-style-type:none;">
-									<el-input type="text" style="margin-bottom: 5px;" v-model="val.text"></el-input>
-								</li> -->
-								<!-- 使用作用域插槽，el-table是子组件，现在往子组件传<template>的内容，并获取里面的内容 -->
-								<el-table :data="motionArray" :show-header="false">
-									<el-table-column prop=motion>
-										<template slot-scope="scope">
-											<el-input v-model="motionArray[scope.$index].motion"></el-input>
-										</template>
-									</el-table-column>
-								</el-table>
-								<!-- <el-input type="text" style="margin-bottom: 5px;"></el-input>
-								<el-input type="text" style="margin-bottom: 5px;"></el-input> -->
-							</div>
-							<div style="float:right">
-								<el-button icon="el-icon-circle-plus" type="success" @click="addMotion"></el-button>
-							</div>
-							<!-- </template> -->
-						</el-form-item>
-					</el-form>
-					<div class="edit_dev">
-						<el-transfer v-model="value" :data="gddata" :titles="['可添加股东信息列表', '已添加股东信息列表']"></el-transfer>
-					</div>
+            <span style="font-size: 10px;color:orangered">(✔表示采用累积投票)</span>
+          </div>
+          <el-form-item v-for="m in motion">
+<!--              <button style="margin-left: 10px" @click="clickHiddenFile">上传附件</button>-->
+<!--              https://www.cnblogs.com/kongxianghai/p/5624785.html-->
+            <li >{{ m }}
+              <el-popconfirm title="确定删除这条议案吗？">
+              <i class="el-icon-delete" style="position: absolute;right: 10px" slot="reference"></i>
+              </el-popconfirm>
+            </li>
+<!--            <span class="btn btn-success fileinput-button">-->
+<!--              <button >上传附件</button>-->
+<!--            <input type="file" value="" id="hiddenFile" @change="uploadConfig($event, m)" >-->
+<!--            </span>-->
+          </el-form-item>
 
-					<div slot="footer" class="dialog-footer">
-						<el-button @click="dialogFormVisible = false">取 消</el-button>
-						<el-button type="primary" @click="submitAdd('form')">确 定</el-button>
-						<!-- <el-button type="primary">
-							<router-link :to="'/table'"><span style="color: white;">确定</span></router-link>
-						</el-button> -->
-					</div>
-				</el-dialog>
+<!--          <el-divider style="margin-top: 10px">累计投票议案</el-divider>-->
+          <el-form-item v-for="m in leijimotion">
+            <el-checkbox v-model="value" :disabled="value"></el-checkbox>
+            <li style="list-style-type: none;display: inline-block;margin-left: 5px">{{m}}
+              <el-popconfirm title="确定删除这条议案吗？">
+                <i class="el-icon-delete" style="position: absolute;right: 10px" slot="reference"></i>
+              </el-popconfirm>
+            </li>
+          </el-form-item>
+          <el-form-item v-show="addmotion.length > 0">
+            <div style="float: left; width: 90%" >
+              <!-- <li v-for="(val, id) in motion.list" :key="id" style="list-style-type:none;">
+                <el-input type="text" style="margin-bottom: 5px;" v-model="val.text"></el-input>
+              </li> -->
+              <!-- 使用作用域插槽，el-table是子组件，现在往子组件传<template>的内容，并获取里面的内容 -->
+              <el-table :data="addmotion" :show-header="false" ref="multipleTable" @selection-change="handleSelectionChange">
+                <el-table-column type="selection" width="28px"></el-table-column>
+                <el-table-column prop=motion>
+                  <template slot-scope="scope">
+                    <el-input v-model="addmotion[scope.$index].motion"></el-input>
+                  </template>
+                </el-table-column>
+                <!--                <el-table-column><button style="margin-left: 10px">上传附件</button></el-table-column>-->
+                <!--            <el-table-column></el-table-column>-->
+              </el-table>
+              <!-- <el-input type="text" style="margin-bottom: 5px;"></el-input>
+              <el-input type="text" style="margin-bottom: 5px;"></el-input> -->
+            </div>
+          </el-form-item>
+          <div class="demo-block-control" @click="addMotion" v-if="motion != '' && leijimotion != ''">
+<!--   <el-tooltip class="item" effect="dark" content="新增议案" placement="bottom">-->
+<!--            <img src="../../assets/img/toggle_bg.png" width="500px" @click="addMotion" ></img>-->
 
-			</el-col>
-			<el-col :span="16">
-				<el-row :gutter="20" class="mgb20">
-					<el-col :span="8">
-						<el-card shadow="hover" :body-style="{padding: '0px'}">
-							<div class="grid-content grid-con-1">
-								<i class="el-icon-lx-people grid-con-icon"></i>
-								<div class="grid-cont-right">
-									<div class="grid-num">1234</div>
-									<div>股东人数</div>
-								</div>
-							</div>
-						</el-card>
-					</el-col>
-					<el-col :span="8">
-						<el-card shadow="hover" :body-style="{padding: '0px'}">
-							<div class="grid-content grid-con-2">
-								<i class="el-icon-lx-notice grid-con-icon"></i>
-								<div class="grid-cont-right">
-									<div class="grid-num">321</div>
-									<div>系统消息</div>
-								</div>
-							</div>
-						</el-card>
-					</el-col>
-					<el-col :span="8">
-						<el-card shadow="hover" :body-style="{padding: '0px'}">
-							<div class="grid-content grid-con-3">
-								<i class="el-icon-lx-goods grid-con-icon"></i>
-								<div class="grid-cont-right">
-									<div class="grid-num">50</div>
-									<div>议案数量</div>
-								</div>
-							</div>
-						</el-card>
-					</el-col>
-				</el-row>
+            <div class="add-motion">
+              <i class="el-icon-caret-bottom"></i>
+              <span >新增议案</span>
+            </div>
 
-				<!-- 会议文件展示功能卡 -->
-				<el-card shadow="hover" style="height:403px;">
-					<div slot="header" class="clearfix">
-						<span>会议文件</span>
-						<el-button style="float: right; padding: 3px 0" type="text">添加</el-button>
-					</div>
-					<el-table :show-header="false" :data="todoList" style="width:100%;">
-						<el-table-column width="40">
-							<template slot-scope="scope">
-								<el-checkbox v-model="scope.row.status"></el-checkbox>
-							</template>
-						</el-table-column>
-						<el-table-column>
-							<template slot-scope="scope">
-								<div class="todo-item" :class="{'todo-item-del': scope.row.status}">{{scope.row.title}}</div>
-							</template>
-						</el-table-column>
-						<el-table-column width="60">
-							<template>
-								<i class="el-icon-edit"></i>
-								<i class="el-icon-delete"></i>
-							</template>
-						</el-table-column>
-					</el-table>
-				</el-card>
-			</el-col>
-		</el-row>
+            <!--            </el-tooltip>-->
+          </div>
+          <div style="text-align: center" @click="addMotion" v-else>
+            <el-button type="success" icon="el-icon-circle-plus"  >新增议案</el-button>
+          </div>
+<!--          <br>-->
+          <el-divider style="margin-top: 10px">表决票说明</el-divider>
+          <el-form-item prop="textarea"><el-input
+              type="textarea"
+              :rows="2"
+              placeholder="请输入内容"
+              v-model="form.descr">
+          </el-input></el-form-item>
 
-		<!-- <el-row :gutter="20">
-			<el-col :span="12">
-				<el-card shadow="hover">
-					<schart ref="bar" class="schart" canvasId="bar" :options="options"></schart>
-				</el-card>
-			</el-col>
-			<el-col :span="12">
-				<el-card shadow="hover">
-					<schart ref="line" class="schart" canvasId="line" :options="options2"></schart>
-				</el-card>
-			</el-col>
-		</el-row>
-	 -->
+        </el-form>
+
+      </div>
+    </div>
+    </div>
 	</div>
 </template>
 
 <script>
-	import {
-		EventBus
-	} from '../../api/event_bus.js';
-	import axios from 'axios';
-	import Schart from 'vue-schart';
-	import bus from '../common/bus';
-	import {
-		fetchData
-	} from '../../api/index';
-	export default {
-		name: 'dashboard',
-		data() {
-			// 检验方法：判断查询年度会议功能模块中输入的年份是否满足以下格式
-			var checkYear = (rule, value, callback) => {
-				if (!value) {
-					return callback(new Error('年份不能为空'));
-				}
-				setTimeout(() => {
-					if (!Number.isInteger(value)) {
-						callback(new Error('请输入数字值'));
-					} else {
-						if (value > 2100 || value < 2000) {
-							callback(new Error('年份需大于2000，小于2100'));
-						} else {
-							callback();
-						}
-					}
-				}, 1000);
-			};
+import AnnualMeeting from '@/components/page/AnnualMeeting'
+import AddMeeting from '@/components/page/AddMeeting'
+import axios from '_axios@0.18.1@axios'
+export default {
+	  name: 'dashboard',
+	  data () {
+    return {
+      multipleSelection: [],
+      value: true,
+      formLabelWidth: '74px',
+      form: {
+        name: '',
+        date1: '',
+        date2: '',
+        options: [],
+        address: '',
+        motion: '',
+        desrc: ''
+      },
+      addmotion: [],
+      addlejimotion: [],
+      motion: [],
+      leijimotion: [],
+      meetingName: [],
+      yearList: [],
+      address: '',
+      query: {
+        year: '',
+        name: '',
+        date: null
+      },
+      username: sessionStorage.username || localStorage.username,
+      token: sessionStorage.token || localStorage.token,
+      // res_data: {},
+      ruleForm: {
+        year: localStorage.year,
+        meetingName: JSON.parse(localStorage.meetingName)
+      },
+      // tableData: [],
+      dialogFormVisible: false,
 
-			return {
-				username: sessionStorage.username || localStorage.username,
-				token: sessionStorage.token || localStorage.token,
-				res_data: {},
+      // yearList: [],
+      // meetingNameList: [],
+      name: localStorage.getItem('ms_username'),
 
-				options: [{
-						value: 'headOffice',
-						label: '总部',
-						children: [{
-								value: 'officeBuilding',
-								label: '办公楼五楼',
-							},
+    }
+  },
+  components: {
+    AnnualMeeting, AddMeeting
+  },
+  created () {
+    this.query.year = localStorage.getItem('year')
+    this.query.name = JSON.parse(localStorage.getItem('meetingName'))
+    this.getData()
+  },
+  updated () {
+    this.ruleForm.year = localStorage.getItem('year')
+    this.ruleForm.meetingName = JSON.parse(localStorage.getItem('meetingName'))
+  },
+  computed: {
+    role () {
+      return this.name === 'admin' ? '超级管理员' : '普通用户'
+    }
+  },
 
-						],
-
-					},
-					{
-						value: 'gaomingDistrict',
-						label: '高明区',
-						children: [{
-								value: 'changan',
-								label: '会议室一'
-							},
-							{
-								value: 'humen',
-								label: '会议室二'
-							}
-						]
-					}
-
-				],
-				ruleForm: {
-					year: null,
-				},
-				rules: {
-					year: [{
-						validator: checkYear,
-						trigger: 'blur'
-					}],
-					name: [{
-							required: true,
-							message: '请输入会议名称',
-							trigger: 'blur'
-						},
-						{
-							min: 1,
-							max: 25,
-							message: '长度在1 到 25 个字符',
-							trigger: 'blur'
-						}
-					],
-					address: [{
-						required: true,
-						trigger: 'blur',
-						message: '请输入会议地址'
-					}, ],
-					date0: [{
-						
-						// required: true,
-						message: '请选择日期',
-						trigger: 'change'
-					}],
-					date2: [{
-						
-						required: true,
-						message: '请选择时间',
-						trigger: 'change'
-					}],
-				},
-				tableData: [],
-				gddata: [],
-				value: [],
-				// dialogTableVisible: false,
-				dialogFormVisible: false,
-				form: {
-					name: '',
-					date1: '',
-					date2: '',
-					options: [],
-					address: '',
-					motion: ''
-				},
-
-				motionArray: [{}],
-				formLabelWidth: '120px',
-
-				// year: null,
-				date: null,
-				meetingName: '',
-				yearList: [],
-				meetingNameList: [],
-				name: localStorage.getItem('ms_username'),
-				todoList: [{
-						title: '关于与广东省广晟财务有限公司签署《金融服务协议》的议案',
-						status: false
-					},
-					{
-						title: '关于修订《公司章程》的议案',
-						status: false
-					},
-					{
-						title: '关于续聘2020年度审计机构的议案',
-						status: false
-					},
-					{
-						title: '关于XXXXXX的议案',
-						status: false
-					},
-					{
-						title: '关于XXXXXX的议案',
-						status: false
-					},
-					// {
-					// 	title: '股东投票文件6',
-					// 	status: true
-					// }
-				],
-				data: [{
-						name: '2020/11/04',
-						value: 1083
-					},
-					{
-						name: '2020/11/05',
-						value: 941
-					},
-					{
-						name: '2020/11/06',
-						value: 1139
-					},
-					{
-						name: '2020/11/07',
-						value: 816
-					},
-					{
-						name: '2020/11/08',
-						value: 327
-					},
-					{
-						name: '2020/11/09',
-						value: 228
-					},
-					{
-						name: '2020/11/10',
-						value: 1065
-					}
-				],
-
-
-			};
-		},
-		components: {
-			Schart
-		},
-		computed: {
-			role() {
-				return this.name === 'admin' ? '超级管理员' : '普通用户';
-			}
-		},
-
-		mounted: function() {
-			axios.get(this.host + 'get_year', {
-					responseType: 'json',
-					headers: {
-						'Authorization': 'JWT ' + this.token
-					},
-					withCredentials: true, //跨域带上cookies
-				}, )
-				.then(response => (
-					// console.log(response.data['date']),
-					this.ruleForm.year = response.data['year'],
-					this.meetingName = response.data['name'],
-					this.date = response.data['date'],
-					this.meetingNameList = response.data['meeting_list']
-				)).catch(error => {
-					// alert('error')
-					console.log(error.response.data);
-				})
-		},
-		watch: {
-			// 侦听年度会议功能卡中的年份发生变化时立马向后台发起数据请求
-			"ruleForm.year": function(newVal) {
-
-				if (newVal) {
-					// alert(this.year)
-					// console.log()
-					axios.get(this.host + 'get_meeting/' + newVal)
-						.then(response => (
-							// console.log(response.data[2020]),
-							this.meetingNameList = response.data[newVal]
-						)).catch(error => {
-							alert('error')
-							// console.log(error.response.data);
-						})
-				}
-			}
-		},
-		// created() {
-		//     this.handleListener();
-		//     this.changeDate();
-		// },
-		// activated() {
-		//     this.handleListener();
-		// },
-		// deactivated() {
-		//     window.removeEventListener('resize', this.renderChart);
-		//     bus.$off('collapse', this.handleBus);
-		// },
-		methods: {
-			addMotion() {
-				this.motionArray.push({})
-			},
-			getData(year, name) {
-				axios.get(this.host + 'get_detail/' + this.ruleForm.year + '/' + this.meetingName)
-					.then(response => (
-						this.res_data = response.data,
-						this.tableData = this.res_data.list,
-						// 事件总线，向BaseForm组件通信，共享数据
-						EventBus.$emit('addition', {
-							year: this.ruleForm.year,
-							date: this.date,
-							meetingName: this.meetingName,
-							tableData: this.tableData,
-							motion: this.res_data.motion,
-							sharehold: this.res_data.sharehold
-						})
-					)).catch(error => {
-						// console.log(error.response);
-					})
-			},
-			submitForm(formName) {
-				this.$refs[formName].validate((valid) => {
-					if (valid) {
-						this.getData();
-					} else {
-						console.log('error submit!!');
-						return false;
-					}
-				});
-			},
-			submitAdd(formName) {
-				console.log(formName)
-				this.$refs[formName].validate((valid) => {
-					if (valid) {
-						axios.post(this.host + 'add_meeting', {
-							meeting: this.form,
-							motion: this.motionArray,
-							gdid: this.value
-						}).then(response => (
-							this.$message.success('提交成功！'),
-							this.dialogFormVisible = false,
-							location.reload()
-							// EventBus.$emit('addition',{
-							// 	year:this.form.year,
-							// 	meetingName: this.form.name
-							// })
-							// this.$router.push({name:'form'})
-						)).catch(error => (this.$message(error.response.data.msg)))
-					} else {
-						this.$message.error("数据校验失败，请按格式填写！")
-					}
-				})
-				
-
-			},
-			changeDate() {
-				const now = new Date().getTime();
-				this.data.forEach((item, index) => {
-					const date = new Date(now - (6 - index) * 86400000);
-					item.name = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
-				});
-			},
-			addMeeting() {
-				this.dialogFormVisible = true;
-				axios.get(this.host + 'get_shareholder')
-					.then(response => (
-						// console.log(response.data)
-						this.gddata = response.data['list']
-						// for(var i = 0; i <= response.data['list'].length; i++) {
-						// 		this.gddata.push({key: response.data['list'][i].id,	label: response.data['list'][i].name})
-						// }
-					)).catch(error => {
-						alert('error')
-						// console.log(error.response.data);
-					})
-			}
-			// handleListener() {
-			//     bus.$on('collapse', this.handleBus);
-			//     // 调用renderChart方法对图表进行重新渲染
-			//     window.addEventListener('resize', this.renderChart);
-			// },
-			// handleBus(msg) {
-			//     setTimeout(() => {
-			//         this.renderChart();
-			//     }, 200);
-			// },
-			// renderChart() {
-			//     this.$refs.bar.renderChart();
-			//     this.$refs.line.renderChart();
-			// }
-		}
-	};
+  methods: {
+    handleSelectionChange (val) {
+      // console.log(val)
+      this.multipleSelection = val
+    },
+    submit () {
+      let url = this.host + 'update_meeting'
+      axios.post(url, {
+        year: this.query.year,
+        name: this.query.name,
+        form: this.form,
+        motion: this.motion,
+        leijimotion: this.leijimotion,
+        addmotion: this.addmotion,
+        addleijimotion: this.multipleSelection
+      }).then(response => {
+        // console.log(response.data)
+        this.$message.success('数据更新成功！')
+        location.reload()
+      })
+    },
+    // download(){
+    //   let self = this;
+    //   let url = this.host + "download_file";
+    //   let data = JSON.stringify({
+    //     // user: self.$store.state.username,
+    //     file_name: self.plist_file_name
+    //   })
+    //   console.log("data:", data)
+    //   axios(
+    //     {
+    //       method: "post",
+    //       url: url,
+    //       data: data,
+    //       responseType: "blob",    // 指定获取数据的类型为blob
+    //     }
+    // ).then(
+    //     function (response) {
+    //       data = response.data // 创建a标签并点击， 即触发下载
+    //       let url = window.URL.createObjectURL(new Blob([data]))
+    //       let link = document.createElement("a")
+    //       link.style.display = "none"
+    //       link.href = url
+    //       link.setAttribute("download", self.plist_file_name)
+    //       document.body.appendChild(link)
+    //       link.click()
+    //     }
+    //   ).catch(function (err) {
+    //     console.log(err)
+    //   })
+    //
+    //
+    // },
+    uploadConfig (e, m) {
+      console.log(m)
+      let formData = new FormData()
+      let data = JSON.stringify({
+        user: 'username',
+        name: m
+      })
+      formData.append('file', e.target.files[0])
+      formData.append('data', data) // 上传文件的同时， 也可以上传其他数据
+      let url = this.host + 'api/posts/upload'
+      let config = {
+        headers: {'Content-Type': 'multipart/form-data'}
+      }
+      axios.post(url, formData, config).then(function (response) {
+        console.log(response.data)
+      })
+    },
+    clickHiddenFile () {
+      let oFile = document.getElementById('hiddenFile')
+      oFile.click()
+    },
+    addMotion () {
+      this.addmotion.push({})
+    },
+    async handleSearch () {
+      // 等待异步请求axios处理完成后再执行initSelectRow操作，因为后者需要等到tableData拿到数据后进行操作
+      await this.getData()
+      localStorage.setItem('year', JSON.stringify(this.query.year))
+      localStorage.setItem('meetingName', JSON.stringify(this.query.name))
+    },
+    getData () {
+      return axios.get(this.host + 'get_detail/' + this.query.year + '/' + this.query.name)
+        .then(response => {
+          // this.tableData = response.data['detail_list']
+          // this.query.year = response.data['current']['year']
+          this.form.date1 = response.data['current']['date']
+          this.form.date2 = response.data['current']['date']
+          // this.query.name = response.data['current']['name']
+          // this.descr = response.data['current']['descr']
+          this.motion = response.data['current']['motion']
+          this.leijimotion = response.data['current']['leijimotion']
+          this.form.address = response.data['current']['address']
+          // console.log(res)
+          // this.leijimotion = res
+          // this.meetingName = response.data['meeting_list']
+          // this.share = response.data['sharehold']
+          // this.gdxmArray = response.data['extr_shareholds']
+        }).catch(error => {})
+    },
+    childByValue (childValue) {
+      this.dialogFormVisible = childValue
+    }
+  }
+}
 </script>
 
 
 <style scoped>
-	.edit_dev>>>.el-transfer-panel {
+/*.fileinput-button {*/
+/*  position: relative;*/
+/*  display: inline-block;*/
+/*  overflow: hidden;*/
+/*}*/
+/deep/ .el-table-column--selection .cell{
+  padding-left: 0px;
+}
 
-		/* width: 300px; */
-		margin: 0 auto;
-		width: 40%
-	}
+.fileinput-button input{
+  position:absolute;
+  right: 0px;
+  top:0px;
+  opacity: 0;
+  -ms-filter: 'alpha(opacity=0)';
+  font-size: 200px;
+}
 
 
 	.search-box {
@@ -665,4 +438,58 @@
 		width: 100%;
 		height: 300px;
 	}
+
+ i:hover {
+  /*border-top-color: #287378;*/
+  /*background: #ebf8e1;*/
+  color: #ff0026;
+}
+
+.demo-block-control {
+  padding-top: 3px;
+  border: 1px solid #eaeefb;
+  height: 24px;
+  box-sizing: border-box;
+  background: linear-gradient(to bottom, #FF5722, #FFCCBC);
+  border-radius: 5px;
+  width: 70%;
+  opacity: 0.7;
+  text-align: center;
+  margin: 0 auto;
+  /*background-color: #d3dce6;*/
+  cursor: pointer;
+  position: relative;
+}
+.add-motion{
+  /*opacity: .5;*/
+  transition: .5s;
+  position: absolute;
+  right: 34%;
+}
+.demo-block-control:hover .add-motion{
+ /*opacity: 1;*/
+  right: 42%;
+
+}
+.demo-block-control .add-motion i {
+  color: gray;
+  transition: .5s;
+}
+.demo-block-control:hover .add-motion i{
+  color: black;
+}
+ .add-motion span {
+   opacity: 0;
+   line-height: 4px;
+ }
+.demo-block-control:hover .add-motion span{
+  opacity: 1;
+  font-size: 14px;
+  /*text-shadow: 0 0 0.1em, 0 0 0.3em;*/
+  /*color: #ffffff;*/
+}
+
+
+
+
 </style>
