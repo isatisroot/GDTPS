@@ -3,6 +3,8 @@ from django.shortcuts import render
 from django.views.generic import View
 from django.http.response import JsonResponse, HttpResponseBadRequest, HttpResponseNotFound, HttpResponseRedirect, \
     HttpResponse
+
+from GDVoteSys.settings import BASE_DIR
 from .models import Meeting, ShareholderInfo, OnSiteMeeting, GB, MotionBook, AccumulateMotion
 from django.contrib.auth import login
 from rest_framework_jwt.settings import api_settings
@@ -12,6 +14,7 @@ from django.contrib.auth import authenticate
 from django_redis import get_redis_connection
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from utils.record_to_word import RecordToWord
 # from django.utils import timezone as datetime
 
 class Login(View):
@@ -438,7 +441,13 @@ class Delete(View):
         return JsonResponse({'code':200, 'msg':'删除成功'})
 
 class Result(View):
+    """查询结果"""
     def get(self, request, year, meeting_name):
+        """
+        motion是普通议案，包含了投赞成，反对，弃权和回避票统计结果，leijimotion是累计投票的议案，只包含赞成票（A股和B股）
+
+        :return:
+        """
         s_list = []
         detail_list = []
         m = Meeting.objects.get(year=year,name=meeting_name)
@@ -453,7 +462,11 @@ class Result(View):
                 "fanduiA": i.fanduiA,
                 "fanduiB": i.fanduiB,
                 "qiquanA": i.qiquanA,
-                "qiquanB": i.qiquanB
+                "qiquanB": i.qiquanB,
+                "is_huibi": i.is_huibi,
+                "huibiA": i.huibiA,
+                "huibiB": i.huibiB,
+                "huibi_descr": i.descr
             }
             motion.append(data)
         leijimotion_qs = m.accumulatemotion_set.all()
@@ -480,13 +493,20 @@ class Result(View):
             cx_gb.append(i.gzB + i.gzA)
 
         ncx_gb = m.gb.gb - sharehold_cx_A -sharehold_cx_B
+
+        # 生成word文档
+
+        doc = RecordToWord()
+        content = doc.vote_result(year, meeting_name)
+
         return  JsonResponse({"motion": motion,
                               "leijimotion": leijimotion,
                               "sharehold_cx_A": sharehold_cx_A,
                               "sharehold_cx_B": sharehold_cx_B,
                               "cx_gd": cx_gd,
                               "cx_gb": cx_gb,
-                              "ncx_gb": ncx_gb})
+                              "ncx_gb": ncx_gb,
+                              "content": content})
 
 class Motion(View):
     def get(self, request, year, meeting_name):
@@ -494,13 +514,14 @@ class Motion(View):
         try:
             m = Meeting.objects.get(year=year,name=meeting_name)
             sharehold = {"totalShare": m.gb.gb, "AShareTotal": m.gb.ltag, "BShareTotal": m.gb.ltbg}
+            # 获取该年度所有议案
             motion = []
             motion_qs =  m.motionbook_set.all()
             for i in motion_qs:
                 data = {
                     "id": i.id,
                     "name": i.name,
-                    "checked": 1
+                    "checked": 1  # 默认是赞成票，1代表赞成，2反对，3弃权
                 }
 
                 motion.append(data)
@@ -542,6 +563,7 @@ class Motion(View):
             return HttpResponseBadRequest(content=json.dumps({'msg':'查询失败'}),content_type="'application/json'")
 
 class Record(View):
+    """唱票功能，将普通议案的赞成，反对和弃权票汇总后写入数据库，将累计议案的赞成票汇总后写入数据库"""
     def get(self, request):
         year = request.GET.get("year")
         name = request.GET.get("name")
@@ -575,7 +597,10 @@ class Record(View):
                 motion_id = j.get("id")
                 _array = data.get(motion_id, [])
                 checked = j.get("checked")
-                _array.append({"gdid": gd_id, "checked": checked})
+                is_huibi = j.get("ishuibi", None)
+                descr = j.get("descr")
+                _array.append({"gdid": gd_id, "checked": checked, "is_huibi": is_huibi, "descr": descr})
+                # data的键是议案的id，值是一个列表，列表里面的元素是字典，每个字典包含投了该议案的股东及投了赞成还是反对票的信息
                 data[motion_id]= _array
 
             for q in leijimotion:
@@ -588,12 +613,17 @@ class Record(View):
 
         # print(data)
         # print(data2)
+        # k是议案id，统计每个id有多少个股东投了赞成，反对或弃权票，如果有回避则记录回避表述descr_text
         for k,v in data.items():
+            descr_text = ""
             m = MotionBook.objects.filter(id=k)
+            is_huibi = None
             sum_zan_A = sum_zan_B = sum_fan_A = sum_fan_B = sum_qi_A = sum_qi_B = huibiA = huibiB = 0
             for i in v:
                 gd_id = i.get("gdid")
                 j = i.get("checked")
+                is_huibi = i.get("is_huibi")
+                descr = i.get("descr", "")
                 s = ShareholderInfo.objects.get(id=gd_id)
                 if j == 1:
                     sum_zan_A += s.gzA
@@ -605,13 +635,25 @@ class Record(View):
                     sum_qi_A += s.gzA
                     sum_qi_B += s.gzB
 
+                if is_huibi:
+                    huibiA += s.gzA
+                    huibiB += s.gzB
+                    # 当有多个股东回避表述时，用分号间隔开
+                    if descr:
+                        descr_text += descr + " "
+
+
             m.update(
                 zanchengA = sum_zan_A,
                 zanchengB = sum_zan_B,
                 fanduiA = sum_fan_A,
                 fanduiB = sum_fan_B,
                 qiquanA = sum_qi_A,
-                qiquanB = sum_qi_B
+                qiquanB = sum_qi_B,
+                is_huibi = True if huibiA >0 or huibiB > 0 else False,
+                huibiA = huibiA,
+                huibiB = huibiB,
+                descr = descr_text
             )
 
         for k,v in data2.items():
@@ -641,7 +683,7 @@ class Refresh(View):
 
 class Download(View):
     def post(self, request):
-        data = json.loads(request.body)
+        data = json.loads(request.body.decode())
         response = {}
         file_name = data.get("file_name")
         if not file_name:
@@ -649,7 +691,11 @@ class Download(View):
             response["error"] = {"error_msg": "parameter error, no file_path"}
             HttpResponse(json.dumps(response))
 
-        file_path = r"C:\Users\49223\Desktop\ShareholderVoteSys\backend\GDVoteSys\files\第三次临时股东大会.docx"
+        year = data.get("year")
+        name = data.get("name")
+
+
+        file_path = BASE_DIR + "/files/" + year + name +".doc"
         file = open(file_path, "rb")
         response = HttpResponse(file)
         response["Content-Type"] = "application/octet-stream"

@@ -102,6 +102,7 @@ class MotionBook(models.Model):
     is_huibi = models.BooleanField(default=False, null=True)
     huibiA = models.IntegerField(null=True)
     huibiB = models.IntegerField(null=True)
+    descr = models.CharField(max_length=200, null=True)
     # is_tongji = models.BooleanField(default=False, null=True)
     annual_meeting = models.ForeignKey(Meeting, on_delete=models.SET_NULL, null=True)
 
