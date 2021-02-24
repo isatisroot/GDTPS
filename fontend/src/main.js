@@ -13,6 +13,8 @@ import Print from 'vue-print-nb'
 import $ from 'jquery'
 import animated from 'animate.css' // 引入
 import Quagga from 'quagga'
+import echarts from "echarts"
+Vue.prototype.$echarts = echarts
 // 挂载到vue全局
 //官网的方法在我的项目里不起作用，我只能这么加载了
 Vue.prototype.$Quagga = Quagga

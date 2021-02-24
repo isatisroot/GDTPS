@@ -54,7 +54,7 @@
 <!--              https://www.cnblogs.com/kongxianghai/p/5624785.html-->
             <li >{{ m }}
               <el-popconfirm title="确定删除这条议案吗？">
-              <i class="el-icon-delete" style="position: absolute;right: 10px" slot="reference"></i>
+<!--              <i class="el-icon-delete" style="position: absolute;right: 10px" slot="reference"></i>-->
               </el-popconfirm>
             </li>
 <!--            <span class="btn btn-success fileinput-button">-->
@@ -66,9 +66,9 @@
 <!--          <el-divider style="margin-top: 10px">累计投票议案</el-divider>-->
           <el-form-item v-for="m in leijimotion">
             <el-checkbox v-model="value" :disabled="value"></el-checkbox>
-            <li style="list-style-type: none;display: inline-block;margin-left: 5px">{{m}}
+            <li style="list-style-type: none;display: inline-block;margin-left: 5px" >{{m}}
               <el-popconfirm title="确定删除这条议案吗？">
-                <i class="el-icon-delete" style="position: absolute;right: 10px" slot="reference"></i>
+<!--                <i class="el-icon-delete" style="position: absolute;right: 10px" slot="reference"></i>-->
               </el-popconfirm>
             </li>
           </el-form-item>
@@ -103,8 +103,10 @@
 
             <!--            </el-tooltip>-->
           </div>
-          <div style="text-align: center" @click="addMotion" v-else>
-            <el-button type="success" icon="el-icon-circle-plus"  >新增议案</el-button>
+          <div style="text-align: center" @click="addMotion" v-else >
+<!--            <el-button type="success" icon="el-icon-circle-plus"  >新增议案</el-button>-->
+
+            <button class="btn1">新增议案</button>
           </div>
 <!--          <br>-->
           <el-divider style="margin-top: 10px">表决票说明</el-divider>
@@ -130,6 +132,7 @@ import axios from '_axios@0.18.1@axios'
 export default {
 	  name: 'dashboard',
 	  data () {
+      var currenYear = new Date().getFullYear()
     return {
       multipleSelection: [],
       value: true,
@@ -148,7 +151,7 @@ export default {
       motion: [],
       leijimotion: [],
       meetingName: [],
-      yearList: [],
+      yearList: [currenYear - 1, currenYear + 1],
       address: '',
       query: {
         year: '',
@@ -175,7 +178,7 @@ export default {
     AnnualMeeting, AddMeeting
   },
   created () {
-    this.query.year = localStorage.getItem('year')
+    this.query.year = JSON.parse(localStorage.getItem('year'))
     this.query.name = JSON.parse(localStorage.getItem('meetingName'))
     this.getData()
   },
@@ -286,7 +289,7 @@ export default {
           this.form.address = response.data['current']['address']
           // console.log(res)
           // this.leijimotion = res
-          // this.meetingName = response.data['meeting_list']
+          this.meetingName = response.data['meeting_list']
           // this.share = response.data['sharehold']
           // this.gdxmArray = response.data['extr_shareholds']
         }).catch(error => {})
@@ -300,6 +303,30 @@ export default {
 
 
 <style scoped>
+.btn1 {
+  margin:10px 5px;
+  padding:10px 60px;
+  border-radius:10px;
+  border:2px solid;
+  font:16px 'Open Sans',sans-serif;
+  text-transform:uppercase;
+  background:none;
+  outline:none;
+  cursor:pointer;
+  -webkit-transition:all .5s;
+  transition:all .3s;
+
+  color: #999;
+  border-color: #f7c5a3;
+  background:-webkit-linear-gradient(left,#a3f7bf,#a3f7bf) no-repeat;
+  background:linear-gradient(to right, #f56405, #f56405) no-repeat;
+  background-size:0% 100%;
+}
+.btn1:hover {
+  background-size:100% 100%;
+  color: #ffffff;
+  text-shadow: 0 0 0.1em, 0 0 0.3em;
+}
 /*.fileinput-button {*/
 /*  position: relative;*/
 /*  display: inline-block;*/
@@ -488,8 +515,6 @@ export default {
   /*text-shadow: 0 0 0.1em, 0 0 0.3em;*/
   /*color: #ffffff;*/
 }
-
-
 
 
 </style>

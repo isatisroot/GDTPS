@@ -113,6 +113,7 @@
             </tr>
           </table>
           </div>
+
           <div class="schart-box">
             <!--                <div class="content-title">柱状图</div>-->
             <schart class="schart" canvasId="bar" :options="options1"></schart>
@@ -156,6 +157,11 @@ export default {
     return {
       content: null,
       options1: {
+        // scales: {
+        //
+        // },
+
+        leftPadding: 140, // 坐标轴距离左边框距离
         type: 'bar',
         title: {
           text: '各项议案表决情况统计'
@@ -178,6 +184,7 @@ export default {
           },
           {
             label: '弃权票',
+            fillColor: 'rgb(49,164,241)',
             data: []
           }
         ]
@@ -239,7 +246,7 @@ export default {
   },
   created () {
     console.log('created')
-    this.query.year = localStorage.getItem('year')
+    this.query.year = JSON.parse(localStorage.getItem('year'))
     this.query.name = JSON.parse(localStorage.getItem('meetingName'))
     axios.get(this.host + 'result/' + this.query.year + '/' + this.query.name).then(response => {
       console.log(response.data)
@@ -277,6 +284,9 @@ export default {
   },
 
   methods: {
+    formatter (val) {
+      return val.slice(0, 9)+'' + val.slice(9)
+    },
     printRes1 () {
       Print('#printRes1', {
         // 以下class属性的div元素不会打印
@@ -292,7 +302,7 @@ export default {
     download () {
       let url = this.host + 'download_file'
       let data = JSON.stringify({
-        file_name: '第三次临时股东大会',
+        file_name: this.query.year + this.query.name,
         year: this.query.year,
         name: this.query.name
       })
@@ -305,13 +315,14 @@ export default {
           responseType: 'blob' // 指定获取数据的类型为blob
         }
       ).then(
-        function (response) {
+        response => {
           data = response.data // 创建a标签并点击， 即触发下载
           let url = window.URL.createObjectURL(new Blob([data], {type: 'application/msword'})) // application/msword指定下载word类型文件
           let link = document.createElement('a')
           link.style.display = 'none'
           link.href = url
-          link.setAttribute('download', '第三次临时股东大会')
+          let name = this.query.year + this.query.name
+          link.setAttribute('download', name)
 
           document.body.appendChild(link)
           link.click()

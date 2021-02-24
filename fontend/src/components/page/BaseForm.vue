@@ -269,7 +269,7 @@ export default {
     //   this.query.year = param.year
     //   this.query.name = param.meetingName
     // })
-    this.query.year = localStorage.getItem('year')
+    this.query.year = JSON.parse(localStorage.getItem('year'))
     this.query.name = JSON.parse(localStorage.getItem('meetingName'))
     this.init('current')
     this.loadAll()

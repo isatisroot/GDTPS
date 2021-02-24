@@ -54,7 +54,7 @@
           <template v-if="row.id">
             <el-form-item v-for="(m, index) in row.motion">
               <template >
-                <li>{{ m.name }}!</li>
+                <li>{{ m.name }}</li>
                 <el-radio-group v-model="m.checked" :disabled="!row.id" >
                   <el-radio :label="1" style="display: none">赞成</el-radio>
                   <el-radio :label="2" >反对</el-radio>
@@ -93,7 +93,7 @@
             <el-form-item v-for="(m, index) in row.leijimotion" >
               <template>
                 <!--              <br>-->
-                <li >{{m.name}}!</li>
+                <li >{{m.name}}</li>
                 <!--              <el-select v-model="agree[index]"  required placeholder="请输入投赞成票数"  filterable allow-create default-first-option-->
                 <!--                          clearable @blur="selectBlur($event, index)" @keyup.enter.native="enterFn">-->
                 <!--                <el-option v-for="(val, id) in agreeList" :key="id" :value="val"></el-option>-->
@@ -200,7 +200,7 @@ export default {
     }
   },
   created () {
-    this.query.year = localStorage.getItem('year')
+    this.query.year = JSON.parse(localStorage.getItem('year'))
     this.query.name = JSON.parse(localStorage.getItem('meetingName'))
     axios.get(this.host + 'motion/' + this.query.year + '/' + this.query.name)
       .then(response => {
