@@ -276,7 +276,7 @@ class QueryDetail(View):
                     'gdtype': s.gdtype,
                     'gddmk': s.gddmk,
                     'sfz': s.sfz,
-                    'rs': s.rs,
+                    'rs': q.rs,
                     'gzA': q.gzA,
                     'gzB': q.gzB,
                     'meno': q.meno
@@ -344,14 +344,16 @@ class UpdateMeeting(View):
 
                 # 如果存在则对股东信息进行修改
                 else:
+                    rs = data.get("rs")
                     s = ShareholderInfo.objects.get(id=id)
                     s.gdxm=data.get("gdxm")
                     s.gdtype = data.get("gdtype")
                     s.gddmk = data.get("gddmk", None)
                     s.sfz = data.get("sfz", None)
-                    s.rs = data.get("rs", 1)
+                    s.rs = int(data.get("rs", 1))
                     s.gzA = data.get("gzA", 0)
                     s.gzB = data.get("gzB", 0)
+                    s.save()
 
                 qs = OnSiteMeeting.objects.filter(meeting_id=m.id, shareholder=id)
                 # 判断登记表中是否有该条记录，有则修改，没有则添加
@@ -361,7 +363,8 @@ class UpdateMeeting(View):
                     xcorwl=data.get("xc") if data.get("xc") else False,
                     gzA=int(data.get("gzA", 0)),
                     gzB=int(data.get("gzB", 0)),
-                    meno = data.get("meno", None)
+                    meno = data.get("meno", None),
+                    rs=int(data.get("rs",1))
                 )
                 else:
                     OnSiteMeeting.objects.create(
@@ -371,7 +374,8 @@ class UpdateMeeting(View):
                         xcorwl=data.get("xc") if data.get("xc") else False,
                         gzA=int(data.get("gzA", 0)),
                         gzB=int(data.get("gzB", 0)),
-                        meno = data.get("meno", None)
+                        meno = data.get("meno", None),
+                        rs=int(data.get("rs",1))
                     )
 
             return JsonResponse({'code':200, 'msg':'更新成功'})
@@ -495,9 +499,12 @@ class Result(View):
         ncx_gb = m.gb.gb - sharehold_cx_A -sharehold_cx_B
 
         # 生成word文档
-
-        doc = RecordToWord()
-        content = doc.vote_result(year, meeting_name)
+        content = {}
+        try:
+            doc = RecordToWord()
+            content = doc.vote_result(year, meeting_name)
+        except Exception as e:
+            print(e)
 
         return  JsonResponse({"motion": motion,
                               "leijimotion": leijimotion,
@@ -618,7 +625,9 @@ class Record(View):
             descr_text = ""
             m = MotionBook.objects.filter(id=k)
             is_huibi = None
-            sum_zan_A = sum_zan_B = sum_fan_A = sum_fan_B = sum_qi_A = sum_qi_B = huibiA = huibiB = 0
+            sum_zan_A = sum_zan_B = sum_fan_A = sum_fan_B = sum_qi_A = sum_qi_B\
+                =zxg_sum_zan_A = zxg_sum_zan_B = zxg_sum_fan_A = zxg_sum_fan_B \
+                = zxg_sum_qi_A = zxg_sum_qi_B = huibiA = huibiB = 0
             for i in v:
                 gd_id = i.get("gdid")
                 j = i.get("checked")
@@ -626,12 +635,22 @@ class Record(View):
                 descr = i.get("descr", "")
                 s = ShareholderInfo.objects.get(id=gd_id)
                 if j == 1:
+                    # 单独对中小股动投票情况进行统计
+                    if s.gdtype == "中小股":
+                        zxg_sum_zan_A += s.gzA
+                        zxg_sum_zan_B += s.gzB
                     sum_zan_A += s.gzA
                     sum_zan_B += s.gzB
                 elif j == 2:
+                    if s.gdtype == "中小股":
+                        zxg_sum_fan_A += s.gzA
+                        zxg_sum_fan_B += s.gzB
                     sum_fan_A += s.gzA
                     sum_fan_B += s.gzB
                 elif j == 3:
+                    if s.gdtype == "中小股":
+                        zxg_sum_qi_A += s.gzA
+                        zxg_sum_qi_B += s.gzB
                     sum_qi_A += s.gzA
                     sum_qi_B += s.gzB
 
@@ -643,6 +662,7 @@ class Record(View):
                         descr_text += descr + " "
 
 
+
             m.update(
                 zanchengA = sum_zan_A,
                 zanchengB = sum_zan_B,
@@ -650,6 +670,12 @@ class Record(View):
                 fanduiB = sum_fan_B,
                 qiquanA = sum_qi_A,
                 qiquanB = sum_qi_B,
+                zxg_zanchengA = zxg_sum_zan_A,
+                zxg_zanchengB = zxg_sum_zan_B,
+                zxg_fanduiA = zxg_sum_fan_A,
+                zxg_fanduiB = zxg_sum_fan_B,
+                zxg_qiA = zxg_sum_qi_A,
+                zxg_qiB = zxg_sum_qi_B,
                 is_huibi = True if huibiA >0 or huibiB > 0 else False,
                 huibiA = huibiA,
                 huibiB = huibiB,
@@ -695,11 +721,13 @@ class Download(View):
         name = data.get("name")
 
 
-        file_path = BASE_DIR + "/files/" + year + name +".doc"
-        file = open(file_path, "rb")
+        # file_path = BASE_DIR + "/files/" + year + name +".doc"
+
+        file = open(BASE_DIR + "/files/" + file_name+".doc", "rb")
         response = HttpResponse(file)
         response["Content-Type"] = "application/octet-stream"
         response["Content-Disposition"] = "attachment:filename={}".format(file_name+".docx")
+        file.close()
         return response
 
 

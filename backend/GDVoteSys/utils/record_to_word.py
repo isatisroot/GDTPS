@@ -13,8 +13,8 @@ class RecordToWord():
         totalShare= m.gb.gb
         AShareTotal= m.gb.ltag
         BShareTotal=m.gb.ltbg
-        qs = m.onsitemeeting_set.all()
-        qs1 = qs.filter(cx=True)
+        qs = m.onsitemeeting_set.all()  # 该会议下所有等级的股东信息
+        qs1 = qs.filter(cx=True)    # 出席会议的股东
         cx_num = len(qs1)
         cx_gb = 0  # 出席会议股东股份数总和
         for q in qs1:
@@ -67,8 +67,8 @@ class RecordToWord():
         num5 = len(qs5)
         sum5 = 0
         for q in qs5:
-            sum5 += q.gzB
-        percent5 = sum5 / BShareTotal
+            sum5 += q.gzA
+        percent5 = sum5 / AShareTotal
         # sum5 = format(sum5, ",")
 
         qs6 = qs.filter(gzA__gt=0, xcorwl=False)
@@ -106,7 +106,15 @@ class RecordToWord():
         self.document.add_paragraph(content3)
 
         self.document.add_paragraph("4. 中小股出席情况：")
-        content4 = """        中小股东（代理人）（不含公司董事、监事、高管、单独或合计持有公司5%以上股份的股东及与持有公司5%以上股份股东形成一致行动人的股东）共{}人，代表股份{}股，占公司B股股东表决权股份{}%。"""
+        zxg_num = zxg_gb = 0
+        for q in qs1:
+            s = q.shareholder
+            # s = ShareholderInfo.objects.get(gdxm=s)
+            # 统计出席会议的中小股信息
+            if s.gdtype == "中小股":
+                zxg_num += s.rs
+                zxg_gb += s.gzB + s.gzA
+        content4 = """        中小股东（代理人）（不含公司董事、监事、高管、单独或合计持有公司5%以上股份的股东及与持有公司5%以上股份股东形成一致行动人的股东）共{}人，代表股份{}股，占公司B股股东表决权股份{:.2%}。""".format(zxg_num, zxg_gb, zxg_gb/totalShare)
         self.document.add_paragraph(content4)
 
         self.document.add_paragraph("二、提案审议和表决情况")
@@ -116,24 +124,37 @@ class RecordToWord():
         for i in motion_qs:
             self.document.add_heading(i.name, level=3)
             zancheng = i.zanchengB + i.zanchengA
+            zxg_zan = i.zxg_zanchengA + i.zxg_zanchengB
+            zxg_fan = i.zxg_fanduiA + i.zxg_fanduiB
+            zxg_qi = i.zxg_qiA + i.zxg_qiB
             fandui = i.fanduiA + i.fanduiB
             qiquan = i.qiquanA + i.qiquanB
             percentY = zancheng / cx_gb
             percentN = fandui / cx_gb
             percentQ = qiquan / cx_gb
-            percentAY = i.zanchengA/sum4 if sum4 > 0 else 0  # 避免sum4为零的情况
+            percentAY = i.zanchengA/sum4 if sum4 > 0 else 0  # 避免除数为零的情况
             percentAN = i.fanduiA/sum4 if sum4 > 0 else 0
             percentAQ = i.qiquanA/sum4 if sum4 > 0 else 0
             percentBY = i.zanchengB/sum8 if sum8 > 0 else 0
             percentBN = i.fanduiB/sum8 if sum8 > 0 else 0
             percentBQ = i.qiquanB/sum8 if sum8 > 0 else 0
+            percent_zxg_z = zxg_zan/zxg_gb if zxg_gb >0 else 0
+            percent_zxg_f = zxg_fan/zxg_gb if zxg_gb >0 else 0
+            percent_zxg_q = zxg_qi/zxg_gb if zxg_gb >0 else 0
 
-
-            content = """            总的表决情况：同意{}股，占出席会议所有股东所持表决权{:.2%}；反对{}股，占出席会议所有股东所持表决权{:.2%}；弃权{}股，占出席会议所有股东所持表决权{:.2%}。A股股东表决情况：同意{}股，占出席会议A股东所持表决权{:.2%}；反对{}股，占出席会议A股东所持表决权{:.2%}；弃权{}股，占出席会议A股股东所持表决权{:.2%}。B股股东表决情况：同意{}股，占出席会议B股东所持表决权{:.2%}；反对{}股，占出席会议A股东所持表决权{:.2%}；弃权{}股，占出席会议B股股东所持表决权{:.2%}
+            content = """            (1)总的表决情况：
+            同意{}股，占出席会议所有股东所持表决权{:.2%}；反对{}股，占出席会议所有股东所持表决权{:.2%}；弃权{}股，占出席会议所有股东所持表决权{:.2%}。
+            (2)A股股东表决情况：
+            同意{}股，占出席会议A股东所持表决权{:.2%}；反对{}股，占出席会议A股东所持表决权{:.2%}；弃权{}股，占出席会议A股股东所持表决权{:.2%}。
+            (3)B股股东表决情况：
+            同意{}股，占出席会议B股东所持表决权{:.2%}；反对{}股，占出席会议A股东所持表决权{:.2%}；弃权{}股，占出席会议B股股东所持表决权{:.2%}。
+            (4)中小股东表决情况:
+            同意{}股，占出席会议中小股东所持表决权{}%；反对{}股，占出席会议中小股东所持表决权{}%；弃权{}股，占出席会议中小股东所持表决权{}%。
             表决结果："""\
                 .format(zancheng, percentY, fandui, percentN, qiquan, percentQ,
                i.zanchengA, percentAY, i.fanduiA, percentAN, i.qiquanA, percentAQ,
-                i.zanchengB, percentBY, i.fanduiB, percentBN, i.qiquanB, percentBQ)
+                i.zanchengB, percentBY, i.fanduiB, percentBN, i.qiquanB, percentBQ,
+                        zxg_zan, percent_zxg_z,zxg_fan, percent_zxg_f,zxg_qi,percent_zxg_q)
 
             self.document.add_paragraph(content)
             motion_content.append({"name": i.name, "content": content})
@@ -145,10 +166,10 @@ class RecordToWord():
         for i in leijimotion_qs:
             self.document.add_heading(i.name, level=3)
             zancheng = i.zanchengB + i.zanchengA
-            percentA = i.zanchengA/sum4*num if sum4>0 else 0
-            percentB = i.zanchengB/sum4*num if sum4 > 0 else 0
+            percentA = i.zanchengA/(sum4*num) if sum4>0 else 0
+            percentB = i.zanchengB/(sum4*num) if sum4 > 0 else 0
             content = """            总得票数：{}票，占出席会议所有股东所持表决权{:.2%}; A股股东票数：{}票，占出席会议A股股东所持表决权{:.2%}; B股股东票数：{}票，占出席会议B股股东所持表决权{:.2%}
-            表决结果：""".format(zancheng,zancheng/cx_gb,
+            表决结果：""".format(zancheng,zancheng/(cx_gb*num),
                             i.zanchengA, percentA,
                             i.zanchengB, percentB)
             self.document.add_paragraph(content)
@@ -157,6 +178,7 @@ class RecordToWord():
         self.document.add_paragraph("监票人签名：")
 
         self.document.save(BASE_DIR + "/files/"+year+name+".doc")
+        print(BASE_DIR + "/files/"+year+name+".doc")
         return  {"content1": content1,
                 "content2": content2,
                 "content3": content3,
