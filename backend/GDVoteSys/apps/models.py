@@ -14,9 +14,9 @@ class ShareholderInfo(models.Model):
     # xh = models.SmallIntegerField()
     # cx = models.SmallIntegerField(choices=BE_PRESENT_CHOICE, verbose_name="是否出席")
     # xcorwl = models.SmallIntegerField(choices=BE_PRESENT_CHOICE,verbose_name="是否出席现场")
-    gdxm = models.CharField(max_length=20) # 股东姓名
+    gdxm = models.CharField(max_length=120) # 股东姓名
     gdtype = models.CharField(max_length=20, null=True) # 股东类型
-    gddmk = models.CharField(max_length=15, null=True)
+    gddmk = models.CharField(max_length=15, unique=True)
     sfz = models.CharField(max_length=25, null=True)
 
     rs = models.SmallIntegerField(null=True)
@@ -76,11 +76,14 @@ class OnSiteMeeting(models.Model):
         (0,'否'),
         (1,'是')
     )
+
+
     # gb = models.ForeignKey(GB, on_delete=models.CASCADE)
     shareholder = models.ForeignKey(ShareholderInfo, on_delete=models.CASCADE)
     meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
     cx = models.BooleanField(default=False, verbose_name="是否出席")
     xcorwl = models.BooleanField(default=False,verbose_name="是否出席现场")
+    rs = models.IntegerField(default=1, verbose_name="人数")
     gzA = models.IntegerField(default=0)
     gzB = models.IntegerField(default=0)
     meno = models.CharField(max_length=20, default=None, null=True) # 备注
@@ -99,10 +102,18 @@ class MotionBook(models.Model):
     fanduiB = models.IntegerField(null=True)
     qiquanA = models.IntegerField(null=True)
     qiquanB = models.IntegerField(null=True)
+    zxg_zanchengA = models.IntegerField(null=True)
+    zxg_zanchengB = models.IntegerField(null=True)
+    zxg_fanduiA = models.IntegerField(null=True)
+    zxg_fanduiB = models.IntegerField(null=True)
+    zxg_qiA = models.IntegerField(null=True)
+    zxg_qiB = models.IntegerField(null=True)
     is_huibi = models.BooleanField(default=False, null=True)
     huibiA = models.IntegerField(null=True)
     huibiB = models.IntegerField(null=True)
+    descr = models.CharField(max_length=200, null=True)
     # is_tongji = models.BooleanField(default=False, null=True)
+    sharehold = models.ManyToManyField(ShareholderInfo, through="VoteRecordDetail")
     annual_meeting = models.ForeignKey(Meeting, on_delete=models.SET_NULL, null=True)
 
     class Meta:
@@ -121,4 +132,45 @@ class AccumulateMotion(models.Model):
     class Meta:
         db_table = 'accumulate_book'
         verbose_name = '议案信息表'
+        verbose_name_plural = verbose_name
+
+class NetworkVoteCount(models.Model):
+    """网络投票统计记录表，由parse_excel工具类解析excel数据统计完成后存储在该表中"""
+    EQUITY_TYPE_CHOICE = (
+        (0,'A'),
+        (1,'B')
+    )
+    zancheng = models.IntegerField(null=True)
+    fandui = models.IntegerField(null=True)
+    qiquan = models.IntegerField(null=True)
+    motion_id = models.IntegerField(null=True)
+    equityType = models.SmallIntegerField(choices=EQUITY_TYPE_CHOICE)
+    excelName = models.CharField(max_length=120)
+    class Meta:
+        db_table = 'network_vote_count'
+        verbose_name = '网络投票统计表'
+        verbose_name_plural = verbose_name
+
+class VoteRecordDetail(models.Model):
+    """记录各股东对各议案投票记录,是会议议案表和股东信息表多对多关系的中间表"""
+    VOTE_CHOICE = (
+        (1, "赞成"),
+        (2, "反对"),
+        (3, "弃权"),
+        (4, "回避")
+    )
+    EQUITY_TYPE_CHOICE = (
+        (0,'A'),
+        (1,'B')
+    )
+    gdId = models.ForeignKey(ShareholderInfo, on_delete=models.CASCADE)
+    motionId = models.ForeignKey(MotionBook, on_delete=models.CASCADE)
+    zanchengVote = models.IntegerField(null=True)
+    vote = models.SmallIntegerField(choices=VOTE_CHOICE, null=True)
+    equityType = models.SmallIntegerField(choices=EQUITY_TYPE_CHOICE)
+    huibi_descr = models.CharField(max_length=120, default=None, null=True)
+
+    class Meta:
+        db_table = 'vote_record_detail'
+        verbose_name = '投票记录统计表'
         verbose_name_plural = verbose_name

@@ -20,5 +20,9 @@ urlpatterns = [
     url(r'motion/(?P<year>\d{4})/(?P<meeting_name>\w+)', views.Motion.as_view()),
     url(r'record', views.Record.as_view()),
     url(r'refresh', views.Refresh.as_view()),
-    url(r'update_meeting', views.UpdateAnnualMeeting.as_view())
+    url(r'update_meeting', views.UpdateAnnualMeeting.as_view()),
+    url(r'upload',views.Upload.as_view()),
+    url(r'teller', views.Teller.as_view()),
+    url(r'tongji', views.Tongji.as_view()),
+
 ]

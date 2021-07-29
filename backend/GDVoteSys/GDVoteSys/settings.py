@@ -53,8 +53,10 @@ MIDDLEWARE = [
 
 ]
 
-SESSION_ENGINE='django.contrib.sessions.backends.cached_db'
-SESSION_COOKIE_SAMESITE = None
+
+
+# SESSION_ENGINE='django.contrib.sessions.backends.cached_db'
+# SESSION_COOKIE_SAMESITE = None
 
 
 # CORS_ALLOWED_ORIGINS = {
@@ -110,12 +112,26 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'HOST': '47.111.148.73',  # 数据库主机
         'PORT': 3306,  # 数据库端口
-        'USER': 'mysql',  # 数据库用户名
+        'USER': 'xhr',  # 数据库用户名
         'PASSWORD': 'mysql',  # 数据库用户密码
         'NAME': 'gdtps'  # 数据库名字
     }
 }
 
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://47.111.148.73:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": "chinafsl123"
+        }
+    }
+}
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
