@@ -99,7 +99,7 @@ class ParseExcel():
                     shareholder = ShareholderInfo.objects.create(gddmk=account,gdxm=gdxm,sfz=sfz,
                                                                  gzA=0, gzB=shares, gdtype="中小股" if percent < 0.05 else None)
 
-            onSite_qs_all.filter(shareholder_id=shareholder.id)
+            onSite_qs = onSite_qs_all.filter(shareholder_id=shareholder.id)
             # 如果表中没有数据，且shareholer存在时，新增数据，如果shareholder为空，不管onSite_qs为真还是假都无法进入里面的判断
             if not onSite_qs and shareholder:
                 # excel表中的股东是已投票的股东，表明他们参加了此次会议，因此补录到股东会议登记表，

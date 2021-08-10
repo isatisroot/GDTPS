@@ -8,21 +8,26 @@ class RecordToWord():
     """
     def __init__(self):
         self.document = Document()
+        self.content1 = ""
+        self.content2 = ""
+        self.content3 = ""
+        self.content4 = ""
+        self.content5 = ""
     def vote_result(self,year, name):
         m = Meeting.objects.filter(year=year, name=name)[0]
-        totalShare= m.gb.gb
-        AShareTotal= m.gb.ltag
-        BShareTotal=m.gb.ltbg
-        qs = m.onsitemeeting_set.all()  # 该会议下所有等级的股东信息
+        totalShare= m.gb.gb  # 总股本
+        AShareTotal= m.gb.ltag # 总流通A股
+        BShareTotal=m.gb.ltbg # 总流通B股
+        qs = m.onsitemeeting_set.all()  # 该会议下所有登记的股东信息
         qs1 = qs.filter(cx=True)    # 出席会议的股东
         cx_num = len(qs1)
         cx_gb = 0  # 出席会议股东股份数总和
         for q in qs1:
             cx_gb += q.gzA + q.gzB
-        percent1 = cx_gb / totalShare
+        percent1 = cx_gb / totalShare  # 出席会议股数占公司总股数百分比
 
 
-        qs2 = qs.filter(cx=True, xcorwl=True)
+        qs2 = qs.filter(cx=True, xcorwl=True)  # 现场出席的股东
         xcorwl_num = len(qs2)
         xcorwl_gb = 0
         for q in qs2:
@@ -46,14 +51,14 @@ class RecordToWord():
         title2.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         # 添加标题内容
         title1_run = title1.add_run("佛山电器照明股份有限公司")
-        title2_run = title2.add_run("{}议案投票表决统计结果".format(year+name))
+        title2_run = title2.add_run("{}议案投票表决统计结果".format(str(year)+name))
         self.document.add_heading( level=1)
         self.document.add_paragraph("一、会议的出席情况")
         self.document.add_paragraph("1. 出席的总体情况：")
         # format(cx_gb, ",")转千分符
-        content1 = """        股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{:.2%}。其中,现场会议股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{:.2%}。网络投标股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{:.2%}。"""\
+        self.content1 = """        股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{:.2%}。其中,现场会议股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{:.2%}。网络投标股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{:.2%}。"""\
             .format(cx_num, format(cx_gb, ","), percent1, xcorwl_num, xcorwl_gb, percent2, wl_num, wl_gb, percent3)
-        self.document.add_paragraph(content1)
+        self.document.add_paragraph(self.content1)
         self.document.add_paragraph("2. A股股东出席情况：")
         qs4 = qs.filter(gzA__gt=0, cx=True) # 出席A股股东
         num4 = len(qs4)
@@ -79,9 +84,9 @@ class RecordToWord():
         percent6= sum6 / AShareTotal
         # sum6 = format(sum6, ",")
 
-        content2 = """        A股股东（代理人）{}人，代表股份{}股，占公司A股股东表决权股份{:.2%}。其中,现场会议股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{:.2%}。网络投标股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{:.2%}。"""\
+        self.content2 = """        A股股东（代理人）{}人，代表股份{}股，占公司A股股东表决权股份{:.2%}。其中,现场会议股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{:.2%}。网络投标股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{:.2%}。"""\
             .format(num4, sum4, percent4, num5, sum5, percent5, num6, sum6, percent6)
-        self.document.add_paragraph(content2)
+        self.document.add_paragraph(self.content2)
 
         self.document.add_paragraph("3. B股股东出席情况：")
         qs7 = qs.filter(gzB__gt=0, cx=True) # 出席B股股东
@@ -101,9 +106,9 @@ class RecordToWord():
         # sum7 = format(sum7, ",")
         # sum8 = format(sum8, ",")
         # sum9 = format(sum9, ",")
-        content3 = """        B股股东（代理人）{}人，代表股份{}股，占公司B股股东表决权股份{:.2%}。其中,现场会议股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{:.2%}。网络投标股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{:.2%}。"""\
+        self.content3 = """        B股股东（代理人）{}人，代表股份{}股，占公司B股股东表决权股份{:.2%}。其中,现场会议股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{:.2%}。网络投标股东（代理人）{}人，代表股份{}股，占公司有表决权总股份{:.2%}。"""\
             .format(num7, sum7, percent7, num8, sum8, percent8, num9, sum9, percent9)
-        self.document.add_paragraph(content3)
+        self.document.add_paragraph(self.content3)
 
         self.document.add_paragraph("4. 中小股出席情况：")
         zxg_num = zxg_gb = 0
@@ -114,8 +119,8 @@ class RecordToWord():
             if s.gdtype == "中小股":
                 zxg_num += s.rs
                 zxg_gb += s.gzB + s.gzA
-        content4 = """        中小股东（代理人）（不含公司董事、监事、高管、单独或合计持有公司5%以上股份的股东及与持有公司5%以上股份股东形成一致行动人的股东）共{}人，代表股份{}股，占公司B股股东表决权股份{:.2%}。""".format(zxg_num, zxg_gb, zxg_gb/totalShare)
-        self.document.add_paragraph(content4)
+        self.content4 = """        中小股东（代理人）（不含公司董事、监事、高管、单独或合计持有公司5%以上股份的股东及与持有公司5%以上股份股东形成一致行动人的股东）共{}人，代表股份{}股，占公司B股股东表决权股份{:.2%}。""".format(zxg_num, zxg_gb, zxg_gb/totalShare)
+        self.document.add_paragraph(self.content4)
 
         self.document.add_paragraph("二、提案审议和表决情况")
         motion_qs =  m.motionbook_set.all()
@@ -177,12 +182,6 @@ class RecordToWord():
         self.document.add_paragraph("唱票统计人签名：")
         self.document.add_paragraph("监票人签名：")
 
-        self.document.save(BASE_DIR + "/files/"+year+name+".doc")
+        self.document.save(BASE_DIR + "/files/"+str(year)+name+".doc")
         print(BASE_DIR + "/files/"+year+name+".doc")
-        return  {"content1": content1,
-                "content2": content2,
-                "content3": content3,
-                "content4": content4,
-                "content5": motion_content,
-                "content6": leiji_content
-                }
+

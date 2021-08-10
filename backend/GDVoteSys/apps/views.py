@@ -1,13 +1,18 @@
 import json
+import os
+
 import xlrd
 import redis
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from django.views.generic import View
 from django.http.response import JsonResponse, HttpResponseBadRequest, HttpResponseNotFound, HttpResponseRedirect, \
     HttpResponse
 
 from GDVoteSys.settings import BASE_DIR
+from utils.statistical_analysis import Statistical
 from .models import Meeting, ShareholderInfo, OnSiteMeeting, GB, MotionBook, AccumulateMotion, VoteRecordDetail
+from django.db.models import Q
 from django.contrib.auth import login
 from rest_framework_jwt.settings import api_settings
 from datetime import datetime,date
@@ -154,8 +159,7 @@ class AddMeeting(View):
         json_str = request.body.decode()
         req_data = json.loads(json_str)
         meeting = req_data.get('meeting')
-        motion = req_data.get("motion")
-        leijimotion = req_data.get("leijimotion",[])
+        motions = req_data.get("motion")
         gdid_list = req_data.get('gdid')
         name = meeting.get("name")
         address = meeting.get("address")
@@ -166,14 +170,6 @@ class AddMeeting(View):
         year = date1.split("-")[0]
         if not all((date1, date2, address)):
             return HttpResponseBadRequest(json.dumps({'msg': '请填写时间和日期'}))
-
-        for i in leijimotion:
-            motion.remove(i)
-        # text = ''
-        # for i in motion:
-        #     if bool(i):
-        #         text += i.get('motion','')+ ";"
-
         try:
             if Meeting.objects.filter(year=year, name=name):
                 return HttpResponseBadRequest( json.dumps({'msg':'会议已存在，无需添加'}))
@@ -197,13 +193,17 @@ class AddMeeting(View):
                 gb=gb
             )
             #判断有无议案，有则写入议案表
-            for i in motion:
-                if i.get("motion"):
-                    MotionBook.objects.create(name=i['motion'], annual_meeting=m)
+            for i in motions:
+                motion = i.get("motion")
+                # 判断是否累计议案
+                if i.get("isleiji") and motion:
 
-            for i in leijimotion:
-                if i.get("motion"):
-                    AccumulateMotion.objects.create(name=i["motion"], annual_meeting=m)
+                    newMotionModel = MotionBook.objects.create(name=motion, annual_meeting=m, isCumulated=True)
+                    leijimotions = i.get("leijicontent")
+                    for j in leijimotions:
+                        MotionBook.objects.create(name=j, annual_meeting=m, pid=newMotionModel)
+                else:
+                    MotionBook.objects.create(name=motion, annual_meeting=m)
 
             # 写入中间表——登记表，并关联年度会议和股东id，记录当年股东的股份数
             m.members.set(gdid_list)
@@ -236,6 +236,7 @@ class QueryDetail(View):
 
         global str_date, sharehold, extr_sh_list, meeting_list, current
         motion = []
+        leijimotion = []
         str_date = ""
         sharehold = {}
         current = {}
@@ -262,12 +263,23 @@ class QueryDetail(View):
             #     motion.pop()
             motion_qs =  m.motionbook_set.all()
             for i in motion_qs:
-                motion.append(i.name)
+                # 判断是否累计议案
+                if i.isCumulated:
+                    # 查询该累计议案下对应的所有子议案
+                    submotionQueryset = i.motionbook_set.all()
+                    submotions = []
+                    for submotion in submotionQueryset:
+                        submotions.append({"id": submotion.id, "name": submotion.name})
 
-            leijimotion = []
-            leijimotion_qs = m.accumulatemotion_set.all()
-            for i in leijimotion_qs:
-                leijimotion.append(i.name)
+                    leijimotion.append({"id": i.id, "name": i.name, "submotions": submotions})
+                else:
+                    if not i.pid:
+                        # 普通议案
+                        motion.append({"id": i.id, "name": i.name})
+
+            # leijimotion_qs = m.accumulatemotion_set.all()
+            # for i in leijimotion_qs:
+            #     leijimotion.append(i.name)
 
             address = m.address
             current = {"year": m.year, "name": m.name, "date": str_date, "motion": motion, "leijimotion": leijimotion, "address": address}
@@ -491,19 +503,19 @@ class Result(View):
         没有则判断是否有统计过，统计过则直接从数据库中拿数据，未统计则返回空值
         :return:
         """
-        motion_list = []
-        leijimotion = []
+
         con = get_redis_connection("default")
         m = Meeting.objects.get(year=year,name=meeting_name)
-        motion_qs =  m.motionbook_set.all()
+        motion_qs =  m.motionbook_set.filter(isCumulated=None,pid=None)
+        leijimotionQueryset = m.motionbook_set.filter(pid__gt=1) # 该会议下pid大于等于1的议案
         onSite_qs =  m.onsitemeeting_set.all()
+        statistics = Statistical()
+        # 如果redis中存在vote，表明用户有唱票行为，需要取出写入到VoteRecordDetail表中
         if con.get("vote"):
+            # 对每一个议案进行唱票
             for motion in motion_qs:
             # 获取出席该会议股东id列,持A股数，持B股数的数据,返回<QuerySet [(1,), (2,), (3,)……]>
-                sum_zan_A = sum_zan_B = sum_fan_A = sum_fan_B = sum_qi_A = sum_qi_B \
-                    =zxg_sum_zan_A = zxg_sum_zan_B = zxg_sum_fan_A = zxg_sum_fan_B \
-                    = zxg_sum_qi_A = zxg_sum_qi_B = sum_huibiA = sum_huibiB = 0
-
+                # 取出redis中投反对，弃权，回避的股东id
                 motion_id = str(motion.id)
                 name_fandui = motion_id +"fandui"
                 name_qiquan = motion_id + "qiquan"
@@ -513,10 +525,11 @@ class Result(View):
                 huibi_gd = con.hkeys(name_huibi)  # 取出所有的键，即所有回避的股东id
                 huibi_descr = con.hvals(name_huibi)
                 descr_text = ""
-                for descr in huibi_descr: descr_text += descr
-                # 如果redis中有个别股东投反对票，那么要进行重新计算统计，否则直接从数据库中获取统计结果
+                for descr in huibi_descr: descr_text += descr.decode()
 
+                # 将redis中有个别股东投了反对票的数据记录到表中
                 for id in fandui_gd:
+                    id = int(id)
                     qs = onSite_qs.filter(shareholder_id=id)
                     if qs:
                         q = qs[0]
@@ -526,9 +539,10 @@ class Result(View):
                             "motionId": motion,
                             "equityType": equityType,
                             "vote": 2
-                        }, gdId=q.shareholder, motionId=motion,  equityType=equityType)
+                        }, gdId=q.shareholder_id, motionId=motion.id,  equityType=equityType)
 
                 for id in qiquan_gd:
+                    id = int(id)
                     qs = onSite_qs.filter(shareholder_id=id)
                     if qs:
                         equityType = 0 if qs[0].gzA > 0 else 1
@@ -537,8 +551,10 @@ class Result(View):
                             "motionId": motion,
                             "equityType": equityType,
                             "vote": 3
-                        }, gdId=qs[0].shareholder, motionId=motion, equityType=equityType)
+                        }, gdId=qs[0].shareholder_id, motionId=motion.id, equityType=equityType)
+
                 for id in huibi_gd:
+                    id = int(id)
                     qs = onSite_qs.filter(shareholder_id=id)
                     if qs:
                         equityType = 0 if qs[0].gzA > 0 else 1
@@ -546,10 +562,14 @@ class Result(View):
                             "gdId": qs[0].shareholder,
                             "motionId": motion,
                             "equityType": equityType,
-                            "vote": 4
-                        }, gdId=qs[0].shareholder, motionId=motion,  equityType=equityType)
+                            "vote": 4,
+                            "huibi_descr": huibi_descr
+                        }, gdId=qs[0].shareholder_id, motionId=motion.id,  equityType=equityType)
+
                 # 剩下的就是投赞成票的股东
-                exclude = list(qiquan_gd & fandui_gd) + huibi_gd
+                exclude = list(qiquan_gd | fandui_gd) + huibi_gd
+                # redis提取出来的元素是byte字节，需要将其转换成整型
+                exclude = [int(i.decode()) if type(i)==bytes else int(i) for i in exclude]
                 zancheng_gd = onSite_qs.exclude(shareholder_id__in=exclude)
                 for gd in zancheng_gd:
                     equityType = 0 if gd.gzA > 0 else 1
@@ -558,63 +578,55 @@ class Result(View):
                         "motionId": motion,
                         "equityType": equityType,
                         "vote": 1
-                    }, gdId=gd.shareholder, motionId=motion,  equityType=equityType)
+                    }, gdId=gd.shareholder_id, motionId=motion.id,  equityType=equityType)
 
-                    # 合并网络投票
-                #     sum_zan_A += excel_A.get_zancheng("A")[i.id]
-                #     sum_fan_A += excel_A.get_fandui("A")[i.id]
-                #     sum_qi_A += excel_A.get_qiquan("A")[i.id]
+                con.delete(name_fandui)
+                con.delete(name_qiquan)
+                con.delete(name_huibi)
 
-                # 将统计完的数据更新到数据库中
-                #     MotionBook.objects.update_or_create(
-                #         defaults={
-                #         "zanchengA": sum_zan_A,
-                #         "zanchengB": sum_zan_B,
-                #         "fanduiA": sum_fan_A,
-                #         "fanduiB": sum_fan_B,
-                #         "qiquanA": sum_qi_A,
-                #         "qiquanB": sum_qi_B,
-                #         "zxg_zanchengA": zxg_sum_zan_A,
-                #         "zxg_zanchengB": zxg_sum_zan_B,
-                #         "zxg_fanduiA": zxg_sum_fan_A,
-                #         "zxg_fanduiB": zxg_sum_fan_B,
-                #         "zxg_qiA": zxg_sum_qi_A,
-                #         "zxg_qiB": zxg_sum_qi_B,
-                #         "is_huibi": True if sum_huibiA >0 or sum_huibiB > 0 else False,
-                #         "huibiA": sum_huibiA,
-                #         "huibiB": sum_huibiB,
-                #         "descr": descr_text
-                #         },
-                #         id=motion.id)
+                statistics.per_motion(m, motion)
+            for leijimotion in leijimotionQueryset:
+                statistics.per_leijimotion(leijimotion)
+            con.delete("vote")
 
+        # 查询统计结果
         motion_qs =  m.motionbook_set.all()
+        motionList = []
+        leijimotionList = []
         for i in motion_qs:
-            data = {
-                "id": i.id,
-                "name": i.name,
-                "zanchengA": i.zanchengA,
-                "zanchengB": i.zanchengB,
-                "fanduiA": i.fanduiA,
-                "fanduiB": i.fanduiB,
-                "qiquanA": i.qiquanA,
-                "qiquanB": i.qiquanB,
-                "is_huibi": i.is_huibi,
-                "huibiA": i.huibiA,
-                "huibiB": i.huibiB,
-                "huibi_descr": i.descr
-            }
-            motion_list.append(data)
+            # 判断是否累计议案
+            if i.isCumulated:
+                # 查询该累计议案下对应的所有子议案
+                submotionQueryset = i.motionbook_set.all()
+                submotions = []
+                for submotion in submotionQueryset:
+                    data = {
+                        "id": submotion.id,
+                        "name": submotion.name,
+                        "zanchengA": submotion.zanchengA,
+                        "zanchengB": submotion.zanchengB
+                    }
+                    submotions.append(data)
 
-        # 对每一个累计议案进行统计，写入数据库然后发送到前端
-        leijimotion_qs = m.accumulatemotion_set.all()
-        for i in leijimotion_qs:
-            data = {
-                "id": i.id,
-                "name": i.name,
-                "zanchengA": i.zanchengA,
-                "zanchengB": i.zanchengB
-            }
-            leijimotion.append(data)
+                leijimotionList.append({"id": i.id, "name": i.name, "submotions": submotions})
+            else:
+                if not i.pid:
+                    data = {
+                            "id": i.id,
+                            "name": i.name,
+                            "zanchengA": i.zanchengA,
+                            "zanchengB": i.zanchengB,
+                            "fanduiA": i.fanduiA,
+                            "fanduiB": i.fanduiB,
+                            "qiquanA": i.qiquanA,
+                            "qiquanB": i.qiquanB,
+                            "is_huibi": i.is_huibi,
+                            "huibiA": i.huibiA,
+                            "huibiB": i.huibiB,
+                            "huibi_descr": i.descr
+                        }
+                    motionList.append(data)
+
 
         queryset = m.onsitemeeting_set.filter(cx=True)
         sharehold_cx_A = 0
@@ -630,22 +642,13 @@ class Result(View):
 
         ncx_gb = m.gb.gb - sharehold_cx_A -sharehold_cx_B
 
-        # 生成word文档
-        content = {}
-        # try:
-        #     doc = RecordToWord()
-        #     content = doc.vote_result(year, meeting_name)
-        # except Exception as e:
-        #     print(e)
-
-        return  JsonResponse({"motion": motion,
-                              "leijimotion": leijimotion,
+        return  JsonResponse({"motion": motionList,
+                              "leijimotion": leijimotionList,
                               "sharehold_cx_A": sharehold_cx_A,
                               "sharehold_cx_B": sharehold_cx_B,
                               "cx_gd": cx_gd,
                               "cx_gb": cx_gb,
-                              "ncx_gb": ncx_gb,
-                              "content": content})
+                              "ncx_gb": ncx_gb}, safe=False)
 
 class Motion(View):
     def get(self, request, year, meeting_name):
@@ -655,25 +658,22 @@ class Motion(View):
             sharehold = {"totalShare": m.gb.gb, "AShareTotal": m.gb.ltag, "BShareTotal": m.gb.ltbg}
             # 获取该年度所有议案
             motion = []
+            leijimotion = []
             motion_qs =  m.motionbook_set.all()
             for i in motion_qs:
-                data = {
-                    "id": i.id,
-                    "name": i.name,
-                    # "checked": 1  # 默认是赞成票，1代表赞成，2反对，3弃权
-                }
+                if i.isCumulated:
+                    # 查询该累计议案下对应的所有子议案
+                    submotionQueryset = i.motionbook_set.all()
+                    submotions = []
+                    for submotion in submotionQueryset:
+                        submotions.append({"id": submotion.id, "name": submotion.name, "agree": None})
 
-                motion.append(data)
+                    leijimotion.append({"id": i.id, "name": i.name, "submotions": submotions})
+                else:
+                    if not i.pid:
+                        # 普通议案
+                        motion.append({"id": i.id, "name": i.name})
 
-            leijimotion = []
-            leijimotion_qs = m.accumulatemotion_set.all()
-            for i in leijimotion_qs:
-                data = {
-                    "id": i.id,
-                    "name": i.name,
-                    "agree": None
-                }
-                leijimotion.append(data)
             queryset = m.onsitemeeting_set.filter(cx=True)
             data_list = []
             for q in queryset:
@@ -696,10 +696,12 @@ class Motion(View):
                     # 'meno': q.meno
                 }
                 data_list.append(data)
-            return JsonResponse({"motion": motion, "leijimotion": leijimotion, "gdmsg": data_list, "isRecord": m.is_tongji})
+            return JsonResponse({"motion": motion, "leijimotion": leijimotion, "gdmsg": data_list})
         except Exception as e:
             print(e)
             return HttpResponseBadRequest(content=json.dumps({'msg':'查询失败'}),content_type="'application/json'")
+
+
 
 class Record(View):
     """唱票功能，将普通议案的赞成，反对和弃权票汇总后写入数据库，将累计议案的赞成票汇总后写入数据库"""
@@ -829,13 +831,6 @@ class Record(View):
 
         return JsonResponse({"success": 1, "msg": "唱票成功"})
 
-class Refresh(View):
-    def get(self, request):
-        year = request.GET.get('year')
-        name = request.GET.get('name')
-        print(year, name)
-        Meeting.objects.filter(year=year, name=name).update(is_tongji = False)
-        return JsonResponse({"success": 1, "msg": "更新成功"})
 
 class Download(View):
     def post(self, request):
@@ -850,15 +845,23 @@ class Download(View):
         year = data.get("year")
         name = data.get("name")
 
+        filePath = BASE_DIR + "/files/" + file_name +".doc"
 
-        # file_path = BASE_DIR + "/files/" + year + name +".doc"
+        # 生成word文档
+        try:
+            doc = RecordToWord()
+            doc.vote_result(year, name)
+        except Exception as e:
+            print(e)
 
-        file = open(BASE_DIR + "/files/" + file_name+".doc", "rb")
+        file = open(filePath, "rb")
         response = HttpResponse(file)
         response["Content-Type"] = "application/octet-stream"
         response["Content-Disposition"] = "attachment:filename={}".format(file_name+".docx")
         file.close()
         return response
+
+
 
 
 class UpdateAnnualMeeting(View):
@@ -868,37 +871,46 @@ class UpdateAnnualMeeting(View):
         year = req_data.get("year")
         name = req_data.get("name")
         form = req_data.get("form", {})
-        motion = req_data.get("motion")
-        leijimotion = req_data.get("leijimotion")
         addmotion = req_data.get("addmotion", [])
-        addleijimotion = req_data.get("addleijimotion", [])
-        for i in addleijimotion:
-            addmotion.remove(i)
         address = form.get("address")
         date1 = form.get("date1")
         date2 = form.get('date2')
         descr = form.get("descr")
         if " " in date1:
-
             stru_date = datetime.strptime(date1, "%Y-%m-%d %H:%M:%S")
         else:
             stru_date = datetime.strptime(date1 +"\xa0" + date2, "%Y-%m-%d %H:%M")
 
-        m = Meeting.objects.filter(year=year, name=name)
-        m.update(date=stru_date, address=address, descr=descr)
-        MotionBook.objects.exclude(name__in=motion).filter(annual_meeting=m[0]).delete()
-        AccumulateMotion.objects.exclude(name__in=leijimotion).filter(annual_meeting=m[0]).delete()
+        try:
+            m = Meeting.objects.filter(year=year, name=name)
+            m.update(date=stru_date, address=address, descr=descr)
+            m = m[0]
+            for i in addmotion:
+                motion = i.get("motion")
+                # 判断是否累计议案
+                if i.get("isleiji") and motion:
+                    newMotionModel = MotionBook.objects.create(name=motion, annual_meeting=m, isCumulated=True)
+                    leijimotions = i.get("leijicontent")
+                    for j in leijimotions:
+                        MotionBook.objects.create(name=j, annual_meeting=m, pid=newMotionModel)
+                else:
+                    MotionBook.objects.create(name=motion, annual_meeting=m)
 
-        for i in addmotion:
-            if i.get("motion"):
-                MotionBook.objects.create(name=i.get("motion"), annual_meeting=m[0])
+            return JsonResponse({"success": 1, "msg": "更新成功"})
+        except Exception as e:
+            print(e)
+            return HttpResponseBadRequest(json.dumps({'msg': '更新会议失败'}))
 
-        for i in addleijimotion:
-            if i.get("motion"):
-                AccumulateMotion.objects.create(name=i.get("motion"), annual_meeting=m[0])
-
-        return JsonResponse({"success": 1, "msg": "更新成功"})
-
+    def delete(self, request):
+        json_str = request.body.decode()
+        req_data = json.loads(json_str)
+        id = req_data.get("id")
+        try:
+            MotionBook.objects.get(id=id).delete()
+            return JsonResponse({"success": 1, "msg": "删除成功"})
+        except ObjectDoesNotExist:
+            print("删除议案失败，没有这个id")
+            return HttpResponseBadRequest(json.dumps({"msg": "没有这个会议议题id"}))
 class Teller(View):
     def post(self, request):
         json_str = request.body.decode()
@@ -908,6 +920,7 @@ class Teller(View):
         con = get_redis_connection("default")
         con.set("vote", 1, ex=3600, nx=True)  # 一个小时后清除,nx=True只有vote不存在时添加
         motions = row["motion"]
+        leijimotions = row["leijimotion"]
         for m in motions:
             id = str(m.get("id"))
             checked = m.get("checked")
@@ -925,11 +938,34 @@ class Teller(View):
                 name = id + "huibi"
                 # 哈希类型， name是议案id+“huibi”组成的字符串，key是投回避票股东的id，value是他的回避描述，{name:{k1:v1,k2:v2}}
                 con.hset(name, row["id"], descr)
+        equityType = "A"
+        if row["gzA"] > 0:
+            for i in leijimotions:
+                submotions = i["submotions"]
+                for j in submotions:
+                    id = j["id"]
+                    agree = j["agree"]
+                    value = con.hget(id, "A")
+                    if not value:
+                        con.hset(id, "A", agree)
+                    else:
+                        value = int(value)
+                        value += int(agree)
+                        con.hset(id, "A", value)
+
+        if row["gzB"] > 0:
+            for i in leijimotions:
+                submotions = i["submotions"]
+                for j in submotions:
+                    id = j["id"]
+                    agree = j["agree"]
+                    value = con.hget(id, "B")
+                    if not value:
+                        con.hset(id, "B", agree)
+                    else:
+                        value = int(value)
+                        value += int(agree)
+                        con.hset(id, "B", value)
+
         return JsonResponse({"success": 1, "msg": "唱票成功"})
 
-class Tongji(View):
-    def get(self, request):
-        res = request.session.keys()
-        print(res)
-        return HttpResponse(json.dumps(res))
-        # return JsonResponse({"success": 1, "msg": "唱票成功"})

@@ -112,9 +112,12 @@ class MotionBook(models.Model):
     huibiA = models.IntegerField(null=True)
     huibiB = models.IntegerField(null=True)
     descr = models.CharField(max_length=200, null=True)
+    isCumulated = models.BooleanField(null=True)
     # is_tongji = models.BooleanField(default=False, null=True)
     sharehold = models.ManyToManyField(ShareholderInfo, through="VoteRecordDetail")
     annual_meeting = models.ForeignKey(Meeting, on_delete=models.SET_NULL, null=True)
+    # 自关联，例如一个累计议案叫《关于选举吴或雷为公司董事的议案》，其子议案有两个《选举吴》和《选举雷》均关联该累计议案
+    pid = models.ForeignKey("MotionBook", null=True, on_delete=models.CASCADE) # 级联删除，当累计议案被删除时，子议案也被删除
 
     class Meta:
         db_table = 'motion_book'

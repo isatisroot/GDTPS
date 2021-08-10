@@ -125,7 +125,9 @@ CACHES = {
         "LOCATION": "redis://47.111.148.73:6379/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD": "chinafsl123"
+            "PASSWORD": "chinafsl123",
+            # 自动将redis中的字节转换成字符串
+            "DECODE_RESPONSES": True,
         }
     }
 }
