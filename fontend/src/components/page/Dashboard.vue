@@ -46,59 +46,74 @@
           <el-form-item prop="address" label="会议地点:" :label-width="formLabelWidth"><el-input v-model="form.address"></el-input></el-form-item>
           <el-divider style="margin-top: 10px">议案主题</el-divider>
           <div style="text-align: center;margin-top: -10px;margin-bottom: 15px">
-
             <span style="font-size: 10px;color:orangered">(✔表示采用累积投票)</span>
           </div>
-          <el-form-item v-for="m in motion">
-<!--              <button style="margin-left: 10px" @click="clickHiddenFile">上传附件</button>-->
-<!--              https://www.cnblogs.com/kongxianghai/p/5624785.html-->
-            <li >{{ m }}
-              <el-popconfirm title="确定删除这条议案吗？">
-<!--              <i class="el-icon-delete" style="position: absolute;right: 10px" slot="reference"></i>-->
-              </el-popconfirm>
-            </li>
-<!--            <span class="btn btn-success fileinput-button">-->
-<!--              <button >上传附件</button>-->
-<!--            <input type="file" value="" id="hiddenFile" @change="uploadConfig($event, m)" >-->
-<!--            </span>-->
+          <el-form-item v-for="(m,idx) in motion">
+              <li class="motion-li" style="list-style:none" >{{idx + 1}}.&nbsp;&nbsp;&nbsp;&nbsp;{{m.name }}
+                <el-popconfirm title="确定删除这条议案吗？" @confirm="deleteMotion(idx, m.id)">
+                  <i class="el-icon-delete"  style="position: absolute;right: 10px;top: 10px" slot="reference" ></i>
+                </el-popconfirm>
+              </li>
           </el-form-item>
 
 <!--          <el-divider style="margin-top: 10px">累计投票议案</el-divider>-->
-          <el-form-item v-for="m in leijimotion">
+          <el-form-item v-for="(m,idx) in leijimotion" class="motion-li">
             <el-checkbox v-model="value" :disabled="value"></el-checkbox>
-            <li style="list-style-type: none;display: inline-block;margin-left: 5px" >{{m}}
-              <el-popconfirm title="确定删除这条议案吗？">
-<!--                <i class="el-icon-delete" style="position: absolute;right: 10px" slot="reference"></i>-->
-              </el-popconfirm>
+            <li style="list-style-type: none;display: inline-block;margin-left: 5px"  >{{m.name}}
+                <el-popconfirm title="确定删除这条议案吗？" @confirm="deleteLeijiMotion(idx, m.id)">
+                  <i class="el-icon-delete" style="position: absolute;right: 10px;top: 10px" slot="reference" ></i>
+                </el-popconfirm>
+              &nbsp;&nbsp;&nbsp;&nbsp;<li style="list-style:none" v-for="(submotion,idx) in m.submotions">{{idx+1}}.&nbsp;&nbsp;&nbsp;&nbsp;{{submotion.name}}</li>
             </li>
           </el-form-item>
-          <el-form-item v-show="addmotion.length > 0">
+          <el-form-item v-show="motionArray.length > 0">
             <div style="float: left; width: 90%" >
               <!-- <li v-for="(val, id) in motion.list" :key="id" style="list-style-type:none;">
                 <el-input type="text" style="margin-bottom: 5px;" v-model="val.text"></el-input>
               </li> -->
-              <!-- 使用作用域插槽，el-table是子组件，现在往子组件传<template>的内容，并获取里面的内容 -->
-              <el-table :data="addmotion" :show-header="false" ref="multipleTable" @selection-change="handleSelectionChange">
-                <el-table-column type="selection" width="28px"></el-table-column>
+              <!-- 使用作用域插槽，el-table是子组件，现在往子组件传<template>的内容，并获取里面的内容 " -->
+              <el-table :data="motionArray" :show-header="false" ref="multipleTable" :row-class-name="tableRowClassName">
+                <el-table-column align="center" width="58px" label="采用累积投票" prop="isleiji">
+                <template slot-scope="scope">
+                  <el-checkbox  v-model="scope.row.isleiji" @change="handleLeijiSelectionChange(scope)"></el-checkbox>
+                </template>
+                </el-table-column>
                 <el-table-column prop=motion>
                   <template slot-scope="scope">
-                    <el-input v-model="addmotion[scope.$index].motion"></el-input>
+                    <el-input v-model="motionArray[scope.$index].motion"></el-input>
+                    <div v-show="motionArray[scope.$index].isleiji">
+                      <el-table :data="motionArray[scope.$index].leiji"  :show-header="false">
+                        <el-table-column label="子编号"  align="center" type="index" :width="28"></el-table-column>
+                        <el-table-column label="子议案主题" align="center" prop=leiji>
+                          <template slot-scope="subscope">
+                            <el-input v-model="motionArray[scope.$index].leijicontent[subscope.$index]"></el-input>
+                          </template>
+                        </el-table-column>
+                      </el-table>
+                      <div class="add-submotion" @click="addSubmotion(scope.$index)">
+                        <i class="el-icon-circle-plus" style="margin-right:13px;color:white"></i>
+                        <span style="color:white">新增子议案</span>
+                      </div>
+                    </div>
                   </template>
                 </el-table-column>
                 <!--                <el-table-column><button style="margin-left: 10px">上传附件</button></el-table-column>-->
                 <!--            <el-table-column></el-table-column>-->
+
+
               </el-table>
               <!-- <el-input type="text" style="margin-bottom: 5px;"></el-input>
               <el-input type="text" style="margin-bottom: 5px;"></el-input> -->
             </div>
           </el-form-item>
-          <div class="demo-block-control" @click="addMotion" v-if="motion != '' && leijimotion != ''">
+
+          <div class="demo-block-control" @click="addMotion" v-if="motion != '' || leijimotion != ''">
 <!--   <el-tooltip class="item" effect="dark" content="新增议案" placement="bottom">-->
 <!--            <img src="../../assets/img/toggle_bg.png" width="500px" @click="addMotion" ></img>-->
 
             <div class="add-motion">
-              <i class="el-icon-caret-bottom"></i>
-              <span >新增议案</span>
+              <i class="el-icon-caret-bottom"></i>&nbsp;
+              <span style="color: white" >新增议案</span>
             </div>
 
             <!--            </el-tooltip>-->
@@ -132,9 +147,9 @@ import axios from '_axios@0.18.1@axios'
 export default {
 	  name: 'dashboard',
 	  data () {
-      var currenYear = new Date().getFullYear()
+    var currenYear = new Date().getFullYear()
     return {
-      multipleSelection: [],
+
       value: true,
       formLabelWidth: '74px',
       form: {
@@ -146,7 +161,7 @@ export default {
         motion: '',
         desrc: ''
       },
-      addmotion: [],
+      motionArray: [],
       addlejimotion: [],
       motion: [],
       leijimotion: [],
@@ -170,7 +185,7 @@ export default {
 
       // yearList: [],
       // meetingNameList: [],
-      name: localStorage.getItem('ms_username'),
+      name: localStorage.getItem('ms_username')
 
     }
   },
@@ -193,10 +208,29 @@ export default {
   },
 
   methods: {
-    handleSelectionChange (val) {
-      // console.log(val)
-      this.multipleSelection = val
+    // 设置table每一行的颜色，当被勾选为累计议案是切换颜色
+    tableRowClassName ({row, rowIndex}) {
+      if (row.isleiji === true) {
+        return 'warning-row'
+      } else {
+        return 'success-row'
+      }
     },
+    deleteBothMotionOrLeiji (id) {
+      axios.delete(this.host + 'meeting/motion', {
+        data: {id: id}}).then(response => {
+        this.$message.success('删除成功')
+      }).catch(() => {})
+    },
+    deleteMotion (idx, id) {
+      this.motion.splice(idx, 1)
+      this.deleteBothMotionOrLeiji(id)
+    },
+    deleteLeijiMotion (idx, id) {
+      this.leijimotion.splice(idx, 1)
+      this.deleteBothMotionOrLeiji(id)
+    },
+
     submit () {
       let url = this.host + 'update_meeting'
       axios.post(url, {
@@ -205,8 +239,7 @@ export default {
         form: this.form,
         motion: this.motion,
         leijimotion: this.leijimotion,
-        addmotion: this.addmotion,
-        addleijimotion: this.multipleSelection
+        addmotion: this.motionArray
       }).then(response => {
         // console.log(response.data)
         this.$message.success('数据更新成功！')
@@ -267,7 +300,18 @@ export default {
       oFile.click()
     },
     addMotion () {
-      this.addmotion.push({})
+      this.motionArray.push({'leijicontent': [], 'leiji': [{}, {}]})
+    },
+
+    // 新增子议案
+    addSubmotion (index) {
+      this.motionArray[index].leiji.push({})
+    },
+    // 当用户点击勾选框时，判断如果是勾选状态，则在motionArray数组中指定下标元素添加leiji属性，该指定下标元素（是一个对象）对应外层el-table某一行数据集合
+    handleLeijiSelectionChange (scope) {
+      if (scope.row.isleiji === true) {
+        this.motionArray[scope.$index].leiji = [{}, {}]
+      }
     },
     async handleSearch () {
       // 等待异步请求axios处理完成后再执行initSelectRow操作，因为后者需要等到tableData拿到数据后进行操作
@@ -285,6 +329,7 @@ export default {
           // this.query.name = response.data['current']['name']
           // this.descr = response.data['current']['descr']
           this.motion = response.data['current']['motion']
+
           this.leijimotion = response.data['current']['leijimotion']
           this.form.address = response.data['current']['address']
           // console.log(res)
@@ -303,6 +348,48 @@ export default {
 
 
 <style scoped>
+/deep/ .el-table .warning-row {
+  /*background: oldlace;*/
+  background: #b4e1e3;
+}
+
+/deep/.el-table .success-row {
+  /*background: #f0f9eb;*/
+  background: rgb(72 153 236 /10%);
+}
+.add-submotion {
+  /*background: #67c23ac7;*/
+  background: #53c8cd;
+  border-radius: 5px;
+  width: 80%;
+  /*opacity: 0.7;*/
+  text-align: center;
+  margin: 0 auto;
+  margin-top: 5px;
+  cursor: pointer; /* 鼠标移入时变手指 */
+}
+.motion-li {
+  /*鼠标悬浮时，由左往右动画填充颜色*/
+  background: linear-gradient(to right, #FFCCBC 35%, ghostwhite 64%);
+  background-size: 300% 100%;
+  background-position:right bottom;
+  transition: 1.5s ease-out;
+}
+.motion-li:hover {
+  /*content: "";*/
+  /*float: left;*/
+  /*width: 10px;*/
+  /*height: 10px;*/
+  /*margin: 10px 0;*/
+  /*background: linear-gradient(to right, #FF5722, #FFCCBC);*/
+  /*opacity: 0.5;*/
+  /*cursor:pointer;*/
+  /*-webkit-transition:all .5s;*/
+  /*transition:all .3s;*/
+  /*border-radius: 10%;*/
+  background-position: left bottom;
+}
+
 .btn1 {
   margin:10px 5px;
   padding:10px 60px;
@@ -477,10 +564,12 @@ export default {
   border: 1px solid #eaeefb;
   height: 24px;
   box-sizing: border-box;
-  background: linear-gradient(to bottom, #FF5722, #FFCCBC);
+  /*background: linear-gradient(to bottom, #FF5722, #FFCCBC);*/
+  /*background: #409EFF;*/
+  background: #5796d7;
   border-radius: 5px;
-  width: 70%;
-  opacity: 0.7;
+  width: 80%;
+  /*opacity: 0.7;*/
   text-align: center;
   margin: 0 auto;
   /*background-color: #d3dce6;*/
@@ -499,11 +588,11 @@ export default {
 
 }
 .demo-block-control .add-motion i {
-  color: gray;
+  color: #0cea2a;
   transition: .5s;
 }
 .demo-block-control:hover .add-motion i{
-  color: black;
+  color: white;
 }
  .add-motion span {
    opacity: 0;

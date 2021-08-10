@@ -1,7 +1,7 @@
 <template>
   <div id="res1">
     <p class="title1" >佛山电器照明股份有限公司</p>
-    <p  class="title2" align="center">{{query.year+query.name}}议案投票表决统计结果</p>
+    <p  class="title2" align="center">{{query.name}}议案投票表决统计结果</p>
     <h4>一、会议的出席情况</h4>
     <h5>1.出席的总体情况：</h5>
     <p>{{content.content1}}</p>

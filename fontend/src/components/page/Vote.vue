@@ -6,7 +6,7 @@
 <!--			<ul id="uvote">　-->
 <!--				<li style="page-break-after:always" v-for="(row,index) in checkedData" :key="index">-->
 					<p class="title1">佛山电器照明股份有限公司</p>
-					<p class="title2">{{query.year+query.name}}议案表决票</p>
+					<p class="title2">{{query.name}}议案表决票</p>
 					<table class="table2">
 						<tr>
 							<th rowspan="2">股东姓名</th>
@@ -31,19 +31,19 @@
 					</table>
 					<br>
       <p v-if="query.descr">{{query.descr}}</p>
-					<p class="text" v-else>说明：每项议案均有一张表决票，请使用“✓”符号在反对或弃权栏中选择其中一项投出表决票，多选无效。</p>
+					<p class="text" v-else>说明：每项议案均有一张表决票，请使用“✓”符号在赞成、反对或弃权栏中选择其中一项投出表决票，多选无效。</p>
 					<table class="table3">
 						<tr >
 							<th width="60">议案编号</th>
 							<th>议案主题</th>
-<!--							<th>赞成</th>-->
+							<th>赞成</th>
 							<th>反对</th>
 							<th>弃权</th>
 						</tr>
 						<tr v-for="(m,index) in motion" :key="index" >
 							<td>{{index+1}}</td>
-							<td>{{m}}</td>
-<!--							<td></td>-->
+							<td>{{m.name}}</td>
+							<td></td>
 							<td></td>
 							<td></td>
 						</tr>
@@ -55,14 +55,18 @@
       <table class="table3">
         <tr >
           <th width="60">议案编号</th>
+          <th width="60">议案子编号</th>
           <th>议案主题</th>
-          <th>赞成</th>
+          <th>选举票数</th>
         </tr>
-        <tr v-for="(m,index) in leijimotion" :key="index" >
+        <li style="list-style:none" v-for="(m,index) in leijimotion" :key="index">
+        <tr v-for="(submotion, idx) in m.submotions" >
           <td>{{index+1}}</td>
-          <td>{{m}}</td>
+          <td>{{idx+1}}</td>
+          <td>{{submotion.name}}</td>
           <td></td>
         </tr>
+        </li>
       </table>
       <p align="right" class="bottom-p">投票人签名：_____________</p>
       <p align="right" class="bottom-p">{{currentDate}}</p>

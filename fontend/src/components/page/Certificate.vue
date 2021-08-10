@@ -4,8 +4,8 @@
 <!--			<ul id="t1">-->
 <!--				<li style="page-break-after:always " v-for="(row,index) in checkedData" :key="index">-->
 					<p class="title1" >佛山电器照明股份有限公司</p>
-					<p class="title2">{{query.year+query.name}}登记凭证</p>
-					<p class="text">此据为参加{{query.year+query.name}}现场会议登记凭证，请凭此据于{{meetingDate}}到本公司{{query.address}}，领取会议材料，并参加股东大会。</p>
+					<p class="title2">{{query.name}}登记凭证</p>
+					<p class="text">此据为参加{{query.name}}现场会议登记凭证，请凭此据于{{meetingDate}}到本公司{{query.address}}，领取会议材料，并参加股东大会。</p>
 					<table  class="table1" >
 						<tr>
 							<th rowspan="2" width="100px">登记日期</th>

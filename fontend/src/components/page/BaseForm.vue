@@ -70,8 +70,8 @@
 				<el-tab-pane name="first" >
 					<div id="onSite" class="on-site">
 						<p class="title1">佛山电器照明股份有限公司</p>
-						<p class="title2" v-show="query.year!=''">{{query.year+query.name}}现场会议登记表</p>
-						<el-table :data="tableData" border class="table" ref="multipleTable" :header-cell-style="headerCellStyle"
+						<p class="title2" v-show="query.year!=''">{{query.name}}现场会议登记表</p>
+						<el-table  :data="tableData" border class="table" ref="multipleTable" :header-cell-style="headerCellStyle"
 						 :cell-style="cellStyle" @row-click="rowClick" highlight-current-row :row-class-name="tableRowClassName" :row-style="rowStyle" @row-dblclick="dbclick" >
 							<el-table-column label="序号"  align="center" type="index" prop="index" :width="38">
 <!--                <template slot-scope="scope">-->
@@ -260,7 +260,7 @@ export default {
       leijimotion: [],
       row: [], // 选中的行
       index: null,
-      test: null,
+      test: null
     }
   },
 

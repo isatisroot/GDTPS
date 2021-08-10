@@ -10,29 +10,42 @@
 <!--        <el-button class="button" icon="el-icon-circle-plus" @click="addRow">增加</el-button>-->
 <!--        <el-button class="button" icon="el-icon-delete" @click="handleDelete(row.index,row)" >删除</el-button>-->
         <el-button class="button" icon="el-icon-printer" @click="printRes1">统计表</el-button>
-        <el-button class="button" icon="el-icon-printer" @click="" v-print="'#res1'">表决结果</el-button>
+<!--        <el-button class="button" icon="el-icon-printer" @click="" v-print="'#res1'">表决结果</el-button>-->
         <el-button class="button" icon="el-icon-download" @click="download">下载</el-button>
       </div>
     </ul>
-		<div class="container">
-      <el-tabs v-model="message" type="border-card" >
+<!--    <ys-load1 :isShow="true"></ys-load1>-->
+    <div class="container"  >
+      <div class="loader" v-if="isShow">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <el-tabs v-model="message" type="border-card"  v-else>
         <el-tab-pane name="first" >
           <div id="printRes1">
         <p class="title1" >佛山电器照明股份有限公司</p>
-        <p  class="title2" align="center">{{query.year+query.name}}议案表决投反对票、弃权票统计表</p>
+        <p  class="title2" align="center">{{query.name}}议案表决投票统计表</p>
         <table class="table4" id="yianTable">
           <tr>
             <th rowspan="2" width="40">议案编号</th>
-            <th rowspan="2" width="25">子编号</th>
+<!--            <th rowspan="2" width="25">子编号</th>-->
             <th rowspan="2" width="300">议案主题</th>
+            <th colspan="3" width="300">赞成票</th>
+
             <th colspan="3" width="300">反对票</th>
             <th colspan="3" width="300">弃权票</th>
 
             <th rowspan="2" width="40">存在回避票</th>
-            <th colspan="2" width="200">回避票数</th>
-            <th rowspan="2" width="150">回避表述</th>
+            <th colspan="2" >回避票数</th>
+            <th rowspan="2" >回避表述</th>
           </tr>
           <tr>
+            <th >A股</th>
+            <th>B股</th>
+            <th>合计</th>
             <th >A股</th>
             <th>B股</th>
             <th>合计</th>
@@ -47,8 +60,11 @@
   <!--        <tbody>-->
           <tr >
             <td  >{{index + 1}}</td>
-            <td  >{{m.id}}</td>
+<!--            <td  >{{m.id}}</td>-->
             <td >{{m.name}}</td>
+            <td>{{m.zanchengA}}</td>
+            <td >{{m.zanchengB}}</td>
+            <td >{{m.zanchengA + m.zanchengB}}</td>
             <td>{{m.fanduiA}}</td>
 <!--            <td><input class="border-input" v-model.number="array1[index]" @keyup.enter="fun1(array1[index], index)"></input></td>-->
             <td >{{m.fanduiB}}</td>
@@ -89,7 +105,10 @@
 
         </table>
         <br>
-          <p  class="title2" align="center">{{query.year+query.name}}议案表决董事表决赞成票统计表</p>
+            <div v-show="leijimotion[0]">
+
+
+          <p  class="title2" align="center">{{query.name}}议案表决董事表决赞成票统计表</p>
           <p>出席会议股东代表股数：{{sharehold_cx_B + sharehold_cx_A}}股，其中B股：{{sharehold_cx_B}}股。</p>
           <table class="table4">
             <tr>
@@ -103,25 +122,28 @@
               <th>B股</th>
               <th>合计</th>
             </tr>
-            <tr v-for="(m, index) in leijimotion" :key="index">
-              <td>{{index+1}}</td>
-              <td></td>
-              <td>{{m.name}}</td>
-              <td>{{m.zanchengA}}</td>
-              <td>{{m.zanchengB}}</td>
-              <td>{{m.zanchengA + m.zanchengB}}</td>
-            </tr>
+            <template v-for="(m, index) in leijimotion"  >
+              <tr v-for="(submotion, idx) in m.submotions" :key="idx">
+                <td>{{index+1}}</td>
+                <td>{{idx + 1}}</td>
+                <td>{{submotion.name}}</td>
+                <td>{{submotion.zanchengA}}</td>
+                <td>{{submotion.zanchengB}}</td>
+                <td>{{submotion.zanchengA + submotion.zanchengB}}</td>
+              </tr>
+            </template>
           </table>
+            </div>
           </div>
 
-          <div class="schart-box">
-            <!--                <div class="content-title">柱状图</div>-->
-            <schart class="schart" canvasId="bar" :options="options1"></schart>
-          </div>
-          <div class="schart-box">
-            <!--                <div class="content-title">环形图</div>-->
-            <schart class="schart" canvasId="ring" :options="options4"></schart>
-          </div>
+<!--          <div class="schart-box">-->
+<!--            &lt;!&ndash;                <div class="content-title">柱状图</div>&ndash;&gt;-->
+<!--            <schart class="schart" canvasId="bar" :options="options1"></schart>-->
+<!--          </div>-->
+<!--          <div class="schart-box">-->
+<!--            &lt;!&ndash;                <div class="content-title">环形图</div>&ndash;&gt;-->
+<!--            <schart class="schart" canvasId="ring" :options="options4"></schart>-->
+<!--          </div>-->
 <!--          <div class="schart-box">-->
 <!--            &lt;!&ndash;                <div class="content-title">饼状图</div>&ndash;&gt;-->
 <!--            <schart class="schart" canvasId="pie" :options="options3"></schart>-->
@@ -150,11 +172,13 @@ import Director from '@/components/page/Director'
 import axios from 'axios'
 import Schart from 'vue-schart'
 import {Print} from "@/utils/Print";
+
 export default {
   name: 'tabs',
   components: {BiaoJueRes, Director, Schart},
   data () {
     return {
+      isShow: true,
       content: null,
       options1: {
         // scales: {
@@ -248,13 +272,14 @@ export default {
     console.log('created')
     this.query.year = JSON.parse(localStorage.getItem('year'))
     this.query.name = JSON.parse(localStorage.getItem('meetingName'))
+    // this.$YsLoad1.startLoad()
     axios.get(this.host + 'result/' + this.query.year + '/' + this.query.name).then(response => {
       console.log(response.data)
       this.motion = response.data['motion']
       this.leijimotion = response.data['leijimotion']
       this.sharehold_cx_A = response.data['sharehold_cx_A']
       this.sharehold_cx_B = response.data['sharehold_cx_B']
-      this.content = response.data['content']
+      // this.content = response.data['content']
 
       this.options3.labels = response.data['cx_gd']
       this.options3.labels.push('未出席股东')
@@ -263,6 +288,8 @@ export default {
       this.options3.datasets[0].data.push(ncx)
       let res1 = response.data['motion']
       let res2 = response.data['leijimotion']
+      // this.$YsLoad1.endLoad()
+      this.isShow = false
       res1.forEach(item => {
         this.options1.labels.push(item.name)
         this.options1.datasets[0].data.push(item.zanchengA + item.zanchengB)
@@ -278,6 +305,7 @@ export default {
     })
   },
   mounted () {
+    // this.$YsLoad1.endLoad()
 
   },
   updated () {
@@ -300,7 +328,7 @@ export default {
       })
     },
     download () {
-      let url = this.host + 'download_file'
+      let url = this.host + 'download/result'
       let data = JSON.stringify({
         file_name: this.query.year + this.query.name,
         year: this.query.year,
@@ -373,4 +401,90 @@ export default {
    width: 600px;
    height: 400px;
  }
+
+/* loading动画，纯CSS*/
+ .loader {
+   position: absolute;
+   top: 50%;
+   left: 40%;
+   margin-left: 10%;
+   transform: translate3d(-50%, -50%, 0);
+ }
+ .dot {
+   width: 24px;
+   height: 24px;
+   background: #3ac;
+   border-radius: 100%;
+   display: inline-block;
+   animation: slide 1s infinite;
+ }
+ .dot:nth-child(1) {
+   animation-delay: 0.1s;
+   background: #32aacc;
+ }
+ .dot:nth-child(2) {
+   animation-delay: 0.2s;
+   background: #64aacc;
+ }
+ .dot:nth-child(3) {
+   animation-delay: 0.3s;
+   background: #96aacc;
+ }
+ .dot:nth-child(4) {
+   animation-delay: 0.4s;
+   background: #c8aacc;
+ }
+ .dot:nth-child(5) {
+   animation-delay: 0.5s;
+   background: #faaacc;
+ }
+ @-moz-keyframes slide {
+   0% {
+     transform: scale(1);
+   }
+   50% {
+     opacity: 0.3;
+     transform: scale(2);
+   }
+   100% {
+     transform: scale(1);
+   }
+ }
+ @-webkit-keyframes slide {
+   0% {
+     transform: scale(1);
+   }
+   50% {
+     opacity: 0.3;
+     transform: scale(2);
+   }
+   100% {
+     transform: scale(1);
+   }
+ }
+ @-o-keyframes slide {
+   0% {
+     transform: scale(1);
+   }
+   50% {
+     opacity: 0.3;
+     transform: scale(2);
+   }
+   100% {
+     transform: scale(1);
+   }
+ }
+ @keyframes slide {
+   0% {
+     transform: scale(1);
+   }
+   50% {
+     opacity: 0.3;
+     transform: scale(2);
+   }
+   100% {
+     transform: scale(1);
+   }
+ }
+
 </style>

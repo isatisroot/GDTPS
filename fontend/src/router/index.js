@@ -1,10 +1,12 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import axios from 'axios'
+import {components} from 'load-vue'
 Vue.prototype.axios = axios
-Vue.prototype.host = 'http://172.30.0.126:8000/'
-Vue.use(Router)
+Vue.prototype.host = 'http://192.168.54.42:8000/'
 
+Vue.use(components.YsLoad1)
+Vue.use(Router)
 export default new Router({
   routes: [
     {

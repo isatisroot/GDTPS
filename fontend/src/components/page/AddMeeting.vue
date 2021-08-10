@@ -23,11 +23,14 @@
         <!-- <el-cascader :options="options" v-model="form.address"></el-cascader> -->
         <el-input v-model="form.address" style="width: 80%"></el-input>
       </el-form-item>
-      <el-divider style="margin-top: 10px">议案主题</el-divider>
-      <div style="text-align: center;margin-top: -10px;margin-bottom: 15px">
+<!--      <el-divider style="margin-top: 10px">议案主题</el-divider>-->
+<!--      <div style="text-align: center;margin-top: -10px;margin-bottom: 15px">-->
 
-        <span style="font-size: 10px;color:orangered;background: white">(✔表示采用累积投票)</span>
-      </div>
+<!--        <span style="font-size: 10px;color:orangered;background: white">(✔表示采用累积投票)</span>-->
+<!--      </div>-->
+      <el-form-item label="议案说明" :label-width="formLabelWidth">
+        <el-input type="textarea" :rows="2" placeholder="可选填" v-model="descr" style="margin:0 auto !important;width: 80%"></el-input>
+      </el-form-item>
       <el-form-item  :label-width="formLabelWidth">
         <!-- <template slot-scope="scope"> -->
         <div style="float: left; width: 80%">
@@ -35,14 +38,32 @@
             <el-input type="text" style="margin-bottom: 5px;" v-model="val.text"></el-input>
           </li> -->
           <!-- 使用作用域插槽，el-table是子组件，现在往子组件传<template>的内容，并获取里面的内容 -->
-          <el-table :data="motionArray" :show-header="false" ref="multipleTable" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="28px"></el-table-column>
-            <el-table-column prop=motion>
+          <el-table  :header-cell-style="headerCellStyle" :data="motionArray"  :row-class-name="tableRowClassName" ref="multipleTable">
+            <el-table-column label="议案编号"  align="center" type="index" ></el-table-column>
+            <el-table-column prop=motion label="议案主题" align="center">
               <template slot-scope="scope">
                 <el-input v-model="motionArray[scope.$index].motion"></el-input>
+                <div v-show="motionArray[scope.$index].isleiji">
+                <el-table :data="motionArray[scope.$index].leiji"  :show-header="false">
+                  <el-table-column label="子编号"  align="center" type="index" :width="28"></el-table-column>
+                  <el-table-column label="子议案主题" align="center" prop=leiji>
+                    <template slot-scope="subscope">
+                      <el-input v-model="motionArray[scope.$index].leijicontent[subscope.$index]"></el-input>
+                    </template>
+                  </el-table-column>
+                </el-table>
+                    <div class="add-submotion" @click="addSubmotion(scope.$index)">
+                      <i class="el-icon-circle-plus" style="margin-right:13px;color:white"></i>
+                      <span style="color:white">新增子议案</span>
+                    </div>
+                </div>
               </template>
             </el-table-column>
-<!--            <el-table-column></el-table-column>-->
+            <el-table-column align="center" width="58px" label="采用累积投票" prop="isleiji">
+              <template slot-scope="scope">
+                <el-checkbox  v-model="scope.row.isleiji" @change="handleLeijiSelectionChange(scope)"></el-checkbox>
+              </template>
+            </el-table-column>
           </el-table>
           <!-- <el-input type="text" style="margin-bottom: 5px;"></el-input>
           <el-input type="text" style="margin-bottom: 5px;"></el-input> -->
@@ -81,15 +102,13 @@
 
         <div class="add-motion" >
           <i class="el-icon-caret-bottom"></i>
-          <span >新增议案</span>
+          <span style="color:white">新增议案</span>
         </div>
 
         <!--            </el-tooltip>-->
       </div>
-      <el-divider style="margin-top: 10px">议案说明</el-divider>
-      <el-form-item :label-width="formLabelWidth">
-        <el-input type="textarea" :rows="2" placeholder="可选填" v-model="descr" style="margin:0 auto !important;width: 80%"></el-input>
-      </el-form-item>
+<!--      <el-divider style="margin-top: 10px">议案说明</el-divider>-->
+
     </el-form>
     <div class="edit_dev">
       <el-row>
@@ -119,6 +138,17 @@ export default {
   name: 'AddMeeting',
   data () {
     return {
+      headerCellStyle: {
+        background: 'rgb(72 153 236 / 20%)!important',
+        color: 'black',
+        // 'border': 'solid 1px #000000 !important',
+        padding: '0px',
+        fontFamily: 'sans-serif',
+        fontWeight: 'normal !important'
+        // fontSize: '14px'
+
+      },
+      showLeiji: true,
       dialogFormVisible: true,
       rules: {
 
@@ -153,8 +183,9 @@ export default {
         }]
       },
       gddata: [],
-      motionArray: [{}],
-      leijimotionArray: [{}],
+      // leijicontent用于记录累计议案的议案内容，数组里的元素是字符串，当用户勾选累计议案时，leiji数组用于遍历内层table的行数，不存储内容
+      motionArray: [{'leijicontent': [], 'leiji': [{}, {}]}],
+      leijimotionArray: [{}, {}],
       descr: '',
       formLabelWidth: '120px',
       date: null,
@@ -164,7 +195,8 @@ export default {
         date2: '',
         options: [],
         address: '办公楼五楼会议室（佛山市禅城区汾江北路64号）',
-        motion: ''
+        // motion: '',
+        // leiji: ''
       },
       value: []
     }
@@ -183,6 +215,25 @@ export default {
       })
   },
   methods: {
+    // 新增子议案
+    addSubmotion (index) {
+      this.motionArray[index].leiji.push({})
+    },
+    // 设置table每一行的颜色，当被勾选为累计议案是切换颜色
+    tableRowClassName ({row, rowIndex}) {
+      if (row.isleiji === true) {
+        return 'warning-row'
+      } else {
+        return 'success-row'
+      }
+    },
+
+    // 当用户点击勾选框时，判断如果是勾选状态，则在motionArray数组中指定下标元素添加leiji属性，该指定下标元素（是一个对象）对应外层el-table某一行数据集合
+    handleLeijiSelectionChange (scope) {
+      if (scope.row.isleiji === true) {
+        this.motionArray[scope.$index].leiji = [{}, {}]
+      }
+    },
     handleSelectionChange (val) {
       // console.log(val)
       this.multipleSelection = val
@@ -192,19 +243,17 @@ export default {
       this.$emit('addValue', this.dialogFormVisible)
     },
     addMotion () {
-      this.motionArray.push({})
+      this.motionArray.push({'leijicontent': []})
     },
     addleijiMotion () {
       this.leijimotionArray.push({})
     },
     submitAdd (formName) {
-      console.log(formName)
       this.$refs[formName].validate((valid) => {
         if (valid) {
           axios.post(this.host + 'add_meeting', {
             meeting: this.form,
             motion: this.motionArray,
-            leijimotion: this.multipleSelection,
             gdid: this.value,
             descr: this.descr
           }).then(response => (
@@ -232,6 +281,15 @@ export default {
 </script>
 
 <style scoped>
+/deep/ .el-table .warning-row {
+  /*background: oldlace;*/
+  background: #b4e1e3;
+}
+
+/deep/.el-table .success-row {
+  /*background: #f0f9eb;*/
+  background: rgb(72 153 236 /10%);
+}
 /*/deep/ .el-table .cell, .el-table--border td:first-child .cell, .el-table--border th:first-child .cell{*/
 /*  padding-left: 0px;*/
 /*}*/
@@ -252,19 +310,31 @@ export default {
   margin-top: 5px;
   text-align: center;
 }
-
+.add-submotion {
+  background: #53c8cd;
+  border-radius: 5px;
+  width: 70%;
+  /*opacity: 0.7;*/
+  text-align: center;
+  margin: 0 auto;
+  margin-top: 5px;
+  cursor: pointer; /* 鼠标移入时变手指 */
+}
 
 .demo-block-control {
   padding-top: 3px;
-  border: 1px solid #eaeefb;
+  /*border: 1px solid #eaeefb;*/
+  border: 1px solid #409EFF;
   height: 24px;
   box-sizing: border-box;
-  background: linear-gradient(to bottom, #bbb8b8, #f5f2f1);
+  /*background: linear-gradient(to bottom, #409EFF, #f5f2f1);*/
+  background: #409EFF;
   border-radius: 5px;
   width: 70%;
-  opacity: 0.7;
+  /*opacity: 0.7;*/
   text-align: center;
   margin: 0 auto;
+  margin-bottom: 15px;
   /*background-color: #d3dce6;*/
   cursor: pointer;
   position: relative;
@@ -281,11 +351,11 @@ export default {
 
 }
 .demo-block-control .add-motion i {
-  color: gray;
+  color: ghostwhite;
   transition: .5s;
 }
 .demo-block-control:hover .add-motion i{
-  color: black;
+  color: white;
 }
 .add-motion span {
   opacity: 0;
